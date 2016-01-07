@@ -5,12 +5,15 @@ secrets: secrets.yml # Include Secrets.yml file (put in flexget folder besides c
 templates:
   global:
     ######################################## Misc
+    verify_ssl_certificates: yes
     proper_movies: yes
     plugin_priority:
       regexp: 250
     parsing:
       movie: guessit
       series: guessit
+    headers:
+      User-Agent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36"
 #    assume_quality:
 #      hdtv: 720p
     domain_delay:  # kimonolabs API allows inputs only every 5 seconds to avoid hammering.
@@ -56,15 +59,28 @@ templates:
     regexp:
       reject:
       # Release
+        - \b(duo|tri|quadri|tetra|penta)logy\b   # Collections
+        - \bextended\b
+        - \bcomplete\b   # Complete (mostly stands for complete series)
+        - \bdirectors.cut\b   #
         - \bcollection\b   # Collection
         - \buntouched\b   # Untouched
       # Video
         - \b3d\b   # 3D
+        - \bhdts|ts|telesync\b   # TS=TeleSync
         - \bcam(rip)\b   # CAM
+        - \b(bd|dvd)scr(eener)\b   # BD- / DVD- / SCR(EENER)
+        - \bremux\b   # Remux
         - \br(5|6)\b   # R5/6 (Region Release: Asia & East-Europe - usually bad Quality)
+        - \bsub(s|bed)\b # Subtitles (Sub / Subs / Subbed / Unsubbed
+        - \bhc|hardcoded\b # Subtitles (HC / Hardcoded)
+#        - \bblur|webblur\b # Blurred-Subtitles 
         - \bread.nfo\b # Mostly means there is some info in the nfo, mostly about hardcoded subs
+#        - \bhdtv\b   # (HD)TV
       # Audio
         - \bflac\b   # flac
+        - \b(true|dts)hd\b   # TRUE- / DTS- HD
+        - \b(ac3)md|mic.dubbed\b
       # Codec
         - \b10bit\b   # 10-Bit
 ###############################################################################################################################################
@@ -187,13 +203,11 @@ templates:
   ######## Defaults
   jdownloader-Defaults:
     exec: 
-      - echo text={{url}} >> "/mnt/Daten/jd2/folderwatch/{{title}}.crawljob"
-      - echo downloadFolder=/mnt/Daten/Downloads/{{title}} >> "/mnt/Daten/jd2/folderwatch/{{title}}.crawljob"
-      - echo autoStart=TRUE >> "/mnt/Daten/jd2/folderwatch/{{title}}.crawljob"
-      - echo forcedStart=TRUE >> "/mnt/Daten/jd2/folderwatch/{{title}}.crawljob"
-      - echo enabled=true >> "/mnt/Daten/jd2/folderwatch/{{title}}.crawljob"
-      - echo extractAfterDownload=TRUE >> "/mnt/Daten/jd2/folderwatch/{{title}}.crawljob"
-      - echo autoConfirm=TRUE >> "/mnt/Daten/jd2/folderwatch/{{title}}.crawljob"
+      - echo " " >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
+      - echo "text={{url}}" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
+      - echo "autoConfirm=TRUE" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
+      - echo "priority=LOWER" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
+      - echo "packageName={{title}}" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
 
   ######## Archive
   jdownloader-Archive:
@@ -463,7 +477,7 @@ tasks:
 #      - main_quality      #differentiation not possible with this feed right now - needs fix
     movie_queue: accept
     inputs:
-      - rss: https://www.kimonolabs.com/api/rss/73a2w24k?apikey=WItbXqBaqFgIoBbeGBWKyH5aM85RvUjv&kimmodify=1
+      - rss: '{{ secrets.flexget.path }}/External-Plugins/HDArea-Feed/HDArea.xml'
     trakt_remove:
       account: '{{ secrets.trakt.acc }}'
       list: watchlist
@@ -481,7 +495,7 @@ tasks:
 #      - main_quality      #differentiation not possible with this feed right now - needs fix
     movie_queue: accept
     inputs:
-      - rss: https://www.kimonolabs.com/api/rss/73a2w24k?apikey=WItbXqBaqFgIoBbeGBWKyH5aM85RvUjv&kimmodify=1
+      - rss: '{{ secrets.flexget.path }}/External-Plugins/HDArea-Feed/HDArea.xml'
 #    trakt_remove:
 #      account: '{{ secrets.trakt.acc }}'
 #      list: watchlist
@@ -502,7 +516,7 @@ tasks:
       list: '{{ secrets.trakt.Favorite_List }}'
       type: movies
     inputs:
-      - rss: https://www.kimonolabs.com/api/rss/73a2w24k?apikey=WItbXqBaqFgIoBbeGBWKyH5aM85RvUjv&kimmodify=1
+      - rss: '{{ secrets.flexget.path }}/External-Plugins/HDArea-Feed/HDArea.xml'
     trakt_remove:
       account: '{{ secrets.trakt.acc }}'
       list: '{{ secrets.trakt.Favorite_List }}'
@@ -524,9 +538,9 @@ tasks:
       - series_lookup
       - main_quality
     inputs:
-      - rss: https://www.kimonolabs.com/api/rss/dnk5qu80?apikey=WItbXqBaqFgIoBbeGBWKyH5aM85RvUjv&kimmodify=1
+      - rss: '{{ secrets.flexget.path }}/External-Plugins/Serienjunkies-Feed/rss.xml'
     serienjunkies:
-      language: german 
+      language: dual 
     # Series on HOLD 
     crossmatch:
       from:
@@ -561,7 +575,7 @@ tasks:
       - main_quality
     seen: local
     inputs:
-      - rss: https://www.kimonolabs.com/api/rss/dnk5qu80?apikey=WItbXqBaqFgIoBbeGBWKyH5aM85RvUjv&kimmodify=1
+      - rss: '{{ secrets.flexget.path }}/External-Plugins/Serienjunkies-Feed/rss.xml'
 
   ######################################## Watchlist-Premieres | Needs work for: Prefer DE, otherwise EN
   Series_Watchlist: 
@@ -587,7 +601,7 @@ tasks:
           list: watchlist
           type: shows
     inputs:
-      - rss: https://www.kimonolabs.com/api/rss/dnk5qu80?apikey=WItbXqBaqFgIoBbeGBWKyH5aM85RvUjv&kimmodify=1
+      - rss: '{{ secrets.flexget.path }}/External-Plugins/Serienjunkies-Feed/rss.xml'
     crossmatch:
       from:
         - trakt_list:
@@ -657,7 +671,7 @@ tasks:
 #       - '{{ secrets.DownloadManager }}-{{ secrets.DownloadManagerQueue }}-Queue'
 #       - main_quality
 #     inputs:
-#       - rss: https://www.kimonolabs.com/api/rss/dnk5qu80?apikey=WItbXqBaqFgIoBbeGBWKyH5aM85RvUjv&kimmodify=1
+#       - rss: '{{ secrets.flexget.path }}/External-Plugins/Serienjunkies-Feed/rss.xml'
 #     imdb:
 #       accept_actors:
 #       # Tatort Bremen
@@ -691,7 +705,7 @@ tasks:
 # #      user_id: '{{ secrets.imdb.usr }}'
 # #      list: 'ls077682456'
 # #    inputs:
-# #      - rss: https://www.kimonolabs.com/api/rss/dnk5qu80?apikey=WItbXqBaqFgIoBbeGBWKyH5aM85RvUjv&kimmodify=1
+# #      - rss: '{{ secrets.flexget.path }}/External-Plugins/Serienjunkies-Feed/rss.xml'
 #     serienjunkies:
 #       language: dual 
 #     exec: echo "text={{url}}"# > "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
