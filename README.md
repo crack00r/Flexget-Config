@@ -10,7 +10,8 @@ https://board.jdownloader.org/showthread.php?t=67579
 In den Flexget Ordner unter "plugins" kopieren.
 Nutzbar zB mit discover unter "from:" via: <br>
 "- searchSerienjunkies: <br>
-  category: Uploaded" <br>
+  hoster: uploaded.to # oder share-online.biz <br>
+  language: german # oder english" <br>
 Vieles noch zu verbessern, bzw zu ergänzen, funktioniert jedoch soweit. <br>
 Es liefert auf jedenfall entries für Flexget. ^^ <br><br>
 
