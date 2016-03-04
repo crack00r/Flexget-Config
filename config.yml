@@ -182,7 +182,8 @@ templates:
           server: '{{ secrets.plex.ip }}'
           username: '{{ secrets.plex.usr }}'
           password: '{{ secrets.plex.pwd }}'
-          section: '{{ secrets.plex.Series_Collection }}'  
+          section: '{{ secrets.plex.Series_Collection }}'
+            
   ######################################## Discover
   Discover-enable-Backfill:
     discover:
@@ -191,8 +192,8 @@ templates:
             backfill: yes
       from:
         - searchSerienjunkies:
-            hoster: '{{ secrets.rss.SerienjunkiesHoster }}'
-            language: '{{ secrets.rss.SerienjunkiesLanguage }}'
+            hoster: '{{ secrets.rss.Serienjunkies.Hoster }}'
+            language: '{{ secrets.rss.Serienjunkies.Language }}'
     no_entries_ok: yes
 
   Discover-disable-Backfill:
@@ -202,8 +203,8 @@ templates:
             backfill: no
       from:
         - searchSerienjunkies:
-            hoster: '{{ secrets.rss.SerienjunkiesHoster }}'
-            language: '{{ secrets.rss.SerienjunkiesLanguage }}'
+            hoster: '{{ secrets.rss.Serienjunkies.Hoster }}'
+            language: '{{ secrets.rss.Serienjunkies.Language }}'
     no_entries_ok: yes
   ######################################## DownloadManager
   ################## JDownloader
@@ -524,7 +525,7 @@ tasks:
     inputs:
       - rss: '{{ secrets.flexget.path }}/External-Plugins/Serienjunkies-Feed/rss.xml'
     serienjunkies:
-      language: '{{ secrets.rss.SerienjunkiesLanguage }}' 
+      language: '{{ secrets.rss.Serienjunkies.Language }}' 
     # Series on HOLD 
     crossmatch:
       from:
