@@ -192,8 +192,8 @@ templates:
             backfill: yes
       from:
         - searchSerienjunkies:
-            hoster: '{{ secrets.rss.Serienjunkies.Hoster }}'
-            language: '{{ secrets.rss.Serienjunkies.Language }}'
+            hoster: '{{ secrets.Serienjunkies.Hoster }}'
+            language: '{{ secrets.Serienjunkies.Language }}'
     no_entries_ok: yes
 
   Discover-disable-Backfill:
@@ -203,8 +203,8 @@ templates:
             backfill: no
       from:
         - searchSerienjunkies:
-            hoster: '{{ secrets.rss.Serienjunkies.Hoster }}'
-            language: '{{ secrets.rss.Serienjunkies.Language }}'
+            hoster: '{{ secrets.Serienjunkies.Hoster }}'
+            language: '{{ secrets.Serienjunkies.Language }}'
     no_entries_ok: yes
   ######################################## DownloadManager
   ################## JDownloader
@@ -525,7 +525,7 @@ tasks:
     inputs:
       - rss: '{{ secrets.flexget.path }}/External-Plugins/Serienjunkies-Feed/rss.xml'
     serienjunkies:
-      language: '{{ secrets.rss.Serienjunkies.Language }}' 
+      language: '{{ secrets.Serienjunkies.Language }}' 
     # Series on HOLD 
     crossmatch:
       from:
