@@ -17,3 +17,7 @@ Es liefert auf jedenfall entries für Flexget. ^^ <br><br>
 
 WICHTIG: Die Serien, nach denen gesucht werden soll, dürfen (noch) keine Jahresangabe im Namen haben. <br>
 Also unter trakt_list "strip_dates: yes" setzen.
+
+Unraid:
+chmod -R 777 /mnt/cache/appdata/flexget
+docker exec -it FlexGet cp /config/Search-Plugins/*.py /usr/local/lib/python2.7/dist-packages/flexget/plugins
