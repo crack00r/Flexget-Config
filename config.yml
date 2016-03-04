@@ -60,29 +60,19 @@ templates:
       reject:
       # Release
         - \b(duo|tri|quadri|tetra|penta)logy\b   # Collections
-        - \bextended\b
-        - \bcomplete\b   # Complete (mostly stands for complete series)
-        - \bdirectors.cut\b   #
         - \bcollection\b   # Collection
+        - \bcomplete\b   # Complete (mostly stands for complete series)
         - \buntouched\b   # Untouched
       # Video
-        - \b3d\b   # 3D
         - \bhdts|ts|telesync\b   # TS=TeleSync
         - \bcam(rip)\b   # CAM
-        - \b(bd|dvd)scr(eener)\b   # BD- / DVD- / SCR(EENER)
-        - \bremux\b   # Remux
-        - \br(5|6)\b   # R5/6 (Region Release: Asia & East-Europe - usually bad Quality)
         - \bsub(s|bed)\b # Subtitles (Sub / Subs / Subbed / Unsubbed
         - \bhc|hardcoded\b # Subtitles (HC / Hardcoded)
-#        - \bblur|webblur\b # Blurred-Subtitles 
-        - \bread.nfo\b # Mostly means there is some info in the nfo, mostly about hardcoded subs
-#        - \bhdtv\b   # (HD)TV
+        - \bblur|webblur\b # Blurred-Subtitles 
+        - \bhdtv\b   # (HD)TV
       # Audio
         - \bflac\b   # flac
-        - \b(true|dts)hd\b   # TRUE- / DTS- HD
         - \b(ac3)md|mic.dubbed\b
-      # Codec
-        - \b10bit\b   # 10-Bit
 ###############################################################################################################################################
 ### Templates #################################################################################################################################
 ###############################################################################################################################################
@@ -192,8 +182,8 @@ templates:
             backfill: yes
       from:
         - searchSerienjunkies:
-            hoster: '{{ secrets.rss.Serienjunkies.Hoster }}'
-            language: '{{ secrets.rss.Serienjunkies.Language }}'
+            hoster: '{{ secrets.Serienjunkies.Hoster }}'
+            language: '{{ secrets.Serienjunkies.Language }}'
     no_entries_ok: yes
 
   Discover-disable-Backfill:
@@ -203,8 +193,8 @@ templates:
             backfill: no
       from:
         - searchSerienjunkies:
-            hoster: '{{ secrets.rss.Serienjunkies.Hoster }}'
-            language: '{{ secrets.rss.Serienjunkies.Language }}'
+            hoster: '{{ secrets.Serienjunkies.Hoster }}'
+            language: '{{ secrets.Serienjunkies.Language }}'
     no_entries_ok: yes
   ######################################## DownloadManager
   ################## JDownloader
@@ -278,57 +268,14 @@ templates:
 
 tasks:
 ############################################################################################################ Updates 
-  ######################################## Sync IMDb-WATCHLIST to Trakt
-  Update_IMDb_to_Trakt:
-    interval: 24 hours
-    template: no_global
-    priority: 1
-    seen: local
-    accept_all: yes  
-    imdb_list:
-      user_id: '{{ secrets.imdb.usr }}'
-      list: watchlist
-    trakt_add:
-      account: '{{ secrets.trakt.acc }}'
-      list: watchlist
-    crossmatch:
-      from:
-        - trakt_list:
-            account: '{{ secrets.trakt.acc }}'
-            list: collection
-            type: movies
-        - trakt_list:
-            account: '{{ secrets.trakt.acc }}'
-            list: watchlist
-            type: movies
-      fields:
-        - imdb_id
-      action: reject 
-  ######################################## Sync IMDb-WATCHLIST to Trakt
-  Remove_IMDb_to_Trakt:
-    trakt_list:
-      account: '{{ secrets.trakt.acc }}'
-      list: watchlist
-      type: movies
-    crossmatch:
-      from:
-        - imdb_list:
-            user_id: '{{ secrets.imdb.usr }}'
-            list: watchlist
-      fields: [imdb_id]
-      action: reject
-    accept_all: yes
-    trakt_remove:
-      account: '{{ secrets.trakt.acc }}'
-      list: watchlist
-    disable: builtins
+
   ######################################## Sync Trakt-Watchlist to Flexget-Queue
   Update_Trakt_to_Flexget:
     interval: 24 hours
     template: no_global
     imdb:
-      min_score: 4.5
-      min_votes: 5000
+      min_score: 3.5
+      min_votes: 2500
     priority: 2
     trakt_list:
       account: '{{ secrets.trakt.acc }}'
@@ -361,50 +308,6 @@ tasks:
       position: next
     accept_all: yes
     set_series_begin: yes
-  ######################################## Remove canceled Series (Nobody wants to start watching canceled Series)
-  Remove_Canceled_Collection:
-    interval: 7 days
-    priority: 4
-    manual: yes
-    seen: local
-    template: 
-      - no_global
-      - series_lookup
-    trakt_list:
-      account: '{{ secrets.trakt.acc }}'
-      list: collection
-      type: shows
-    if:
-      - trakt_series_status == 'canceled': accept
-#      - imdb_score <= '5.0': accept
-    trakt_remove:
-      account: '{{ secrets.trakt.acc }}'
-      list: collection     
-    trakt_remove:
-      account: '{{ secrets.trakt.acc }}'
-      list: '{{ secrets.trakt.foreign }}'   
-  Keep_Canceled_Collection:
-    exec:
-      - echo "Canceled Collections will not deleted"
-    manual: yes
-  ######################################## Remove canceled Series (Nobody wants to start watching canceled Series)
-  Remove_Canceled_Watchlist:
-    interval: 48 hours
-    priority: 4
-    manual: yes
-    template: 
-      - no_seen
-      - no_global
-      - series_lookup
-    trakt_list:
-      account: '{{ secrets.trakt.acc }}'
-      list: watchlist
-      type: shows
-    if:
-      - trakt_series_status == 'canceled': accept
-    trakt_remove:
-      account: '{{ secrets.trakt.acc }}'
-      list: watchlist     
   ######################################## Remove Collected Movie_Queue_Entrys (usually added manually)
   RemoveCollected:
     priority: 9
@@ -485,26 +388,6 @@ tasks:
 #      account: '{{ secrets.trakt.acc }}'
 #      list: watchlist
     movie_queue: add
-  ######################################## 10 Star Rating = high quality    
-  Movies_10Star_HighQuality_Stream:
-    priority: 5
-    seen: local
-    template: 
-      - '{{ secrets.DownloadManager }}-Defaults'
-      - '{{ secrets.DownloadManager }}-Archive'
-      - '{{ secrets.DownloadManager }}-{{ secrets.DownloadManagerQueue }}-Queue'
-      - German
-      - movies_lookup
-      - high_quality
-    trakt_list:
-      account: '{{ secrets.trakt.acc }}'
-      list: '{{ secrets.trakt.Favorite_List }}'
-      type: movies
-    inputs:
-      - rss: '{{ secrets.flexget.path }}/External-Plugins/HDArea-Feed/HDArea.xml'
-    trakt_remove:
-      account: '{{ secrets.trakt.acc }}'
-      list: '{{ secrets.trakt.Favorite_List }}'
 
 ############################################################################################################ Series ############################################################################################################
 
@@ -525,7 +408,7 @@ tasks:
     inputs:
       - rss: '{{ secrets.flexget.path }}/External-Plugins/Serienjunkies-Feed/rss.xml'
     serienjunkies:
-      language: '{{ secrets.rss.Serienjunkies.Language }}' 
+      language: '{{ secrets.Serienjunkies.Language }}' 
     # Series on HOLD 
     crossmatch:
       from:
@@ -614,16 +497,16 @@ tasks:
 #               account: '{{ secrets.trakt.acc }}'
 #               list: '{{ secrets.trakt.Foreign }}' 
 #############################################################
-  YouTube-Personal-Playlist:
-    priority: 10
-    rss:
-      url: "http://www.youtube.com/feeds/videos.xml?playlist_id={{ secrets.YouTube.Playlist }}"
-      ascii: yes
-    accept_all: yes
-    template: 
-      - '{{ secrets.DownloadManager }}-Defaults'
-      - '{{ secrets.DownloadManager }}-YouTube'
-    disable: regexp   
+#  YouTube-Personal-Playlist:
+#    priority: 10
+#    rss:
+#      url: "http://www.youtube.com/feeds/videos.xml?playlist_id={{ secrets.YouTube.Playlist }}"
+#      ascii: yes
+#    accept_all: yes
+#    template: 
+#      - '{{ secrets.DownloadManager }}-Defaults'
+#      - '{{ secrets.DownloadManager }}-YouTube'
+#    disable: regexp   
 
 ###############################################################################################################################################
 ## MISC #######################################################################################################################################
@@ -632,10 +515,10 @@ tasks:
 schedules:
   - tasks: '*' # Run every task on given schedule, except tasks with own interval 
     schedule:
-      hour: '{{ secrets.flexget.scheduler }}'      
+      minute: '{{ secrets.flexget.scheduler }}'      
 ###############      
-web_server:
-  bind: 0.0.0.0
-  port: 5050
-api: yes
-webui: yes
+#web_server:
+#  bind: 0.0.0.0
+#  port: 5050
+#api: yes
+#webui: yes
