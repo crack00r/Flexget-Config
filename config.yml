@@ -182,8 +182,7 @@ templates:
           server: '{{ secrets.plex.ip }}'
           username: '{{ secrets.plex.usr }}'
           password: '{{ secrets.plex.pwd }}'
-          section: '{{ secrets.plex.Series_Collection }}'
-            
+          section: '{{ secrets.plex.Series_Collection }}'  
   ######################################## Discover
   Discover-enable-Backfill:
     discover:
@@ -191,20 +190,15 @@ templates:
         - emit_series:
             backfill: yes
       from:
-        - searchSerienjunkies:
-            hoster: '{{ secrets.rss.Serienjunkies.Hoster }}'
-            language: '{{ secrets.rss.Serienjunkies.Language }}'
+        - search_rss: '{{ secrets.rss.SerienjunkiesSearch }}'
     no_entries_ok: yes
-
   Discover-disable-Backfill:
     discover:
       what:
         - emit_series:
             backfill: no
       from:
-        - searchSerienjunkies:
-            hoster: '{{ secrets.rss.Serienjunkies.Hoster }}'
-            language: '{{ secrets.rss.Serienjunkies.Language }}'
+        - search_rss: '{{ secrets.rss.SerienjunkiesSearch }}'
     no_entries_ok: yes
   ######################################## DownloadManager
   ################## JDownloader
@@ -277,7 +271,24 @@ templates:
 ###############################################################################################################################################
 
 tasks:
-############################################################################################################ Updates 
+############################################################################################################ Updates ##########################################################################################################
+# NOT WORKING YET - USE CRONJOB INSTEAD
+#   Create_TV_SourceRSS:
+#     exec:
+#       auto_escape: yes
+#       allow_background: yes
+#       on_start:
+#         phase: "python {{ secrets.flexget.path }}/External-Plugins/Serienjunkies-Feed/Serienjunkies-RSS.py"
+#     priority: 0
+#     no_entries_ok: yes
+#   Create_Movie_SourceRSS:
+#     exec:
+#       auto_escape: yes
+#       allow_background: yes
+#       on_start:
+#         phase: "{{ secrets.flexget.path }}/External-Plugins/HDArea-Feed/HDAreaOrg-RSS.py"
+#     priority: 0
+#     no_entries_ok: yes
   ######################################## Sync IMDb-WATCHLIST to Trakt
   Update_IMDb_to_Trakt:
     interval: 24 hours
@@ -383,6 +394,16 @@ tasks:
     trakt_remove:
       account: '{{ secrets.trakt.acc }}'
       list: '{{ secrets.trakt.foreign }}'   
+#   filesystem:
+#     path: '{{ secrets.filesystem.Watchlist }}'
+#     recursive: True
+#   move:
+#     to: "'{{ secrets.filesystem.Trash }}'"
+#       #clean_source: 1
+#       along:
+#         - sub
+#         - srt
+#         - nfo
   Keep_Canceled_Collection:
     exec:
       - echo "Canceled Collections will not deleted"
@@ -431,6 +452,24 @@ tasks:
       account: '{{ secrets.trakt.acc }}'
       list: watchlist
     movie_queue: remove
+  ######################################## 10Star Ratings to TopMovies-List  // Needs Trakt-Plugin-Update (Ratings)
+#   Upgrade_10Star_Watchlist:
+#     interval: 12 hours
+#     priority: 4
+#     disable: [urlrewrite_redirect]
+#     template: 
+#       - no_seen
+#       - no_global
+#     trakt_list:
+#       account: '{{ secrets.trakt.acc }}'
+#       list: rating: 10
+#       type: movies
+#     trakt_add:
+#       account: '{{ secrets.trakt.acc }}'
+#       list: '{{ secrets.trakt.Favorite_List }}'
+#     trakt_remove:
+#       account: '{{ secrets.trakt.acc }}'
+#       list: watchlist
 ############################################################################################################ Movies ############################################################################################################
 
  ######################################## Search for queued Movies on hdarea with the help of a custom  pipe  ### Broken (needs HDArea-Search fix)
@@ -458,7 +497,7 @@ tasks:
       - '{{ secrets.DownloadManager }}-Watchlist'
       - '{{ secrets.DownloadManager }}-{{ secrets.DownloadManagerQueue }}-Queue'
       - movies_lookup    
-#      - German            #differentiation not possible with this feed right now - needs fix
+#      - German     #differentiation not possible with this feed right now - needs fix
 #      - main_quality      #differentiation not possible with this feed right now - needs fix
     movie_queue: accept
     inputs:
@@ -525,7 +564,7 @@ tasks:
     inputs:
       - rss: '{{ secrets.flexget.path }}/External-Plugins/Serienjunkies-Feed/rss.xml'
     serienjunkies:
-      language: '{{ secrets.rss.Serienjunkies.Language }}' 
+      language: dual 
     # Series on HOLD 
     crossmatch:
       from:
@@ -613,6 +652,28 @@ tasks:
 #             trakt_add:
 #               account: '{{ secrets.trakt.acc }}'
 #               list: '{{ secrets.trakt.Foreign }}' 
+###############################################################################################################################################
+## Specials ###################################################################################################################################
+###############################################################################################################################################
+#   TV_Collection_EN:  
+#     manual: yes # NEEDS TESTING ! Sometimes weird behavior
+#     disable: regexp
+#     template: 
+#       - '{{ secrets.DownloadManager }}-Defaults'
+#       - '{{ secrets.DownloadManager }}-Archive'
+#       - '{{ secrets.DownloadManager }}-{{ secrets.DownloadManagerQueue }}-Queue'
+#     priority: 100
+#     inputs:
+#       - rss: http://rapidmoviez.com/feed
+#     configure_series:
+#       settings:
+#         quality: 720p
+#         identified_by: auto
+#       from:
+#         trakt_list:
+#           account: '{{ secrets.trakt.acc }}'
+#           list: collection
+#           type: shows
 #############################################################
   YouTube-Personal-Playlist:
     priority: 10
@@ -624,6 +685,70 @@ tasks:
       - '{{ secrets.DownloadManager }}-Defaults'
       - '{{ secrets.DownloadManager }}-YouTube'
     disable: regexp   
+############################################################# FAVORITE TATORT - NOT WORKING
+#   Tatort:
+#     priority: 8
+#     series: 
+#       - Tatort
+#     template: 
+#       - '{{ secrets.handler }}'
+#       - '{{ secrets.DownloadManager }}-Archive'
+#       - '{{ secrets.DownloadManager }}-Defaults'
+#       - '{{ secrets.DownloadManager }}-{{ secrets.DownloadManagerQueue }}-Queue'
+#       - main_quality
+#     inputs:
+#       - rss: '{{ secrets.flexget.path }}/External-Plugins/Serienjunkies-Feed/rss.xml'
+#     imdb:
+#       accept_actors:
+#       # Tatort Bremen
+#         - nm0692907
+#         - nm0597376
+#       # Tatort Münster
+#         - nm0695127
+#         - nm0509583       
+
+# ############################################################# Ebooks
+#   eBooks:
+#     rss: https://ebook-hell.to/?p=rss&category=6&version=2&encoded=1
+#     regexp:
+#       accept:
+#         - Evelyn Sanders
+#         - Susan Elizabeth Phillips
+#         - Sibylle Weischenberg
+#         - (J(|.|oanne)) (K(|.)) Rowling
+#     template: 
+#       - no_global
+#       - '{{ secrets.DownloadManager }}-Defaults'
+#       - '{{ secrets.DownloadManager }}-EBooks'
+
+###############################################################################################################################################          
+######## TESTING-AREA   ########### TESTING-AREA  ############## TESTING-AREA  ############## TESTING-AREA  ############## TESTING-AREA #######           
+################# TESTING-AREA ############## TESTING-AREA  ############## TESTING-AREA  ############## TESTING-AREA  ######################### 
+###############################################################################################################################################
+
+#   TESTING:
+#     manual: yes
+#     seen: local
+#     accept_all: yes 
+#     dynamic_imdb:
+#       imdb_list:
+#         user_id: '{{ secrets.imdb.usr }}'
+#         list: 'ls077682456'
+#       job_types:
+#         - actor
+#         - actress
+#       accept_all: yes
+#     template: 
+# #      - high_quality
+#       - no_seen
+# #    imdb_list:
+# #      user_id: '{{ secrets.imdb.usr }}'
+# #      list: 'ls077682456'
+# #    inputs:
+# #      - rss: '{{ secrets.flexget.path }}/External-Plugins/Serienjunkies-Feed/rss.xml'
+#     serienjunkies:
+#       language: dual 
+#     exec: echo "text={{url}}"# > "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
 
 ###############################################################################################################################################
 ## MISC #######################################################################################################################################
