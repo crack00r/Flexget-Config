@@ -11,6 +11,3 @@ search_Serienjunkies.py aus dem Ordner "Search-Plugins" nach "python/site-packag
 
 Vieles noch zu verbessern, bzw zu ergänzen, funktioniert jedoch soweit. <br>
 Es liefert auf jedenfall entries für Flexget. ^^ <br><br>
-
-WICHTIG: Die Serien, nach denen gesucht werden soll, dürfen (noch) keine Jahresangabe im Namen haben. <br>
-Also unter trakt_list "strip_dates: yes" setzen.
