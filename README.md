@@ -5,13 +5,10 @@ from JDownloader-Forum<br>
 https://board.jdownloader.org/showthread.php?t=67579
 
 
-
 # search_serienjunkies :
-In den Flexget Ordner unter "plugins" kopieren.
-Nutzbar zB mit discover unter "from:" via: <br>
-"- searchSerienjunkies: <br>
-  hoster: uploaded.to # oder share-online.biz <br>
-  language: german # oder english" <br>
+search_Serienjunkies.py aus dem Ordner "Search-Plugins" nach "python/site-packages/flexget/plugins/*.py" verschieben.
+
+
 Vieles noch zu verbessern, bzw zu ergänzen, funktioniert jedoch soweit. <br>
 Es liefert auf jedenfall entries für Flexget. ^^ <br><br>
 
