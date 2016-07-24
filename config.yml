@@ -9,9 +9,9 @@ templates:
     proper_movies: yes
     plugin_priority:
       regexp: 250
-#     parsing:
-#       movie: guessit
-#       series: guessit
+    parsing:
+      movie: guessit
+      series: guessit
     headers:
       User-Agent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36"
 #    assume_quality:
@@ -20,7 +20,8 @@ templates:
       retry_time: 20 seconds
       retry_time_multiplier: 2
       max_retries: 6
-    manipulate:  ## Fix for Serienjunkies.org
+    manipulate:  
+    ## Fix for Serienjunkies.org
       - title:
           replace:            
             regexp: 'Deutsch'
@@ -134,11 +135,13 @@ templates:
       - seen_info_hash
       - seen_movies
   ######################################## Languages
-  German: # Accept Only German, by Title
+  German:
+  # Accept Only German, by Title
     regexp:
       reject_excluding: 
         - \bgerman\b
-  English:  # Accept Only Non-German, by IMDB_Language
+  English:  
+  # Accept Only Non-German, by IMDB_Language
     regexp:
       reject: 
         - \bgerman\b
@@ -320,6 +323,11 @@ tasks:
       action: reject
     accept_all: yes
     disable: builtins
+    list_remove:
+      - trakt_list:
+          account: '{{ secrets.trakt.acc }}'
+          list: watchlist
+          type: movies
   ######################################## Sync Trakt-Watchlist to Flexget-Queue
   Update_Trakt_to_Flexget:
     interval: 24 hours
@@ -392,82 +400,81 @@ tasks:
 #         - imdb_id
 #       action: reject
   ######################################## Remove canceled Series (Nobody wants to start watching canceled Series)
-#   Remove_Canceled_Collection:
-#     interval: 7 days
-#     priority: 4
-#     manual: yes
-#     seen: local
-#     template: 
-#       - no_global
-#       - series_lookup
-#     list_match:
-#       from:
-#         - trakt_list:
-#             account: '{{ secrets.trakt.acc }}'
-#             list: collection
-#             type: shows
-#     if:
-#       - trakt_series_status == 'canceled': accept
-# #      - imdb_score <= '5.0': accept
-# #     list_remove:
-# #       - trakt_list:
-# #           account: '{{ secrets.trakt.acc }}'
-# #           list: collection     
+  Remove_Canceled:
+    interval: 48 hours
+    priority: 4
+    manual: yes
+    template: 
+      - no_seen
+      - no_global
+      - series_lookup
+    list_match:
+      from:
+        - trakt_list:
+            account: '{{ secrets.trakt.acc }}'
+            list: watchlist
+            type: shows
+        - trakt_list:
+            account: '{{ secrets.trakt.acc }}'
+            list: collection
+            type: shows
+    if:
+      - trakt_series_status == 'canceled': accept
+    list_remove:
+      - trakt_list:
+          account: '{{ secrets.trakt.acc }}'
+          list: watchlist
+          type: shows
+      - imdb_list:
+          login: '{{ secrets.imdb.usr }}'
+          password: '{{ secrets.imdb.pwd }}'
+          list: watchlist   
+      - trakt_list:
+          account: '{{ secrets.trakt.acc }}'
+          list: '{{ secrets.trakt.foreign }}' 
+          type: shows 
 #       - trakt_list:
 #           account: '{{ secrets.trakt.acc }}'
-#           list: '{{ secrets.trakt.foreign }}'   
-#   Keep_Canceled_Collection:
-#     exec:
-#       - echo "Canceled Collections will not deleted"
-#     manual: yes
-  ######################################## Remove canceled Series (Nobody wants to start watching canceled Series)
-#   Remove_Canceled_Watchlist:
-#     interval: 48 hours
-#     priority: 4
-#     manual: yes
-#     template: 
-#       - no_seen
-#       - no_global
-#       - series_lookup
-#     list_match:
-#       - trakt_list:
-#           account: '{{ secrets.trakt.acc }}'
-#           list: watchlist
-#           type: shows
-#     if:
-#       - trakt_series_status == 'canceled': accept
-#     list_remove:
-#       - trakt_list:
-#           account: '{{ secrets.trakt.acc }}'
-#           list: watchlist     
+#           list: collection
+  #########
+  Keep_Canceled_Collection:
+    exec:
+      - echo "Canceled Collections will not deleted"
+    manual: yes
   ######################################## Remove Collected Movie_Queue_Entrys (usually added manually)
-#   RemoveCollected:
-#     priority: 9
-#     interval: 24 hours
-#     disable: [urlrewrite_redirect]
-#     seen: local
-#     template: 
-#       - no_global
-#       - movies_lookup
-#     list_match:
-#       - trakt_list:
-#           account: '{{ secrets.trakt.acc }}'
-#           list: watchlist
-#           type: movies
-#     crossmatch:
-#       from:
-#         - trakt_list:
-#             account: '{{ secrets.trakt.acc }}'
-#             list: collection
-#             type: movies
-#       fields:
-#         - imdb_id
-#       action: accept
-#     list_remove:
-#       - trakt_list:
-#           account: '{{ secrets.trakt.acc }}'
-#           list: watchlist
-#       - movie_list: '{{ secrets.queue.movie }}'
+  RemoveCollected:
+    priority: 9
+    interval: 24 hours
+    disable: [urlrewrite_redirect]
+    seen: local
+    template: 
+      - no_global
+      - movies_lookup
+    list_match:
+      from:
+        - trakt_list:
+            account: '{{ secrets.trakt.acc }}'
+            list: watchlist
+            type: movies
+    crossmatch:
+      from:
+        - trakt_list:
+            account: '{{ secrets.trakt.acc }}'
+            list: collection
+            type: movies
+      fields:
+        - imdb_id
+      action: accept
+    list_remove:
+      - trakt_list:
+          account: '{{ secrets.trakt.acc }}'
+          list: watchlist
+          type: movies
+      - imdb_list:
+          login: '{{ secrets.imdb.usr }}'
+          password: '{{ secrets.imdb.pwd }}'
+          list: watchlist
+#      - movie_list: '{{ secrets.queue.movie }}'
 ############################################################################################################ Movies ############################################################################################################
 
  ######################################## Search for queued Movies on hdarea with the help of a custom  pipe  ### Broken (needs HDArea-Search fix)
@@ -482,16 +489,29 @@ tasks:
       - German
     list_match:
       from:
-        - movie_list: '{{ secrets.queue.movie }}'
+        - movie_list: 
+            list_name: '{{ secrets.queue.movie }}'
+            strip_year: yes
     discover:
       what:
-        - movie_list: '{{ secrets.queue.movie }}'
+        - movie_list:
+            list_name: '{{ secrets.queue.movie }}'
+            strip_year: yes
       from:
         - search_rss: "{{ secrets.rss.HDAreaSearch }}"
 #        - search_rss: "{{ secrets.rss.MovieBlog }}"        
+    list_remove:
+      - trakt_list:
+          account: '{{ secrets.trakt.acc }}'
+          list: watchlist
+          type: movies
+      - imdb_list:
+          login: '{{ secrets.imdb.usr }}'
+          password: '{{ secrets.imdb.pwd }}'
+          list: watchlist
   ######################################## Search based on Stream    
   Movies_Watchlist_Stream_DE:
-    priority: 5
+    priority: 4
     template: 
       - '{{ secrets.DownloadManager }}-Defaults'
       - '{{ secrets.DownloadManager }}-Watchlist'
@@ -504,10 +524,15 @@ tasks:
         - movie_list: '{{ secrets.queue.movie }}'
     inputs:
       - rss: '{{ secrets.flexget.path }}/External-Plugins/HDArea-Feed/HDArea.xml'
-#     list_remove:
-#       - trakt_list:
-#           account: '{{ secrets.trakt.acc }}'
-#           list: watchlist
+    list_remove:
+      - trakt_list:
+          account: '{{ secrets.trakt.acc }}'
+          list: watchlist
+          type: movies
+      - imdb_list:
+          login: '{{ secrets.imdb.usr }}'
+          password: '{{ secrets.imdb.pwd }}'
+          list: watchlist
   ######################################## Search based on Stream    
   Movies_Watchlist_Stream_EN:
     priority: 6
@@ -533,7 +558,7 @@ tasks:
       - movie_list: '{{ secrets.queue.movie }}'
   ######################################## 10 Star Rating = high quality    
   Movies_10Star_HighQuality_Stream:
-    priority: 5
+    priority: 6
     seen: local
     template: 
       - '{{ secrets.DownloadManager }}-Defaults'
@@ -549,7 +574,15 @@ tasks:
             type: movies
     inputs:
       - rss: '{{ secrets.flexget.path }}/External-Plugins/HDArea-Feed/HDArea.xml'
-
+    list_remove:
+      - trakt_list:
+          account: '{{ secrets.trakt.acc }}'
+          list: watchlist
+          type: movies
+      - imdb_list:
+          login: '{{ secrets.imdb.usr }}'
+          password: '{{ secrets.imdb.pwd }}'
+          list: watchlist
 
 ############################################################################################################ Series ############################################################################################################
 
@@ -615,7 +648,7 @@ tasks:
 #    series_premiere:
 #      allow_teasers: no
 #      allow_seasonless: yes
-    priority: 7
+    priority: 8
     template: 
       - '{{ secrets.handler }}'
       - '{{ secrets.DownloadManager }}-Defaults'
@@ -672,7 +705,8 @@ tasks:
 ###############################################################################################################################################
               
 schedules:
-  - tasks: '*' # Run every task on given schedule, except tasks with own interval 
+  - tasks: '*' 
+  # Run every task on given schedule, except tasks with own interval:
     schedule:
       hour: '{{ secrets.flexget.scheduler }}'      
 ###############      
