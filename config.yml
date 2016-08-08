@@ -604,13 +604,17 @@ tasks:
       - rss: '{{ secrets.flexget.path }}/External-Plugins/Serienjunkies-Feed/rss.xml'
     serienjunkies:
       language: dual #'{{ secrets.rss.Serienjunkies.Language }}' 
-    # Series on HOLD 
+    # Crossmatch for Series on HOLD - and double check for Episodes already existing
     crossmatch:
       from:
         - trakt_list:
             account: '{{ secrets.trakt.acc }}'
             list: '{{ secrets.trakt.OnHold }}'
             type: shows
+        - trakt_list:
+            account: '{{ secrets.trakt.acc }}'
+            list: collection
+            type: episode
       fields:
         - imdb_id
       action: reject
@@ -703,10 +707,21 @@ tasks:
 ###############################################################################################################################################
 ## MISC #######################################################################################################################################
 ###############################################################################################################################################
-              
+      
+  TEST:
+    manual: yes
+    filesystem: 
+      path: 
+        - /media/snikay/Series/Archiv
+      recursive: yes
+      retrieve: files
+    duplicates:
+      field: tmdb_id
+      action: accept      
+      
+# Run every task on given schedule, except tasks with own interval:              
 schedules:
-  - tasks: '*' 
-  # Run every task on given schedule, except tasks with own interval:
+  - tasks: '*'
     schedule:
       hour: '{{ secrets.flexget.scheduler }}'      
 ###############      
