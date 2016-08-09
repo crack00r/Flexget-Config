@@ -668,11 +668,7 @@ tasks:
         - trakt_list:
             account: '{{ secrets.trakt.acc }}'
             list: watchlist
-            type: shows
-        - trakt_list:
-            account: '{{ secrets.trakt.acc }}'
-            list: collection
-            type: episodes          
+            type: shows       
     inputs:
       - rss: '{{ secrets.flexget.path }}/External-Plugins/Serienjunkies-Feed/rss.xml'
     crossmatch:
@@ -680,7 +676,7 @@ tasks:
         - trakt_list:
             account: '{{ secrets.trakt.acc }}'
             list: collection
-            type: shows
+            type: episodes   
       fields:
         - imdb_id
       action: reject
