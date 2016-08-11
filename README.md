@@ -11,3 +11,6 @@ search_Serienjunkies.py aus dem Ordner "Search-Plugins" nach "python/site-packag
 
 Vieles noch zu verbessern, bzw zu ergänzen, funktioniert jedoch soweit. <br>
 Es liefert auf jedenfall entries für Flexget. ^^ <br><br>
+
+Spenden gerne an:
+bitcoin:36WjJWkePr5Vg4gJc8nFyB8dLyXPKgGa3K
