@@ -367,6 +367,37 @@ tasks:
       list: collection
     accept_all: yes
     set_series_begin: yes
+  ######################################## Remove On-Hold if episode 3 was seen
+  Remove_on_Hold:
+    interval: 24 hours
+    manual: yes ###TESTING
+    priority: 3
+    template: 
+      - no_seen
+      - no_global
+      - series_lookup
+    trakt_list:
+      account: '{{ secrets.trakt.acc }}'
+      list: watched
+      type: episodes
+    accept_all: yes
+    crossmatch:
+      from:
+        - trakt_list:
+            account: '{{ secrets.trakt.acc }}'
+            list: '{{ secrets.trakt.OnHold }}'
+            type: shows
+      fields:
+        - imdb_id
+      action: accept
+    regexp:
+      accept:  
+        - \b1x03\b
+    list_remove:
+      - trakt_list:
+          account: '{{ secrets.trakt.acc }}'
+          list: OnHold
+          type: shows
 #   ########################################
 #   Sync_PlexWatchlist_Trakt_OnHold:
 #     manual: yes
@@ -418,6 +449,7 @@ tasks:
             account: '{{ secrets.trakt.acc }}'
             list: collection
             type: shows
+      single_match: no
     if:
       - trakt_series_status == 'canceled': accept
     list_remove:
@@ -456,6 +488,7 @@ tasks:
             account: '{{ secrets.trakt.acc }}'
             list: watchlist
             type: movies
+      single_match: no
     crossmatch:
       from:
         - trakt_list:
@@ -477,7 +510,7 @@ tasks:
 #      - movie_list: '{{ secrets.queue.movie }}'
 ############################################################################################################ Movies ############################################################################################################
 
- ######################################## Search for queued Movies on hdarea with the help of a custom  pipe  ### Broken (needs HDArea-Search fix)
+ ######################################## Search for queued Movies on hdarea with the help of a custom  pipe
   Movies_Watchlist_Search:
     priority: 5
     template: 
@@ -487,11 +520,6 @@ tasks:
       - movies_lookup
       - main_quality
       - German
-    list_match:
-      from:
-        - movie_list: 
-            list_name: '{{ secrets.queue.movie }}'
-            strip_year: yes
     discover:
       what:
         - movie_list:
@@ -517,11 +545,12 @@ tasks:
       - '{{ secrets.DownloadManager }}-Watchlist'
       - '{{ secrets.DownloadManager }}-{{ secrets.DownloadManagerQueue }}-Queue'
       - movies_lookup    
-#      - German            #differentiation not possible with this feed right now - needs fix
-#      - main_quality      #differentiation not possible with this feed right now - needs fix
+#      - German            #differentiation not possible with this feed right now - feed is pre-filtered for German - needs fix
+#      - main_quality      #differentiation not possible with this feed right now - feed is pre-filtered for 720p - needs fix
     list_match:
       from:
         - movie_list: '{{ secrets.queue.movie }}'
+      single_match: no
     inputs:
       - rss: '{{ secrets.flexget.path }}/External-Plugins/HDArea-Feed/HDArea.xml'
     list_remove:
@@ -533,8 +562,27 @@ tasks:
           login: '{{ secrets.imdb.usr }}'
           password: '{{ secrets.imdb.pwd }}'
           list: watchlist
+#   ######################################## Search based on Stream    
+#   Movies_Watchlist_Stream_EN_HDA:
+#     priority: 6
+#     seen: local
+#     template: 
+#       - '{{ secrets.DownloadManager }}-Defaults'
+#       - '{{ secrets.DownloadManager }}-Watchlist'
+#       - '{{ secrets.DownloadManager }}-{{ secrets.DownloadManagerQueue }}-Queue'
+#       - '{{ secrets.English }}-English' #enable/disable this Task
+#       - movies_lookup    
+#       - English
+#       - main_quality
+#     list_match:
+#       from: 
+#         - movie_list: '{{ secrets.queue.movie }}'
+#       single_match: no
+#       remove_on_match: no
+#     inputs:
+#       - rss: '{{ secrets.flexget.path }}/External-Plugins/HDArea-Feed/HDArea.xml'
   ######################################## Search based on Stream    
-  Movies_Watchlist_Stream_EN:
+  Movies_Watchlist_Stream_EN_Sceper:
     priority: 6
     seen: local
     template: 
@@ -544,18 +592,14 @@ tasks:
       - '{{ secrets.English }}-English' #enable/disable this Task
       - movies_lookup    
       - English
-#      - main_quality      #differentiation not possible with this feed right now - needs fix
+      - main_quality
     list_match:
       from: 
         - movie_list: '{{ secrets.queue.movie }}'
-    inputs:
-      - rss: '{{ secrets.flexget.path }}/External-Plugins/HDArea-Feed/HDArea.xml'
-#    list_remove:
-#      - trakt_list:
-#          account: '{{ secrets.trakt.acc }}'
-#          list: watchlist
-    list_add:
-      - movie_list: '{{ secrets.queue.movie }}'
+      single_match: no
+      remove_on_match: no
+    sceper: http://sceper.ws/category/tv-shows/tv-shows-x264
+    disable_urlrewriters: [urlrewrite_redirect]
   ######################################## 10 Star Rating = high quality    
   Movies_10Star_HighQuality_Stream:
     priority: 6
@@ -572,6 +616,7 @@ tasks:
             account: '{{ secrets.trakt.acc }}'
             list: '{{ secrets.trakt.Favorite_List }}'
             type: movies
+      single_match: no
     inputs:
       - rss: '{{ secrets.flexget.path }}/External-Plugins/HDArea-Feed/HDArea.xml'
     list_remove:
@@ -680,18 +725,17 @@ tasks:
       fields:
         - imdb_id
       action: reject
-#     trakt_add:
-#       account: '{{ secrets.trakt.acc }}'
-#       list: '{{ secrets.trakt.OnHold }}'    
+    list_add:
+      - trakt_list:
+          account: '{{ secrets.trakt.acc }}'
+          list: '{{ secrets.trakt.OnHold }}'    
     regexp:
       reject_excluding:  
         - \bS01(.E0|E0)(1|2|3)\b   # Only Episode 1-3 to check out for a new series
 #     if:
 #       - "'german' != (imdb_languages or ['german'])[0]":
 #           set:
-#             trakt_add:
-#               account: '{{ secrets.trakt.acc }}'
-#               list: '{{ secrets.trakt.Foreign }}' 
+#             seen: local
 #############################################################
   YouTube-Personal-Playlist:
     priority: 10
@@ -723,7 +767,7 @@ tasks:
 schedules:
   - tasks: '*'
     schedule:
-      hour: '{{ secrets.flexget.scheduler }}'      
+      hour: '{{ secrets.flexget.scheduler }}'
 ###############      
 web_server:
   bind: 0.0.0.0
