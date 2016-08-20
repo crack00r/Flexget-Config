@@ -223,27 +223,27 @@ templates:
   ######## Archive-Series
   jdownloader-Archive-Series:
     exec: 
-      - echo "downloadFolder={{ secrets.DLFolder }}/{{ secrets.DLFolderArchive }}/Series/{{title}}.{{imdb_original_name}}.{{imdb_id}}.{{imdb_year}}" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
+      - echo "downloadFolder={{ secrets.DLFolder }}/{{ secrets.DLFolderArchive }}/Series/{{title}}" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
   ######## Archive-Movies
   jdownloader-Archive-Movies:
     exec: 
-      - echo "downloadFolder={{ secrets.DLFolder }}/{{ secrets.DLFolderArchive }}/Movies/{{title}}.{{imdb_original_name}}.{{imdb_id}}.{{imdb_year}}" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
+      - echo "downloadFolder={{ secrets.DLFolder }}/{{ secrets.DLFolderArchive }}/Movies/{{title}}" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
   ######## Watchlist
   jdownloader-Watchlist-Series:
     exec: 
-      - echo "downloadFolder={{ secrets.DLFolder }}/{{ secrets.DLFolderWatchlist }}/Series/{{title}}.{{imdb_original_name}}.{{imdb_id}}.{{imdb_year}}" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
+      - echo "downloadFolder={{ secrets.DLFolder }}/{{ secrets.DLFolderWatchlist }}/Series/{{title}}" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
   ######## Watchlist
   jdownloader-Watchlist-Movies:
     exec: 
-      - echo "downloadFolder={{ secrets.DLFolder }}/{{ secrets.DLFolderWatchlist }}/Movies/{{title}}.{{imdb_original_name}}.{{imdb_id}}.{{imdb_year}}" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
+      - echo "downloadFolder={{ secrets.DLFolder }}/{{ secrets.DLFolderWatchlist }}/Movies/{{title}}" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
   ######## YouTube
   jdownloader-YouTube:
     exec: 
-      - echo "downloadFolder={{ secrets.DLFolder }}/{{ secrets.DLFolderYouTube }}/{{title}}.{{imdb_original_name}}.{{imdb_id}}.{{imdb_year}}" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
+      - echo "downloadFolder={{ secrets.DLFolder }}/{{ secrets.DLFolderYouTube }}/{{title}}" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
   ######## YouTube
   jdownloader-EBooks:
     exec: 
-      - echo "downloadFolder={{ secrets.DLFolder }}/{{ secrets.DLFolderEBooks }}/{{title}}.{{imdb_original_name}}.{{imdb_id}}.{{imdb_year}}" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
+      - echo "downloadFolder={{ secrets.DLFolder }}/{{ secrets.DLFolderEBooks }}/{{title}}" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
   ######## Queue-enable
   jdownloader-enable-Queue:
     exec:
@@ -464,12 +464,7 @@ tasks:
       - trakt_list:
           account: '{{ secrets.trakt.acc }}'
           list: watchlist
-          type: movies
-      - trakt_list:
-          account: '{{ secrets.trakt.acc }}'
-          list: watchlist
           type: shows
-      - movie_list: '{{ secrets.queue.movie }}'
   ######################################## Remove Collected Movie_Queue_Entrys (usually added manually)
   RemoveCollectedTraktMovies:
     priority: 1
@@ -496,10 +491,6 @@ tasks:
           account: '{{ secrets.trakt.acc }}'
           list: watchlist
           type: movies
-      - trakt_list:
-          account: '{{ secrets.trakt.acc }}'
-          list: watchlist
-          type: shows
       - movie_list: '{{ secrets.queue.movie }}'
   ######################################## Remove Collected Movie_Queue_Entrys (usually added manually)
   RemoveCollectedIMDb:
