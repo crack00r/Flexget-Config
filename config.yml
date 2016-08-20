@@ -440,37 +440,6 @@ tasks:
       - echo "Canceled Collections will not deleted"
     manual: yes
   ######################################## Remove Collected Movie_Queue_Entrys (usually added manually)
-  RemoveCollectedTraktMovies:
-    priority: 1
-    interval: 24 hours
-    seen: local
-    template: 
-      - no_global
-      - movies_lookup
-    trakt_list:
-      account: '{{ secrets.trakt.acc }}'
-      list: watchlist
-      type: movies
-    crossmatch:
-      from:
-        - trakt_list:
-            account: '{{ secrets.trakt.acc }}'
-            list: collection
-            type: movies
-      fields:
-        - imdb_id
-      action: accept
-    list_remove:
-      - trakt_list:
-          account: '{{ secrets.trakt.acc }}'
-          list: watchlist
-          type: movies
-      - imdb_list:
-          login: '{{ secrets.imdb.usr }}'
-          password: '{{ secrets.imdb.pwd }}'
-          list: watchlist
-      - movie_list: '{{ secrets.queue.movie }}'
-  ######################################## Remove Collected Movie_Queue_Entrys (usually added manually)
   RemoveCollectedTrakt:
     priority: 1
     interval: 24 hours
