@@ -9,7 +9,7 @@ templates:
     proper_movies: yes
     plugin_priority:
       regexp: 250
-    pathscrub: windows  # Use Windows conform filenames
+#    pathscrub: windows  # Use Windows conform filenames
     parsing:
       movie: guessit
       series: guessit
@@ -439,8 +439,39 @@ tasks:
     exec:
       - echo "Canceled Collections will not deleted"
     manual: yes
+  ######################################## Remove Collected Series_Queue_Entrys (usually added manually)
+  RemoveCollectedTraktSeries:
+    priority: 1
+    interval: 24 hours
+    seen: local
+    template: 
+      - no_global
+      - movies_lookup
+    trakt_list:
+      account: '{{ secrets.trakt.acc }}'
+      list: watchlist
+      type: shows
+    crossmatch:
+      from:
+        - trakt_list:
+            account: '{{ secrets.trakt.acc }}'
+            list: collection
+            type: shows
+      fields:
+        - imdb_id
+      action: accept
+    list_remove:
+      - trakt_list:
+          account: '{{ secrets.trakt.acc }}'
+          list: watchlist
+          type: movies
+      - trakt_list:
+          account: '{{ secrets.trakt.acc }}'
+          list: watchlist
+          type: shows
+      - movie_list: '{{ secrets.queue.movie }}'
   ######################################## Remove Collected Movie_Queue_Entrys (usually added manually)
-  RemoveCollectedTrakt:
+  RemoveCollectedTraktMovies:
     priority: 1
     interval: 24 hours
     seen: local
@@ -451,20 +482,12 @@ tasks:
       account: '{{ secrets.trakt.acc }}'
       list: watchlist
       type: movies
-    trakt_list:
-      account: '{{ secrets.trakt.acc }}'
-      list: watchlist
-      type: shows
     crossmatch:
       from:
         - trakt_list:
             account: '{{ secrets.trakt.acc }}'
             list: collection
             type: movies
-        - trakt_list:
-            account: '{{ secrets.trakt.acc }}'
-            list: collection
-            type: shows
       fields:
         - imdb_id
       action: accept
