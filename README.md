@@ -4,9 +4,9 @@ Flexget-Config by snickers2k<br>
 thanks to crack00r for testing<br>
 
 
-Easy to use Flexget config with support of secrets file. You only need to fill in your credentials.
-JDownloader and pyLoad are supported Download-Managers.
-IMDb and Trakt are supported handlers.
+Easy to use Flexget config with support of secrets file. You only need to fill in your credentials. <br>
+JDownloader and pyLoad are supported Download-Managers. <br>
+IMDb and Trakt are supported handlers. <br>
 
 support-Forum<br>
 https://board.jdownloader.org/showthread.php?t=67579
