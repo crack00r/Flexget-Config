@@ -957,16 +957,16 @@ tasks:
 #         files:
 #           - sub
 #           - srt
-  TEST:
-    manual: yes
-    filesystem:
-      path:
-        - /media/snikay/Series/Archiv
-      recursive: yes
-      retrieve: files
-    duplicates:
-      field: tmdb_id
-      action: accept
+#   TEST:
+#     manual: yes
+#     filesystem:
+#       path:
+#         - /media/snikay/Series/Archiv
+#       recursive: yes
+#       retrieve: files
+#     duplicates:
+#       field: tmdb_id
+#       action: accept
 
 # Run every task on given schedule, except tasks with own interval:
 schedules:
