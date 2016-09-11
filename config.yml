@@ -55,11 +55,11 @@ templates:
           replace:
             regexp: ','
             format: ''
-    ######################################## Global Exclude  (For testing: http://pythex.org/)
+    ######################################## Global Exclude  (For testing: https://regex101.com)
     regexp:
       reject:
       # Release
-        - \b(duo|tri|quadri|tetra|penta)logy\b   # Collections
+        - \b(duo|tri|quadri|tetra|penta)logy\b # Collections
         - \bextended\b
         - \bcomplete\b   # Complete (mostly stands for complete series)
         - \bdirectors.cut\b   #
@@ -67,20 +67,21 @@ templates:
         - \buntouched\b   # Untouched
       # Video
         - \b3d\b   # 3D
-        - \b(hd)ts|telesync\b   # TS=TeleSync
+        - \b(hd|)ts|telesync\b   # TS=TeleSync
+        - \brucke([^\s]+)\b # ruckel/ruckeln/ruckelt/ruckelig
         - \bcam\b   # CAM
-        - \b(bd|dvd)scr|screener\b   # BD- / DVD- / SCR(EENER)
+        - \b(bd|dvd|)scr(\b|eener)\b   # BD- / DVD- / SCR(EENER)
         - \bremux\b   # Remux
         - \br(5|6)\b   # R5/6 (Region Release: Asia & East-Europe - usually bad Quality)
-        - \bsub(s|bed)\b # Subtitles (Sub / Subs / Subbed / Unsubbed
+        - \basia.sub(s|bed)\b # Subtitles (Sub / Subs / Subbed / Unsubbed
         - \bhc|hardcoded\b # Subtitles (HC / Hardcoded)
-#        - \bblur|webblur\b # Blurred-Subtitles
+        - \b([^\s]+|web|)blur(\b|rt|red)\b # Blurred-Subtitles
         - \bread.nfo\b # Mostly means there is some info in the nfo, mostly about hardcoded subs
 #        - \bhdtv\b   # (HD)TV
       # Audio
         - \bflac\b   # flac
         - \b(true|dts)hd\b   # TRUE- / DTS- HD
-        - \b(ac3)md|mic.dubbed\b
+        - \b(ac3|)md|mic.dubbed\b
       # Codec
         - \b10bit\b   # 10-Bit
 ###############################################################################################################################################
@@ -93,7 +94,6 @@ templates:
     tmdb_lookup: yes
     rottentomatoes_lookup: yes
     trakt_lookup: yes
-
   ######################################## Series-Global
   series_lookup:
     plugin_priority:
@@ -387,6 +387,9 @@ tasks:
       list: collection
     accept_all: yes
     set_series_begin: yes
+    if:
+      - tvdb_status == 'Ended': reject
+      - trakt_series_status == 'ended': reject
   ######################################## Set_Series_Begin based on "Collected" in Trakt - for every show
   Download_Series_Missing:
     manual: yes
@@ -593,6 +596,11 @@ tasks:
           login: '{{ secrets.imdb.usr }}'
           password: '{{ secrets.imdb.pwd }}'
           list: watchlist
+#     if:
+#       - "has_field('description')":
+#           regexp:
+#             reject_excluding:
+#               - '(without|ohne|keine)(.|.[^\s]+.)sub(s|title(|[^\s]+))': {from: description}
   ######################################## Search based on Stream
   Movies_Watchlist_Stream_DE:
     priority: 4
@@ -656,7 +664,6 @@ tasks:
       - '{{ secrets.DownloadManager }}-{{ secrets.DownloadManagerQueue }}-Queue'
       - '{{ secrets.English }}-English' #enable/disable this Task
       - movies_lookup
-      - English
       - main_quality
     list_match:
       from:
@@ -696,8 +703,56 @@ tasks:
 
 ############################################################################################################ Series ############################################################################################################
 
-
   ########################################
+
+#   Series_Collection_DE_test:
+#     priority: 6
+#     template:
+#       - '{{ secrets.handler }}'
+#       - '{{ secrets.DownloadManager }}-Defaults'
+#       - '{{ secrets.DownloadManager }}-Archive-Series'
+#       - '{{ secrets.DownloadManager }}-{{ secrets.DownloadManagerQueue }}-Queue'
+#       - 'Discover-{{ secrets.series.backfill }}-Backfill'
+#       - German
+#       - series_lookup
+#       - main_quality
+# #     seen:
+# #       fields:
+# #         - title
+#     inputs:
+#       - rss: '{{ secrets.flexget.path }}/External-Plugins/Serienjunkies-Feed/rss.xml'
+#     serienjunkies:
+#       language: '{{ secrets.Serienjunkies.Language }}'
+#     # Crossmatch for Series on HOLD - and double check for Episodes already existing
+#     crossmatch:
+#       from:
+#         - trakt_list:
+#             account: '{{ secrets.trakt.acc }}'
+#             list: '{{ secrets.trakt.OnHold }}'
+#             type: shows
+#         - trakt_list:
+#             account: '{{ secrets.trakt.acc }}'
+#             list: collection
+#             type: episodes
+#       fields:
+#         - imdb_id
+#       action: reject
+#     series:
+#       # Series with Localized-Titles - HUGE Problem. Searching for a better solution
+#       - Die.Simpsons:
+#           name_regexp: ^The.Simpsons?
+#       - Akte.X:
+#           name_regexp: ^The.X.Files?
+#       - Chaos.City:
+#           name_regexp: ^Spin.City?
+#       - House.of.Cards.(US):
+#           name_regexp: ^House.of.Cards?
+#     if:
+#       - "'trakt_languages' or 'imdb_languages' or 'trakt_translations.language' == ['german']": accept
+#         exec:
+#           - echo "{{title}} accepted by language test" >> "{{ secrets.DLFolder }}/test_{{title}}.txt"  
+
+  ######################################## Stream and Search for Serienunkies
 
   Series_Collection_DE:
     priority: 7
@@ -710,11 +765,11 @@ tasks:
       - German
       - series_lookup
       - main_quality
-    seen:
-      fields:
-        - title
-    inputs:
-      - rss: '{{ secrets.flexget.path }}/External-Plugins/Serienjunkies-Feed/rss.xml'
+#     seen:
+#       fields:
+#         - title
+#    inputs:
+#      - rss: '{{ secrets.flexget.path }}/External-Plugins/Serienjunkies-Feed/rss.xml'
     serienjunkies:
       language: '{{ secrets.Serienjunkies.Language }}'
     # Crossmatch for Series on HOLD - and double check for Episodes already existing
@@ -740,8 +795,7 @@ tasks:
       - Chaos.City:
           name_regexp: ^Spin.City?
       - House.of.Cards.(US):
-          name_regexp: ^House.of.Cards?
-
+          name_regexp: ^House.of.Cards?       
   ######################################## Based on Series-Collection "English"
 
   Series_Collection_EN:
@@ -757,6 +811,10 @@ tasks:
     seen: local
     sceper: 'http://sceper.ws/category/tv-shows/tv-shows-x264'
     disable: [urlrewrite_redirect]
+    if:
+      - trakt_languages == ['german']: reject
+      - imdb_languages == ['german']: reject
+      - trakt_translations.language == ['german']: reject             
   ######################################## Watchlist-Premieres | Needs work for: Prefer DE, otherwise EN
   Series_Watchlist:
     plugin_priority:
@@ -809,7 +867,7 @@ tasks:
     rss:
       url: "http://www.youtube.com/feeds/videos.xml?playlist_id={{ secrets.YouTube.Playlist }}"
       ascii: yes
-    accept_all: yes
+#     accept_all: yes
     template:
       - '{{ secrets.DownloadManager }}-Defaults'
       - '{{ secrets.DownloadManager }}-YouTube'
@@ -821,66 +879,66 @@ tasks:
 ###############################################################################################################################################
 
 
-  Plex_Rating_Delete:
-    manual: yes
-    plex:
-      section: '{{ secrets.plex.Series_Watchlist }}'
-      server: '{{ secrets.plex.ip }}'
-      selection: recentlyViewed
-      username: '{{ secrets.plex.usr }}'
-      password: '{{ secrets.plex.pwd }}'                     
-    if:
-      - "'plex_userrating' <= 2": accept
-    filesystem:
-      path: 
-        - '{{ secrets.Filesystem.SeriesWatchlist }}'
-      recursive: yes
-    delete:
-      clean_source: 1
-      along:
-        files:
-          - sub
-          - srt
-  Plex_Rating_Move_Archive:
-    manual: yes
-    plex:
-      section: '{{ secrets.plex.Series_Watchlist }}'
-      server: '{{ secrets.plex.ip }}'
-      selection: recentlyViewed
-      username: '{{ secrets.plex.usr }}'
-      password: '{{ secrets.plex.pwd }}'                     
-    if:
-      - "'plex_userrating' == 3 or 'plex_userrating' == 4": accept
-    filesystem:
-      path: 
-        - '{{ secrets.Filesystem.SeriesWatchlist }}'
-      recursive: yes
-    move:
-      to: '{{ secrets.Filesystem.SeriesArchive }}/'
-      along:
-        files:
-          - sub
-          - srt
-  Plex_Rating_Move_Archive5Star:
-    manual: yes
-    plex:
-      section: '{{ secrets.plex.Series_Watchlist }}'
-      server: '{{ secrets.plex.ip }}'
-      selection: recentlyViewed
-      username: '{{ secrets.plex.usr }}'
-      password: '{{ secrets.plex.pwd }}'                     
-    if:
-      - "'plex_userrating' == 5": accept
-    filesystem:
-      path: 
-        - '{{ secrets.Filesystem.SeriesWatchlist }}'
-      recursive: yes
-    move:
-      to: '{{ secrets.Filesystem.SeriesArchive }}/'
-      along:
-        files:
-          - sub
-          - srt
+#   Plex_Rating_Delete:
+#     manual: yes
+#     plex:
+#       section: '{{ secrets.plex.Series_Watchlist }}'
+#       server: '{{ secrets.plex.ip }}'
+# #       selection: recentlyViewed
+#       username: '{{ secrets.plex.usr }}'
+#       password: '{{ secrets.plex.pwd }}'                     
+#     if:
+#       - "'plex_userrating' <= 2": accept
+#     filesystem:
+#       path: 
+#         - '{{ secrets.Filesystem.SeriesWatchlist }}'
+#       recursive: yes
+#     delete:
+#       clean_source: 1
+#       along:
+#         files:
+#           - sub
+#           - srt
+#   Plex_Rating_Move_Archive:
+#     manual: yes
+#     plex:
+#       section: '{{ secrets.plex.Series_Watchlist }}'
+#       server: '{{ secrets.plex.ip }}'
+#       selection: recentlyViewed
+#       username: '{{ secrets.plex.usr }}'
+#       password: '{{ secrets.plex.pwd }}'                     
+#     if:
+#       - "'plex_userrating' == 3 or 'plex_userrating' == 4": accept
+#     filesystem:
+#       path: 
+#         - '{{ secrets.Filesystem.SeriesWatchlist }}'
+#       recursive: yes
+#     move:
+#       to: '{{ secrets.Filesystem.SeriesArchive }}/'
+#       along:
+#         files:
+#           - sub
+#           - srt
+#   Plex_Rating_Move_Archive5Star:
+#     manual: yes
+#     plex:
+#       section: '{{ secrets.plex.Series_Watchlist }}'
+#       server: '{{ secrets.plex.ip }}'
+#       selection: recentlyViewed
+#       username: '{{ secrets.plex.usr }}'
+#       password: '{{ secrets.plex.pwd }}'                     
+#     if:
+#       - "'plex_userrating' == 5": accept
+#     filesystem:
+#       path: 
+#         - '{{ secrets.Filesystem.SeriesWatchlist }}'
+#       recursive: yes
+#     move:
+#       to: '{{ secrets.Filesystem.SeriesArchive }}/'
+#       along:
+#         files:
+#           - sub
+#           - srt
             
 #   cleanup:
 #     manual: yes
