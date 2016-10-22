@@ -1017,8 +1017,4 @@ schedules:
     schedule:
       hour: '{{ secrets.flexget.scheduler }}'
 ###############
-web_server:
-  bind: 0.0.0.0
-  port: 5050
-api: yes
-webui: yes
+web_server: yes
