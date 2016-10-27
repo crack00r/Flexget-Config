@@ -1017,4 +1017,4 @@ schedules:
     schedule:
       hour: '{{ secrets.flexget.scheduler }}'
 ###############
-web_server: yes
+#web_server: yes
