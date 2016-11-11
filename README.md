@@ -5,18 +5,20 @@ thanks to crack00r for testing<br>
 
 
 Easy to use Flexget config with support of secrets file. You only need to fill in your credentials. <br>
-JDownloader and pyLoad are supported Download-Managers. <br>
-IMDb and Trakt are supported handlers. <br>
+Mainly for German Users <br>
 
-support-Forum<br>
+
+# support-Forum<br>
 https://board.jdownloader.org/showthread.php?t=67579
 
+# Best Uploaded.to Multi-Hoster
+[Premiumize](https://www.premiumize.me/ref/709558658) <br>
+- Best All-In-One Provider <br>
 
-# search_serienjunkies :
-search_Serienjunkies.py aus dem Ordner "Search-Plugins" nach "python/site-packages/flexget/plugins/*.py" verschieben.
+[DebridItalia](http://www.debriditalia.com/?ref=ref68473) <br>
+- Cheapest UNLIMITED-Traffic for Uploaded.to<br>
 
 
-Vieles noch zu verbessern, bzw zu ergänzen, funktioniert jedoch soweit. <br>
+# Donations / Spenden:
+bitcoin: https://greenaddress.it/pay/GA3ZpVx9d7CG5Gf4vfVX6vBkg5dVCC/
 
-Spenden gerne an:
-bitcoin:https://greenaddress.it/pay/GA3ZpVx9d7CG5Gf4vfVX6vBkg5dVCC/
