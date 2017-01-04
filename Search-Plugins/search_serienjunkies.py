@@ -3,6 +3,8 @@ from __future__ import unicode_literals, division, absolute_import
 import logging
 import urllib
 import re
+import json
+import html
 
 from flexget import plugin
 from flexget.entry import Entry
@@ -10,7 +12,7 @@ from flexget.event import event
 from flexget.config_schema import one_or_more
 from flexget.utils import requests
 from flexget.utils.soup import get_soup
-from flexget.utils.search import torrent_availability, normalize_unicode
+from flexget.utils.search import normalize_unicode
 
 log = logging.getLogger('searchSerienjunkies')
 
@@ -60,7 +62,6 @@ class SearchSerienjunkies(object):
         """
             Search for entries on Serienjunkies
         """
-        base_url = 'http://serienjunkies.org/search/'
         mull = {"Dauer:", "Download:", "Uploader:", u"Größe:", u"Tonhöhe:", "Sprache:", "Format:", "HQ-Cover:"}
         self.config = task.config.get('searchSerienjunkies') or {}
         self.config.setdefault('hoster', DEFHOS)
@@ -68,41 +69,49 @@ class SearchSerienjunkies(object):
 
         entries = set()
         for search_string in entry.get('search_strings', [entry['title']]):
+            # Formating and searching
             query = normalize_unicode(search_string)
-            query_url_fragment = urllib.quote(query.encode('utf8'))
+            results = requests.post('http://serienjunkies.org/media/ajax/search/search.php', data={'string': query}).json()
+            log.debug('Searching on Serienjunkies for : %s' % query)
 
-            # http://serienjunkies.org/search/QUERY
-            url = (base_url + query_url_fragment)
-            log.debug('Serienjunkies search url: %s' % url)
 
-            page = requests.get(url).content
-            soup = get_soup(page)
-            hoster = self.config['hoster']
-            if self.config['language'] == 'english':
-                english = True
-            else:
-                english = None
-            for p in soup.find_all('p'):
-                entry = Entry()
-                if p.strong is not None and p.strong.text not in mull:
-                  if english:
-                    try:
-                      if not p.strong.find(text=re.compile("german", flags=re.IGNORECASE)):
-                        link = p.find(text=re.compile(hoster)).find_previous('a')
-                        entry['title'] = p.strong.text
-                        entry['url'] = link.get('href')
-                        entries.add(entry)
-                    except:
-                      pass
-                  else:
-                    try:
-                      if p.strong.find(text=re.compile("german", flags=re.IGNORECASE)):
-                        link = p.find(text=re.compile(hoster)).find_previous('a')
-                        entry['title'] = p.strong.text
-                        entry['url'] = link.get('href')
-                        entries.add(entry)
-                    except:
-                      pass
+            # Getting the series url
+            series_url = ''
+            for r in results:
+              if html.unescape(r[1]) == query:
+                log.debug('Found a match with iD: %s' % str(r[0]))
+                series_url = 'http://serienjunkies.org/?cat='+str(r[0])
+
+            # Getting the download links out of the series url
+            if series_url != '':
+              page = requests.post(url).content
+              soup = get_soup(page)
+              hoster = self.config['hoster']
+              if self.config['language'] == 'english':
+                  english = True
+              else:
+                  english = None
+              for p in soup.find_all('p'):
+                  entry = Entry()
+                  if p.strong is not None and p.strong.text not in mull:
+                    if english:
+                      try:
+                        if not p.strong.find(text=re.compile("german", flags=re.IGNORECASE)):
+                          link = p.find(text=re.compile(hoster)).find_previous('a')
+                          entry['title'] = p.strong.text
+                          entry['url'] = link.get('href')
+                          entries.add(entry)
+                      except:
+                        pass
+                    else:
+                      try:
+                        if p.strong.find(text=re.compile("german", flags=re.IGNORECASE)):
+                          link = p.find(text=re.compile(hoster)).find_previous('a')
+                          entry['title'] = p.strong.text
+                          entry['url'] = link.get('href')
+                          entries.add(entry)
+                      except:
+                        pass
         return entries
 
 
