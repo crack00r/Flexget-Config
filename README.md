@@ -9,7 +9,7 @@ Mainly for German Users <br>
 
 
 ### support-Forum<br>
-https://board.jdownloader.org/showthread.php?t=67579
+https://board.jdownloader.org/showthread.php?t=67579  <br>
 
 #
 #### Best Uploaded.to Multi-Hoster
@@ -21,5 +21,5 @@ https://board.jdownloader.org/showthread.php?t=67579
 
 
 #### Donations / Spenden:
-bitcoin: 12vHS4h6patf4Ne6og4BHcDxRma3g2URUK
-Paypal: koenig_m@me.com
+bitcoin: 12vHS4h6patf4Ne6og4BHcDxRma3g2URUK  <br>
+Paypal: koenig_m@me.com  <br>
