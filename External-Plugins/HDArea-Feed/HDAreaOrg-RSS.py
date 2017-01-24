@@ -60,8 +60,7 @@ def get_year(soup1, dlLink, rls_title):
         year = imdb_site.find("span", {"class" : "nobr"})
         year = unicode.join(u'',map(unicode,year))
         year = re.sub(r".*([0-9]{4}).*", r"\1", year)
-        orig_title = imdb_site.find("h1", {"itemprop" : "name"}).getText()
-        orig_title = orig_title.replace('&nbsp;', '')
+        orig_title = imdb_site.find("span", {"class" : "itemprop"}).getText()
         title = replaceUmlauts(orig_title)
         print title+" ("+year+")"
         print dlLink+"\n"
