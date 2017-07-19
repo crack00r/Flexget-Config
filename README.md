@@ -23,3 +23,13 @@ https://board.jdownloader.org/showthread.php?t=67579  <br>
 #### Donations / Spenden:
 bitcoin: 12vHS4h6patf4Ne6og4BHcDxRma3g2URUK  <br>
 Paypal: koenig_m@me.com  <br>
+
+
+
+ # search_serienjunkies :
+ -In den Flexget Ordner unter "plugins" kopieren.
+ -Nutzbar zB mit discover unter "from:" via: <br>
+ -"- searchSerienjunkies: <br>
+ -  hoster: uploaded.to # oder share-online.biz <br>
+ -  language: german # oder english" <br>
+ +search_Serienjunkies.py aus dem Ordner "Search-Plugins" nach "python/site-packages/flexget/plugins/*.py" verschieben.
