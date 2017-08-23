@@ -1,36 +1,41 @@
-######################################################################################################################################################################config#by#snickers2k######
-################### Global ################################################################################################################################################################################################
-secrets: secrets.yml # Include Secrets.yml file (put in flexget folder besides config.yml)
+
+
+#################################################################################################################################config#by#snickers2k######
+################### Global ###########################################################################################################################################################
+variables: options.yml # Includes Options.yml file (put in flexget folder besides config.yml)
 #######
 templates:
   global:
     ######################################## Misc
     verify_ssl_certificates: yes
-    proper_movies: yes
+    proper_movies: yes  #accept Quality-fixes (Proper means there was a bug in the release before)
+    magnets: no
     plugin_priority:
       regexp: 250
-    pathscrub: windows  # Use Windows conform filenames
+#    assume_quality:
+#      NetflixUHD: bluray
+#      NetflixHD: bluray
+#      AmazonHD: bluray
+#      iTunesHD: bluray
     parsing:
       movie: guessit
       series: guessit
+    ######## Some HTML setup
     headers:
       User-Agent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36"
-#    assume_quality:
-#      hdtv: 720p
     retry_failed:
       retry_time: 20 seconds
       retry_time_multiplier: 2
       max_retries: 6
+    ######## Naming-Fixes
+    pathscrub: windows  # Use Windows conform filenames
     manipulate:
     ## Fix for Serienjunkies.org
       - title:
-          replace:
-            regexp: 'Deutsch'
+          replace:            
+            regexp: '.(Deutsch|Englisch).'
             format: ''
-      - title:
-          replace:
-            regexp: 'Englisch'
-            format: ''
+    ## other name-fixes
       - title:
           replace:
             regexp: 'ö'
@@ -45,45 +50,31 @@ templates:
             format: 'ue'
       - title:
           replace:
-            regexp: '!'
-            format: ''
-      - title:
-          replace:
-            regexp: 'tv-film'
-            format: ''
-      - title:
-          replace:
-            regexp: ','
+            regexp: '!|tv-film|,'
             format: ''
     ######################################## Global Exclude  (For testing: https://regex101.com)
     regexp:
       reject:
       # Release
-        - \b(duo|tri|quadri|tetra|penta)logy\b # Collections
-        - \bextended\b
-        - \bcomplete\b   # Complete (mostly stands for complete series)
-        - \bdirectors.cut\b   #
-        - \bcollection\b   # Collection
-        - \buntouched\b   # Untouched
+        - \b(duo|tri|quadri|tetra|penta)logy\b # Movie-Collections (often we already have some of those in our Library)
+        - \bcomplete\b   # Complete (usually stands for complete series - not working well with flexget)
+        - \bcollection\b   # Collections (usually stands for complete series - not working well with flexget)
+        - \buntouched\b   # Untouched (usually complete BDs with extras - incompatible with Plex/Kodi etc.)
+        - \bdirectors.cut\b   # usually nerdish, too long Versions of a Movie
+        - \bextended\b # usually nerdish, too long Versions of a Movie
       # Video
-        - \b3d\b   # 3D
-        - \b(hd|)ts|telesync\b   # TS=TeleSync
-        - \brucke([^\s]+)\b # ruckel/ruckeln/ruckelt/ruckelig
-        - \bcam\b   # CAM
+        - \b((hd|)ts|telesync)\b   # Bad-Quality
+        - \b((hd|)cam)\b   # Bad-Quality
+        - \brucke([^\s]+)\b # ruckel/ruckeln/ruckelt/ruckelig ## German for "lagging", Bad-Quality 
         - \b(bd|dvd|)scr(\b|eener)\b   # BD- / DVD- / SCR(EENER)
-        - \bremux\b   # Remux
         - \br(5|6)\b   # R5/6 (Region Release: Asia & East-Europe - usually bad Quality)
-        - \bsub(s|bed)\b # Subtitles (Sub / Subs / Subbed / Unsubbed
-        - \bhc|hardcoded\b # Subtitles (HC / Hardcoded)
-        - \b([^\s]+|web|)blur(\b|rt|red)\b # Blurred-Subtitles
-        - \bread.nfo\b # Mostly means there is some info in the nfo, mostly about hardcoded subs
-#        - \bhdtv\b   # (HD)TV
+        - \b(un|)sub(|s|bed)\b # Subtitles (Sub / Subs / Subbed / Unsubbed)
+        - \b(hc|hardcoded)\b # Subtitles (HC / Hardcoded)
+        - \b(web|)blur(\b|rt|red)\b # Blurred-Subtitles
+#        - \bread.nfo\b # usually means there is something in the nfo-file, mostly about hardcoded subs or other "bad"-Info
       # Audio
         - \bflac\b   # flac
-        - \b(true|dts)hd\b   # TRUE- / DTS- HD
-        - \b(ac3|)md|mic.dubbed\b
-      # Codec
-        - \b10bit\b   # 10-Bit
+        - \b((ac3|)md|mic.dubbed)\b
 ###############################################################################################################################################
 ### Templates #################################################################################################################################
 ###############################################################################################################################################
@@ -91,18 +82,20 @@ templates:
   ######################################## Movie-Global
   movies_lookup:
     imdb_lookup: yes
-    tmdb_lookup: yes
-    rottentomatoes_lookup: yes
-    trakt_lookup: yes
+    trakt_lookup:
+      account: '{? trakt.acc ?}'
+#    tmdb_lookup: yes
+#    rottentomatoes_lookup: yes
   ######################################## Series-Global
   series_lookup:
     plugin_priority:
       # manipulate must fix the titles before metainfo_series.
       manipulate: 255
-#    metainfo_series: yes
-    thetvdb_lookup: yes
-    trakt_lookup: yes
-    tvmaze_lookup: yes
+    metainfo_series: yes
+    thetvdb_lookup:
+      language: de
+    trakt_lookup:
+      account: '{? trakt.acc ?}' 
     set:
       tvdb_language: de
     manipulate:
@@ -118,22 +111,123 @@ templates:
           replace:
             regexp: '^\([^\]]*\)[^a-z0-9]*'
             format: ''
-      # Now the modifications
-      - title:
-          replace:
-            regexp: '.*(marvel|marvels|marvel.s)?.agents.of.(s.h.i.e.l.d.|shield)[\b-.]*'
-            format: 'marvels_agents_of_shield.'
-      - title:
-          replace:
-            regexp: '^[^a-z0-9]*house.of.cards.(us|\(us\))?[^a-z0-9]*'
-            format: 'House.of.Cards.(US).'
-
   ######################################## No_Seen
   no_seen:
     disable:
       - seen
       - seen_info_hash
       - seen_movies
+  ######################################## Download Streams
+  Movie_Streams:
+    inputs:
+#      - rss: '{? flexget.path ?}/External-Plugins/HDArea-Feed/HDArea.xml' #not working right now
+      - rss: '{? flexget.path ?}/External-Plugins/HDWorld-Movies-Feed/HDWorld.xml'
+                      
+  Series_Streams:
+    inputs:
+      - rss: '{? flexget.path ?}/External-Plugins/HDWorld-Series-Feed/HDWorld.xml'    
+      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_1.xml'
+      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_2.xml'
+      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_3.xml'
+      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_4.xml'
+      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_5.xml'
+      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_6.xml'
+      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_7.xml'
+      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_8.xml'
+      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_9.xml'
+      
+  ######################################## Enable/Disable Discover
+  Discover-enable-Backfill:
+    discover:
+      what:
+        - next_series_episodes:
+            backfill: yes
+            from_start: yes
+      from:
+        - searchSerienjunkies:
+            hoster: '{? Serienjunkies.Hoster ?}'
+            language: '{? Serienjunkies.Language ?}'
+    no_entries_ok: yes
+
+  Discover-disable-Backfill:
+    discover:
+      what:
+        - next_series_episodes:
+            backfill: no
+      from:
+        - searchSerienjunkies:
+            hoster: '{? Serienjunkies.Hoster ?}'
+            language: '{? Serienjunkies.Language ?}'
+    no_entries_ok: yes
+
+  ######################################## Enable/Disable Upgrade
+  enable-Upgrade:
+    configure_series:
+      settings:
+        target: '{? quality.main ?}'
+        quality: '{? quality.low ?}'
+        propers: 2 weeks        
+        timeframe: 24 hours
+        identified_by: ep
+        tracking: '{? series.tracking ?}'
+        upgrade: yes #'{? series.upgrade ?}' 
+      from:
+        trakt_list:
+          account: '{? trakt.acc ?}'
+          list: collection
+          type: shows
+
+  disable-Upgrade:
+    configure_series:
+      settings:
+        target: '{? quality.main ?}'
+        quality: '{? quality.low ?}'
+        propers: 2 weeks        
+        timeframe: 24 hours
+        identified_by: ep
+        tracking: '{? series.tracking ?}'
+        upgrade: no #'{? series.upgrade ?}' 
+      from:
+        trakt_list:
+          account: '{? trakt.acc ?}'
+          list: collection
+          type: shows
+
+  ######################################## Enable/Disable Special (Author) Tasks
+  enable-Download_Second_IMDb_Movies:
+    manual: no
+  disable-Download_Second_IMDb_Movies:
+    manual: yes    
+
+  enable-Sync_Main_IMDb_to_Second:
+    manual: no
+  disable-Sync_Main_IMDb_to_Second:
+    manual: yes  
+
+  enable-Studio_Downloads:
+    manual: no
+  disable-Studio_Downloads:
+    manual: yes 
+
+  enable-Download_Best_on_IMDb:
+    manual: no
+  disable-Download_Best_on_IMDb:
+    manual: yes 
+
+  enable-YouTube_Downloads: 
+    manual: no
+  disable-YouTube_Downloads: 
+    manual: yes
+
+  enable-Download_Specials: 
+    manual: no
+  disable-Download_Specials: 
+    manual: yes
+
+  enable-Download_Sports: 
+    manual: no
+  disable-Download_Sports: 
+    manual: yes
   ######################################## Languages
   German:
   # Accept Only German, by Title
@@ -141,7 +235,7 @@ templates:
       reject_excluding:
         - \bgerman\b
   English:
-  # Accept Only Non-German, by IMDB_Language
+  # Accept Only Non-German
     regexp:
       reject:
         - \bgerman\b
@@ -153,102 +247,55 @@ templates:
     manual: yes
     exec:
       - echo "English Disabled"
-  ######################################## Quality
-  main_quality:
-    quality: '{{ secrets.quality.main }}'
-
-  high_quality:
-    quality: '{{ secrets.quality.high }}'
-  ######################################## Handler
-
-  trakt:
-    configure_series:
-      settings:
-        identified_by: ep
-        tracking: '{{ secrets.series.tracking }}'
-        upgrade: yes
-      from:
-        trakt_list:
-          account: '{{ secrets.trakt.acc }}'
-          list: collection
-          type: shows
-
-  plex:
-    configure_series:
-      settings:
-        identified_by: ep
-        tracking: '{{ secrets.series.tracking }}'
-        upgrade: yes
-      from:
-        plex:
-          server: '{{ secrets.plex.ip }}'
-          username: '{{ secrets.plex.usr }}'
-          password: '{{ secrets.plex.pwd }}'
-          section: '{{ secrets.plex.Series_Collection }}'
-
-  ######################################## Discover
-  Discover-enable-Backfill:
-    discover:
-      what:
-        - next_series_episodes:
-            backfill: yes
-      from:
-        - searchSerienjunkies:
-            hoster: '{{ secrets.Serienjunkies.Hoster }}'
-            language: '{{ secrets.Serienjunkies.Language }}'
-    no_entries_ok: yes
-
-  Discover-disable-Backfill:
-    discover:
-      what:
-        - next_series_episodes:
-            backfill: no
-      from:
-        - searchSerienjunkies:
-            hoster: '{{ secrets.Serienjunkies.Hoster }}'
-            language: '{{ secrets.Serienjunkies.Language }}'
-    no_entries_ok: yes
   ######################################## DownloadManager
   ################## JDownloader
   ######## Defaults
   jdownloader-Defaults:
     exec:
-      - echo " " >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
-      - echo "text={{url}}" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
-      - echo "autoConfirm=TRUE" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
-      - echo "priority=LOWER" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
-      - echo "packageName={{title}}" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
+      - echo " " >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
+      - echo "text={{url}}" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
+      - echo "autoConfirm=TRUE" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
+      - echo "priority=LOWER" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
+      - echo "packageName={{title}}" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
 
 
   ######## Archive-Series
   jdownloader-Archive-Series:
     exec:
-      - echo "downloadFolder={{ secrets.DLFolder }}/{{ secrets.DLFolderArchive }}/Series/{% if imdb_name|default(False) %}{{imdb_name}}.{{imdb_id}}.{{imdb_year}}{% elif series_name|default(False) %}{{ series_name }}.{{series_id}}{% else %}(?){{title}}{% endif %}/" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
+      - echo "downloadFolder={? DLFolder ?}/{? DLFolderArchive ?}/Series/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
   ######## Archive-Movies
   jdownloader-Archive-Movies:
     exec:
-      - echo "downloadFolder={{ secrets.DLFolder }}/{{ secrets.DLFolderArchive }}/Movies/{{title}}/{% if imdb_name|default(False) %}{{ imdb_name }}.{{imdb_id}}.{{imdb_year}}{% elif movie_name|default(False) %}{{movie_name}}.{{ movie_year }}{% else %}(?){{title}}{% endif %}/" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
+      - echo "downloadFolder={? DLFolder ?}/{? DLFolderArchive ?}/Movies/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
   ######## Watchlist
   jdownloader-Watchlist-Series:
     exec:
-      - echo "downloadFolder={{ secrets.DLFolder }}/{{ secrets.DLFolderWatchlist }}/Series/{{title}}/{% if imdb_name|default(False) %}{{imdb_name}}.{{imdb_id}}.{{imdb_year}}{% elif series_name|default(False) %}{{series_name}}.{{series_id}}{% else %}(?){{title}}{% endif %}/" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
+      - echo "downloadFolder={? DLFolder ?}/{? DLFolderWatchlist ?}/Series/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
   ######## Watchlist
   jdownloader-Watchlist-Movies:
     exec:
-      - echo "downloadFolder={{ secrets.DLFolder }}/{{ secrets.DLFolderWatchlist }}/Movies/{{title}}/{% if imdb_name|default(False) %}{{imdb_name}}.{{imdb_id}}.{{imdb_year}}{% elif movie_name|default(False) %}{{movie_name}}.{{movie_year}}{% else %}(?){{title}}{% endif %}/" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
+      - echo "downloadFolder={? DLFolder ?}/{? DLFolderWatchlist ?}/Movies/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
   ######## YouTube
   jdownloader-YouTube:
     exec:
-      - echo "downloadFolder={{ secrets.DLFolder }}/{{ secrets.DLFolderYouTube }}/{{title}}/" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
+      - echo "downloadFolder={? DLFolder ?}/{? DLFolderYouTube ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
+  ######## 3D
+  jdownloader-3D:
+    exec:
+      - echo "downloadFolder={? DLFolder ?}/{? DLFolder3D ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
   ######## YouTube
   jdownloader-EBooks:
     exec:
-      - echo "downloadFolder={{ secrets.DLFolder }}/{{ secrets.DLFolderEBooks }}/{{title}}/" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
+      - echo "downloadFolder={? DLFolder ?}/{? DLFolderEBooks ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
+  ######## Sports
+  jdownloader-Sports:
+    exec:
+      - echo "downloadFolder={? DLFolder ?}/{? DLFolderSports ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
   ######## Queue-enable
   jdownloader-enable-Queue:
     exec:
-      - echo "autoStart=TRUE" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
-      - echo "forcedStart=TRUE" >> "{{ secrets.JDownloader.path }}/folderwatch/{{title}}.crawljob"
+      - echo "autoStart=TRUE" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
+      - echo "forcedStart=TRUE" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
   ######## Queue-Disable
   jdownloader-disable-Queue:
     exec:
@@ -258,23 +305,23 @@ templates:
 #   ######## Defaults
 #   pyload-Defaults:
 #     pyload:
-#       api: '{{ secrets.pyload.protocol }}://{{ secrets.pyload.ip }}:{{ secrets.pyload.port }}/api'
-#       username: '{{ secrets.pyload.usr }}'
-#       password: '{{ secrets.pyload.pwd }}'
-#       hoster: '{{ secrets.pyload.hoster }}'
+#       api: '{? pyload.protocol ?}://{? pyload.ip ?}:{? pyload.port ?}/api'
+#       username: '{? pyload.usr ?}'
+#       password: '{? pyload.pwd ?}'
+#       hoster: '{? pyload.hoster ?}'
 #       parse_url: yes
 #   ######## Watchlist
 #   pyload-Watchlist:
 #     pyload:
-#       folder: '{{ secrets.DLFolder }}/{{ secrets.DLFolderWatchlist }}/{{title}}'
+#       folder: '{? DLFolder ?}/{? DLFolderWatchlist ?}/{{title}}'
 #   ######## Archive
 #   pyload-Archive:
 #     pyload:
-#       folder: '{{ secrets.DLFolder }}/{{ secrets.DLFolderArchive }}/{{title}}'
+#       folder: '{? DLFolder ?}/{? DLFolderArchive ?}/{{title}}'
 #   ######## YouTube
 #   pyload-Youtube:
 #     pyload:
-#       folder: '{{ secrets.DLFolder }}/{{ secrets.DLFolderYouTube }}/{{title}}'
+#       folder: '{? DLFolder ?}/{? DLFolderYouTube ?}/{{title}}'
 #   ######## Queue-Enable
 #   pyload-enable-Queue:
 #     pyload:
@@ -288,81 +335,52 @@ templates:
 ###############################################################################################################################################
 
 tasks:
-############################################################################################################ Updates
-  ######################################## Sync IMDb-WATCHLIST to Trakt
-  Update_IMDb_to_Trakt:
-    interval: 24 hours
-    template: no_global
-    priority: 2
-    seen: local
-    imdb_list:
-      login: '{{ secrets.imdb.usr }}'
-      password: '{{ secrets.imdb.pwd }}'
-      list: watchlist
-    list_add:
-      - trakt_list:
-          account: '{{ secrets.trakt.acc }}'
-          list: watchlist
-    crossmatch:
-      from:
-        - trakt_list:
-            account: '{{ secrets.trakt.acc }}'
-            list: collection
-            type: movies
-        - trakt_list:
-            account: '{{ secrets.trakt.acc }}'
-            list: watchlist
-            type: movies
-      action: reject
-      fields: [imdb_id]
+############################################################################################################ DATABASE UPDATES
+############################################################################################################
 
-  ######################################## Sync IMDb-WATCHLIST to Trakt
-  Remove_IMDb_to_Trakt:
+  ############################################################## Updates
+  #
+  ########################################
+  Crawl_Plugins:
+    interval: 1 hours
+    template:
+      - no_seen
+      - no_global
     priority: 2
-    trakt_list:
-      account: '{{ secrets.trakt.acc }}'
-      list: watchlist
-      type: movies
-    crossmatch:
-      from:
-        - imdb_list:
-            login: '{{ secrets.imdb.usr }}'
-            password: '{{ secrets.imdb.pwd }}'
-            list: watchlist
-      fields: [imdb_id]
-      action: reject
-    accept_all: yes
-    disable: builtins
-    list_remove:
-      - trakt_list:
-          account: '{{ secrets.trakt.acc }}'
-          list: watchlist
-          type: movies
-  ######################################## Sync Trakt-Watchlist to Flexget-Queue
-  Update_Trakt_to_Flexget:
+    exec:
+      on_start:
+        phase: 
+          - "cd {? flexget.path ?}/External-Plugins/HDArea-Feed/ && rm *.xml && python ./HDAreaOrg-RSS.py"
+          - "cd {? flexget.path ?}/External-Plugins/HDWorld-Movies-Feed/ && rm *.xml && python ./HDWorld-Movies-RSS.py"
+          - "cd {? flexget.path ?}/External-Plugins/HDWorld-Series-Feed/ && rm *.xml && python ./HDWorld-Series-RSS.py"
+          - "cd {? flexget.path ?}/External-Plugins/Serienjunkies-Feed/ && rm *.xml && python ./Serienjunkies-RSS.py"          
+  #
+  ######################################## Sync Trakt/IMDb Movie-Watchlist to Flexget-Queue
+  Update_Movies_to_Flexget:
     interval: 24 hours
     template: no_global
-    imdb:
-      min_score: 4.5
-      min_votes: 5000
     priority: 2
     trakt_list:
-      account: '{{ secrets.trakt.acc }}'
+      account: '{? trakt.acc ?}'
       list: watchlist
       type: movies
+    imdb_watchlist:
+      user_id: '{? imdb.usrID ?}'
+      list: watchlist
+      force_language: de-de
     accept_all: yes
     seen: local
-    list_add:
-      - movie_list: '{{ secrets.queue.movie }}'
     crossmatch:
       from:
         - trakt_list:
-            account: '{{ secrets.trakt.acc }}'
+            account: '{? trakt.acc ?}'
             list: collection
             type: movies
       fields:
         - imdb_id
       action: reject
+    list_add:
+      - movie_list: Default
   ######################################## Set_Series_Begin based on "Collected" in Trakt - for every show
   Update_Series_Begin:
     interval: 24 hours
@@ -372,95 +390,87 @@ tasks:
       - no_global
       - series_lookup
     next_trakt_episodes:
-      account: '{{ secrets.trakt.acc }}'
+      account: '{? trakt.acc ?}'
       context: collected
       list: collection
     accept_all: yes
-    set_series_begin: yes
-    if:
-      - tvdb_status == 'Ended': reject
-      - trakt_series_status == 'ended': reject
-  ######################################## Set_Series_Begin based on "Collected" in Trakt - for every show
-  Download_Series_Missing:
-    manual: yes
-    interval: 24 hours
-    priority: 3
-    trakt_list:
-      account: '{{ secrets.trakt.acc }}'
-      list: collection
-      type: shows
-    crossmatch:
-      from:
-        - trakt_list:
-            account: '{{ secrets.trakt.acc }}'
-            list: collection
-            type: episodes
-      fields:
-        - imdb_id
-      action: reject
-    list_add: 
-      - entry_list: testing    
-  ############################################################## Removing
+    set_series_begin: yes   
+
+#   ######################################## Fill Favorites
+#   Update_Movie_Favorites:
+#     priority: 1
+#     template:
+#       - no_seen
+#       - no_global
+#     trakt_lookup:
+#       account: '{? trakt.acc ?}'   
+#     trakt_list:
+#       account: '{? trakt.acc ?}'
+#       list: collection
+#       type: movies
+#     if:
+#       - trakt_movie_user_rating > 9: accept
+#     list_add:
+#       - trakt_list:
+#           account: '{? trakt.acc ?}'
+#           list: '{? trakt.Favorite_List ?}'
+#           type: movies
+#       - trakt_list:
+#           account: '{? trakt.acc ?}'
+#           list: '{? trakt.FavoritesUpgrade ?}'
+#           type: movies
+  ############################################################## Removings
   #
   ######################################## Remove canceled Series (Nobody wants to start watching canceled Series)
   Remove_Canceled:
-    interval: 48 hours
     priority: 1
-    manual: yes
     template:
       - no_seen
       - no_global
       - series_lookup
-    list_match:
-      from:
-        - trakt_list:
-            account: '{{ secrets.trakt.acc }}'
-            list: watchlist
-            type: shows
-        - trakt_list:
-            account: '{{ secrets.trakt.acc }}'
-            list: collection
-            type: shows
-      single_match: no
+    trakt_list:
+      account: '{? trakt.acc ?}'
+      list: watchlist
+      type: shows
+#     imdb_list:
+#       login: '{? imdb.usr ?}'
+#       password: '{? imdb.pwd ?}'
+#       list: watchlist
     if:
       - trakt_series_status == 'canceled': accept
     list_remove:
       - trakt_list:
-          account: '{{ secrets.trakt.acc }}'
+          account: '{? trakt.acc ?}'
           list: watchlist
           type: shows
-      - imdb_list:
-          login: '{{ secrets.imdb.usr }}'
-          password: '{{ secrets.imdb.pwd }}'
-          list: watchlist
       - trakt_list:
-          account: '{{ secrets.trakt.acc }}'
-          list: '{{ secrets.trakt.foreign }}'
+          account: '{? trakt.acc ?}'
+          list: '{? trakt.foreign ?}'
           type: shows
-#       - trakt_list:
-#           account: '{{ secrets.trakt.acc }}'
-#           list: collection
   #########
   Keep_Canceled_Collection:
     exec:
       - echo "Canceled Collections won't be deleted"
     manual: yes
   ######################################## Remove Collected
-  RemoveCollectedTraktSeries:
+  Remove_CollectedSeriesFromWatchlist:
     priority: 1
     interval: 24 hours
     seen: local
     template:
       - no_global
-      - movies_lookup
     trakt_list:
-      account: '{{ secrets.trakt.acc }}'
+      account: '{? trakt.acc ?}'
       list: watchlist
       type: shows
+#     imdb_list:
+#       login: '{? imdb.usr ?}'
+#       password: '{? imdb.pwd ?}'
+#       list: watchlist 
     crossmatch:
       from:
         - trakt_list:
-            account: '{{ secrets.trakt.acc }}'
+            account: '{? trakt.acc ?}'
             list: collection
             type: shows
       fields:
@@ -468,25 +478,28 @@ tasks:
       action: accept
     list_remove:
       - trakt_list:
-          account: '{{ secrets.trakt.acc }}'
+          account: '{? trakt.acc ?}'
           list: watchlist
           type: shows
-  ######################################## Remove Collected
-  RemoveCollectedTraktMovies:
+#       - imdb_list:
+#           login: '{? imdb.usr ?}'
+#           password: '{? imdb.pwd ?}'
+#           list: watchlist
+  ######################################## Remove Collected trakt-Watchlist
+  Remove_CollectedMoviesFromWatchlist:
     priority: 1
     interval: 24 hours
     seen: local
     template:
       - no_global
-      - movies_lookup
     trakt_list:
-      account: '{{ secrets.trakt.acc }}'
+      account: '{? trakt.acc ?}'
       list: watchlist
       type: movies
     crossmatch:
       from:
         - trakt_list:
-            account: '{{ secrets.trakt.acc }}'
+            account: '{? trakt.acc ?}'
             list: collection
             type: movies
       fields:
@@ -494,527 +507,565 @@ tasks:
       action: accept
     list_remove:
       - trakt_list:
-          account: '{{ secrets.trakt.acc }}'
+          account: '{? trakt.acc ?}'
           list: watchlist
           type: movies
-      - movie_list: '{{ secrets.queue.movie }}'
-  ######################################## Remove Collected
-  RemoveCollectedIMDb:
+      - movie_list: Default
+#       - imdb_list:
+#           login: '{? imdb.usr ?}'
+#           password: '{? imdb.pwd ?}'
+#           list: watchlist
+
+  ######################################## Remove Series from OnHold automatically, if Episode 3 is already watched - so it starts Downloading again
+  Remove_Watched_OnHold:
     priority: 1
-    interval: 24 hours
-    seen: local
     template:
+      - no_seen
       - no_global
-      - movies_lookup
-    imdb_list:
-      login: '{{ secrets.imdb.usr }}'
-      password: '{{ secrets.imdb.pwd }}'
-      list: watchlist
-    crossmatch:
-      from:
-        - trakt_list:
-            account: '{{ secrets.trakt.acc }}'
-            list: collection
-            type: shows
-        - trakt_list:
-            account: '{{ secrets.trakt.acc }}'
-            list: collection
-            type: movies
-      fields:
-        - imdb_id
-      action: accept
+      - series_lookup
+    next_trakt_episodes:
+      account: '{? trakt.acc ?}'
+      list: '{? trakt.OnHold ?}'
+      context: watched
+      position: next
+    if:
+      - trakt_ep_id > 'S01E{? series.Start_Collection_counter ?}': accept
     list_remove:
-      - imdb_list:
-          login: '{{ secrets.imdb.usr }}'
-          password: '{{ secrets.imdb.pwd }}'
+      - trakt_list:    
+          account: '{? trakt.acc ?}'
+          list: '{? trakt.OnHold ?}'
+          type: shows
+      - trakt_list:
+          account: '{? trakt.acc ?}'
           list: watchlist
-      - movie_list: '{{ secrets.queue.movie }}'
+          type: shows
+
 ############################################################################################################ Movies ############################################################################################################
 
  ######################################## Search for queued Movies on hdarea with the help of a custom  pipe
-  Movies_Watchlist_Search:
-    priority: 5
+  Movies_Watchlist_Search_DE_Main:
+    priority: 4
     template:
-      - '{{ secrets.DownloadManager }}-Defaults'
-      - '{{ secrets.DownloadManager }}-Watchlist-Movies'
-      - '{{ secrets.DownloadManager }}-{{ secrets.DownloadManagerQueue }}-Queue'
-      - movies_lookup
-      - main_quality
+      - '{? DownloadManager ?}-Defaults'
+      - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
+      - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
+#      - movies_lookup
       - German
+    quality: '{? quality.main ?}'
+#    content_size: (not working well - too often, size can't be fetched at all and results in errors
+#      min: 2500 #'{? Minimum_Movie_Size ?}'
+#      max: 20000  #'{? Maximum_Movie_Size ?}'
     discover:
       what:
         - movie_list:
-            list_name: '{{ secrets.queue.movie }}'
+            list_name: Default
             strip_year: yes
+#         - trakt_list:
+#             account: '{? trakt.acc ?}'
+#             list: UpgradeQuality
+#             type: movies
       from:
-        - search_rss: "{{ secrets.rss.HDAreaSearch }}"
-#        - search_rss: "{{ secrets.rss.MovieBlog }}"
-    crossmatch:
-      from:
-        - trakt_list:
-            account: '{{ secrets.trakt.acc }}'
-            list: collection
-            type: movies
-      fields:
-        - imdb_id
-      action: reject
+#        - search_rss: "{? rss.HDAreaSearch ?}"
+        - search_rss: "{? rss.HDWorldSearch ?}"        
+#        - search_rss: "{? rss.MovieBlog ?}"
     list_remove:
       - trakt_list:
-          account: '{{ secrets.trakt.acc }}'
+          account: '{? trakt.acc ?}'
           list: watchlist
           type: movies
-      - imdb_list:
-          login: '{{ secrets.imdb.usr }}'
-          password: '{{ secrets.imdb.pwd }}'
-          list: watchlist
-#     if:
-#       - "has_field('description')":
-#           regexp:
-#             reject_excluding:
-#               - '(without|ohne|keine)(.|.[^\s]+.)sub(s|title(|[^\s]+))': {from: description}
+#       - imdb_list:
+#           login: '{? imdb.usr ?}'
+#           password: '{? imdb.pwd ?}'
+#           list: watchlist
+      - trakt_list:
+          account: '{? trakt.acc ?}'
+          list: UpgradeQuality
+          type: movies
+ ######################################## Search for queued Movies on hdarea with the help of a custom  pipe
+  Movies_Watchlist_Search_DE_Low:
+    delay: 24 hours
+    priority: 5
+    template:
+      - '{? DownloadManager ?}-Defaults'
+      - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
+      - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
+#      - movies_lookup
+      - German
+    quality: '{? quality.low ?}'
+#    content_size:  (not working well - too often, size can't be fetched at all and results in errors
+#      min: 2000 #'{? Minimum_Movie_Size ?}'
+#      max: 12000  #'{? Maximum_Movie_Size ?}'
+    discover:
+      what:
+        - movie_list:
+            list_name: Default
+            strip_year: yes
+#         - trakt_list:
+#             account: '{? trakt.acc ?}'
+#             list: UpgradeQuality
+#             type: movies
+      from:
+#        - search_rss: "{? rss.HDAreaSearch ?}"
+        - search_rss: "{? rss.HDWorldSearch ?}"        
+#        - search_rss: "{? rss.MovieBlog ?}"
+#    list_remove:
+#      - trakt_list:
+#          account: '{? trakt.acc ?}'
+#          list: watchlist
+#          type: movies
+#       - imdb_list:
+#           login: '{? imdb.usr ?}'
+#           password: '{? imdb.pwd ?}'
+#           list: watchlist
   ######################################## Search based on Stream
-  Movies_Watchlist_Stream_DE:
+  Movies_Watchlist_Stream_DE_Main:
     priority: 4
     template:
-      - '{{ secrets.DownloadManager }}-Defaults'
-      - '{{ secrets.DownloadManager }}-Watchlist-Movies'
-      - '{{ secrets.DownloadManager }}-{{ secrets.DownloadManagerQueue }}-Queue'
-      - movies_lookup
+      - '{? DownloadManager ?}-Defaults'
+      - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
+      - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
+#      - movies_lookup
       - German            #differentiation not possible with this feed right now - feed is pre-filtered for German - needs fix
-      - main_quality      #differentiation not possible with this feed right now - feed is pre-filtered for 720p - needs fix
+      - Movie_Streams
+    quality: '{? quality.main ?}'
+#    content_size: (not working well - too often, size can't be fetched at all and results in errors
+#      min: 2000 #'{? Minimum_Movie_Size ?}'
+#      max: 20000  #'{? Maximum_Movie_Size ?}'
     list_match:
       from:
-        - movie_list: '{{ secrets.queue.movie }}'
-      single_match: no
-    inputs:
-      - rss: '{{ secrets.flexget.path }}/External-Plugins/HDArea-Feed/HDArea.xml'
+        - movie_list: Default
+        - trakt_list:
+            account: '{? trakt.acc ?}'
+            list: UpgradeQuality
+            type: movies
+    list_remove:
+      - trakt_list:
+          account: '{? trakt.acc ?}'
+          list: watchlist
+          type: movies
+#       - imdb_list:
+#           login: '{? imdb.usr ?}'
+#           password: '{? imdb.pwd ?}'
+#           list: watchlist
+    regexp:
+      reject:
+        - \b3D\b
+  ######################################## Search based on Stream
+  Movies_Watchlist_Stream_DE_Low:
+    delay: 24 hours
+    priority: 5
+    template:
+      - '{? DownloadManager ?}-Defaults'
+      - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
+      - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
+#      - movies_lookup
+      - German            #differentiation not possible with this feed right now - feed is pre-filtered for German - needs fix
+      - Movie_Streams
+    quality: '{? quality.low ?}'
+#    content_size: (not working well - too often, size can't be fetched at all and results in errors
+#      min: 2000 #'{? Minimum_Movie_Size ?}'
+#      max: 12000  #'{? Maximum_Movie_Size ?}'
+    if:
+      - trakt_collected: reject
+    list_match:
+      from:
+        - movie_list: Default
     crossmatch:
       from:
         - trakt_list:
-            account: '{{ secrets.trakt.acc }}'
-            list: collection
-            type: movies
+            account: '{? trakt.acc ?}'
+            list: '{? trakt.Favorite_List ?}'
+            type: movies      
       fields:
         - imdb_id
       action: reject
-    list_remove:
-      - trakt_list:
-          account: '{{ secrets.trakt.acc }}'
-          list: watchlist
-          type: movies
-      - imdb_list:
-          login: '{{ secrets.imdb.usr }}'
-          password: '{{ secrets.imdb.pwd }}'
-          list: watchlist
-
-  ######################################## Search based on Stream
-  Movies_Watchlist_Stream_EN_Sceper:
-    priority: 6
-    seen: local
+    regexp:
+      reject:
+        - \b3D\b
+#    list_remove:
+#      - trakt_list:
+#          account: '{? trakt.acc ?}'
+#          list: watchlist
+#          type: movies
+#       - imdb_list:
+#           login: '{? imdb.usr ?}'
+#           password: '{? imdb.pwd ?}'
+#           list: watchlist
+            
+  ######################################## 3D
+  Movies_3D_Stream:
+    priority: 3
     template:
-      - '{{ secrets.DownloadManager }}-Defaults'
-      - '{{ secrets.DownloadManager }}-Watchlist-Movies'
-      - '{{ secrets.DownloadManager }}-{{ secrets.DownloadManagerQueue }}-Queue'
-      - '{{ secrets.English }}-English' #enable/disable this Task
+      - '{? DownloadManager ?}-Defaults'
+      - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
+      - jdownloader-3D
       - movies_lookup
-      - main_quality
+      - German            #differentiation not possible with this feed right now - feed is pre-filtered for German - needs fix
+      - Movie_Streams
+    quality: '{? quality.main ?}'
     list_match:
       from:
-        - movie_list: '{{ secrets.queue.movie }}'
-      single_match: no
-      remove_on_match: no
-    sceper: 'http://sceper.ws/category/movies'
-    disable: [urlrewrite_redirect]
-    if:
-      - trakt_languages == ['german']: reject
-      - imdb_languages == ['german']: reject
-  ######################################## 10 Star Rating = high quality
-  Movies_10Star_HighQuality_Stream:
-    priority: 6
-    seen: local
-    template:
-      - '{{ secrets.DownloadManager }}-Defaults'
-      - '{{ secrets.DownloadManager }}-Archive-Movies'
-      - '{{ secrets.DownloadManager }}-{{ secrets.DownloadManagerQueue }}-Queue'
-      - movies_lookup
-      - high_quality
-    list_match:
-      from:
+        - movie_list: Default
         - trakt_list:
-            account: '{{ secrets.trakt.acc }}'
-            list: '{{ secrets.trakt.Favorite_List }}'
-            type: movies
-      single_match: no
-    inputs:
-      - rss: '{{ secrets.flexget.path }}/External-Plugins/HDArea-Feed/HDArea.xml'
-    list_remove:
-      - trakt_list:
-          account: '{{ secrets.trakt.acc }}'
-          list: watchlist
-          type: movies
-      - imdb_list:
-          login: '{{ secrets.imdb.usr }}'
-          password: '{{ secrets.imdb.pwd }}'
-          list: watchlist
-
+            account: '{? trakt.acc ?}'
+            list: collection
+            type: movies  
+    regexp:
+      accept:
+        - \b3D\b
+    seen: local
+  ######################################## Search based on Stream
+#   Movies_Watchlist_Stream_EN_Sceper:
+#     priority: 6
+#     seen: local
+#     template:
+#       - '{? DownloadManager ?}-Defaults'
+#       - '{? DownloadManager ?}-Watchlist-Movies'
+#       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
+#       - '{? English ?}-English' #enable/disable this Task
+#       - English
+#       - movies_lookup
+#     quality: '{? quality.main ?}'
+#     list_match:
+#       from:
+#         - movie_list: Default
+#       remove_on_match: no
+#     sceper: 'http://sceper.ws/category/movies'
+#     disable: [urlrewrite_redirect]
+#     list_add:
+#       - trakt_list:
+#           account: '{? trakt.acc ?}'
+#           list: '{? trakt.foreign ?}'
+#           type: movies
+#     if:
+#       - not imdb_languages or not 'english' in imdb_languages: reject
+#       - 'german' in imdb_languages: reject
+#   ######################################## 10 Star Rating = high quality
+#   Movies_10Star_HighQuality_Stream:
+#     priority: 6
+#     seen: local
+#     template:
+#       - '{? DownloadManager ?}-Defaults'
+#       - '{? DownloadManager ?}-Archive-Movies'
+#       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
+#       - movies_lookup
+#       - Movie_Streams
+#       - German
+#     quality: '{? quality.high ?}'
+##    content_size:  (not working well - too often, size can't be fetched at all and results in errors
+##      min: 8000
+##      max: 20000
+#     trakt_list:
+#       account: '{? trakt.acc ?}'
+#       list: '{? trakt.FavoritesUpgrade ?}'
+#       type: movies
+#     list_remove:
+#       - trakt_list:
+#           account: '{? trakt.acc ?}'
+#           list: '{? trakt.FavoritesUpgrade ?}'
+#           type: movies
+#     if:
+#       - trakt_movie_user_rating > 9:
+#           quality: '{? quality.high ?}'
+#           list_add:   
+#             - trakt_list:
+#                 account: '{? trakt.acc ?}'
+#                 list: '{? trakt.Favorite_List ?}'
+#                 type: movies
 ############################################################################################################ Series ############################################################################################################
 
   ######################################## Stream and Search for Serienunkies
 
-  Series_Collection_DE:
+  Series_Collection_DE_Search:
     priority: 7
     template:
-      - '{{ secrets.handler }}'
-      - '{{ secrets.DownloadManager }}-Defaults'
-      - '{{ secrets.DownloadManager }}-Archive-Series'
-      - '{{ secrets.DownloadManager }}-{{ secrets.DownloadManagerQueue }}-Queue'
-      - 'Discover-{{ secrets.series.backfill }}-Backfill'
+      - '{? DownloadManager ?}-Defaults'
+      - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Series'
+      - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
+      - 'Discover-{? series.backfill ?}-Backfill'
+      - '{? series.backfill ?}-Upgrade'
       - German
-      - series_lookup
-      - main_quality
-#     seen:
-#       fields:
-#         - title
-#    inputs:
-#      - rss: '{{ secrets.flexget.path }}/External-Plugins/HDWorld-Feed/HDWorld-RSS.xml'    
-#      - rss: '{{ secrets.flexget.path }}/External-Plugins/Serienjunkies-Feed/rss.xml'
-    serienjunkies:
-      language: '{{ secrets.Serienjunkies.Language }}'
+#      - series_lookup
     # Crossmatch for Series on HOLD
     crossmatch:
       from:
         - trakt_list:
-            account: '{{ secrets.trakt.acc }}'
-            list: '{{ secrets.trakt.OnHold }}'
+            account: '{? trakt.acc ?}'
+            list: '{? trakt.OnHold ?}'
             type: shows
       fields:
         - imdb_id
       action: reject
-    series:
-      # Series with Localized-Titles - HUGE Problem. Searching for a better solution
-      - Die.Simpsons:
-          name_regexp: ^The.Simpsons?
-      - Akte.X:
-          name_regexp: ^The.X.Files?
-      - Chaos.City:
-          name_regexp: ^Spin.City?
-      - House.of.Cards.(US):
-          name_regexp: ^House.of.Cards?       
-  ######################################## Based on Series-Collection "English"
+    if:     
+      - trakt_series_status == 'canceled': reject
+  ######################################## Stream and Search for Serienunkies
 
-  Series_Collection_EN:
-    priority: 8
+  Series_Collection_DE_Stream:
+    priority: 7
     template:
-      - '{{ secrets.handler }}'
-      - '{{ secrets.DownloadManager }}-Archive-Series'
-      - '{{ secrets.DownloadManager }}-{{ secrets.DownloadManagerQueue }}-Queue'
-      - 'Discover-{{ secrets.series.backfill }}-Backfill'
-      - series_lookup
-      - English
-      - main_quality
-    seen: local
-    sceper: 'http://sceper.ws/category/tv-shows/tv-shows-x264'
-    disable: [urlrewrite_redirect]
-    if:
-      - trakt_languages == ['german']: reject
-      - imdb_languages == ['german']: reject
-  ######################################## Watchlist-Premieres | Needs work for: Prefer DE, otherwise EN
-  Series_Watchlist:
-    plugin_priority:
-      regexp: 250
-#    series_premiere:
-#      allow_teasers: no
-#      allow_seasonless: yes
-    priority: 8
-    template:
-      - '{{ secrets.handler }}'
-      - '{{ secrets.DownloadManager }}-Defaults'
-      - '{{ secrets.DownloadManager }}-Watchlist-Series'
-      - '{{ secrets.DownloadManager }}-{{ secrets.DownloadManagerQueue }}-Queue'
-      - 'Discover-{{ secrets.series.backfill }}-Backfill'
-      - series_lookup
-      - main_quality
-    configure_series:
-      settings:
-        identified_by: ep
-      from:
-        trakt_list:
-          account: '{{ secrets.trakt.acc }}'
-          list: watchlist
-          type: shows
-    inputs:
-      - rss: '{{ secrets.flexget.path }}/External-Plugins/Serienjunkies-Feed/rss.xml'
-#      - rss: '{{ secrets.flexget.path }}/External-Plugins/HDWorld-Feed/HDWorld-RSS.xml'
+      - '{? DownloadManager ?}-Defaults'
+      - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Series'
+      - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
+      - '{? series.backfill ?}-Upgrade'
+      - German
+#      - series_lookup
+      - Series_Streams
+    # Crossmatch for Series on HOLD
     crossmatch:
       from:
         - trakt_list:
-            account: '{{ secrets.trakt.acc }}'
-            list: collection
+            account: '{? trakt.acc ?}'
+            list: '{? trakt.OnHold ?}'
             type: shows
+      fields:
+        - imdb_id
+      action: reject
+    if:     
+      - trakt_series_status == 'canceled': reject
+  ######################################## Based on Series-Collection "English"
+
+#   Series_Collection_EN:
+#     priority: 8
+#     template:
+#       - '{? DownloadManager ?}-Archive-Series'
+#       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
+#       - 'Discover-{? series.backfill ?}-Backfill'
+#       - series_lookup
+#       - English
+#     quality: '{? quality.main ?}'
+#     seen: local
+#     sceper: 'http://sceper.ws/category/tv-shows/tv-shows-x264'
+#     disable: [urlrewrite_redirect]
+#     if:
+#       - trakt_languages == ['german']: reject
+#       - imdb_languages == ['german']: reject
+  ######################################## Watchlist-Premieres | Needs work for: Prefer DE, otherwise EN
+  ################################## What it does: Download Episode 1-3 and add to custom trakt-OnHold-List 
+  Series_Watchlist:
+    plugin_priority:
+      regexp: 250
+#     series_premiere:
+#       allow_teasers: no
+#       allow_seasonless: yes
+    priority: 8
+    template:
+      - '{? DownloadManager ?}-Defaults'
+      - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Series'
+      - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
+      - 'Discover-{? series.backfill ?}-Backfill'
+#      - series_lookup
+      - German
+      - Series_Streams
+    list_match:
+      from:
+        - trakt_list:
+            account: '{? trakt.acc ?}'
+            list: watchlist
+            type: shows
+      remove_on_match: no
+    list_add:
+      - trakt_list:
+          account: '{? trakt.acc ?}'
+          list: '{? trakt.OnHold ?}'
+          type: shows
+    regexp:
+      reject_excluding:
+        - \bS01(.E0|E0)('{? series.Stop_watchlist_counter ?}')\b  # counter has to be set in options.yml
+    if:     
+      - trakt_series_status == 'canceled': reject
+############################################################################################################ YouTube ############################################################################################################
+  YouTube-Personal-Playlist:
+    priority: 10
+    rss:
+      url: "http://www.youtube.com/feeds/videos.xml?playlist_id={? YouTube.Playlist ?}"
+      ascii: yes
+    accept_all: yes
+    template:
+      - '{? disable_enable_tasks.YouTube_Downloads ?}-YouTube_Downloads'
+      - '{? DownloadManager ?}-Defaults'
+      - '{? DownloadManager ?}-YouTube'
+      - no_global
+    seen: local
+###############################################################################################################################################
+## SPECIALS ############################################################################################config#by#snickers2k###################
+###############################################################################################################################################
+
+  Sports:
+    priority: 10
+    regexp:
+      accept:
+        - Chicago.Bulls
+        - Golden.State.Warriors
+        - New.York.Knicks
+    template:
+      - '{? disable_enable_tasks.Download_Sports ?}-Download_Sports'    
+      - '{? DownloadManager ?}-Defaults'
+      - '{? DownloadManager ?}-Sports'
+      - no_global
+    seen: local
+    csv:
+      url: 'file://{? flexget.path ?}/External-Plugins/TVRex/TVRex.csv'
+      values:
+        title: 1
+        quality: 2
+        url: 3
+  ######################################## Search based on Stream (THIS PLUGIN IS BASED ON https://flexget.com/Plugins/from_imdb AND NEEDS "pip install imdbpy")
+  Studio_Downloads:
+    priority: 1
+    seen: local
+    template:
+      - no_global
+      - '{? disable_enable_tasks.Studio_Downloads ?}-Studio_Downloads'
+    from_imdb: 
+      content_types: movie
+      id:
+        # Best Animation Studios
+        - co0047265 ## Blue Sky Studios (e.g. Ice Age)
+        - co0179259 ## Twentieth Century Fox Animation (e.g. Ice Age, Rio)
+        - co0074039 ## Walt Disney Animation Studios (e.g. Frozen)
+        - co0129164 ## DreamWorks Animation (e.g. Shrek)
+        - co0072491 ## Industrial Light & Magic (e.g. Indiana Jones)
+        - co0103818 ## Framestore (e.g. JungleBook)
+      max_entries: 99999
+    crossmatch:
+      from:
+        - trakt_list:
+            account: '{? trakt.acc ?}'
+            list: collection
+            type: movies
       fields:
         - imdb_id
       action: reject
     list_add:
+      - imdb_list:
+          login: '{? imdb.usr ?}'
+          password: '{? imdb.pwd ?}'
+          list: watchlist     
       - trakt_list:
-          account: '{{ secrets.trakt.acc }}'
-          list: '{{ secrets.trakt.OnHold }}'
-    regexp:
-      reject_excluding:
-        - \bS01(.E0|E0)(1|2|3)\b   # Only Episode 1-3 to check out for a new series
-#     if:
-#       - "'german' != (imdb_languages or ['german'])[0]":
-#           set:
-#             seen: local
-#############################################################
-  YouTube-Personal-Playlist:
-    priority: 10
-    rss:
-      url: "http://www.youtube.com/feeds/videos.xml?playlist_id={{ secrets.YouTube.Playlist }}"
-      ascii: yes
-#     accept_all: yes
+          account: '{? trakt.acc ?}'
+          list: collection
+          type: movies
+    if:
+      - trakt_collected: reject
+  ######################################## Search based on Stream
+  Download_Second_IMDb_Movies:
+    priority: 9
     template:
-      - '{{ secrets.DownloadManager }}-Defaults'
-      - '{{ secrets.DownloadManager }}-YouTube'
-    disable: regexp
-    seen: local
+      - '{? DownloadManager ?}-Defaults'
+      - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
+      - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
+#      - movies_lookup
+      - German
+      - Movie_Streams
+      - '{? disable_enable_tasks.Download_Second_IMDb_Movies ?}-Download_Second_IMDb_Movies'
+    quality: '{? quality.main ?}'
+    imdb_list:
+      login: '{? imdb.usr2 ?}'
+      password: '{? imdb.pwd2 ?}'
+      list: watchlist
+      force_language: de-de
+    crossmatch:
+      from:
+        - imdb_list:
+            login: '{? imdb.usr ?}'
+            password: '{? imdb.pwd ?}'
+            list: watchlist
+        - trakt_list:
+            account: '{? trakt.acc ?}'
+            list: collection
+            type: movies
+      fields:
+        - imdb_id
+      action: reject
 
-###############################################################################################################################################
-## TESTING #############################################################################################config#by#snickers2k###################
-###############################################################################################################################################
-
-
-
-#   ########################################
-#   Sync_Plex_Watchlist_to_Trakt_OnHold:
-#     interval: 1 days
-#     priority: 1
-#     seen: local
+  ######################################## Download IMDb's Best-Rated
+#   Movies_Best_on_IMDb:
+#     priority: 8
 #     template:
-#       - no_global
-#       - series_lookup
-#     configure_series:
-#       from:
-#         plex:
-#           username: '{{ secrets.plex.usr }}'
-#           password: '{{ secrets.plex.pwd }}'
-#           server: '{{ secrets.plex.ip }}'
-#           section: '{{ secrets.plex.Series_Watchlist }}'
-#     list_add:
-#       - trakt_list:
-#           account: '{{ secrets.trakt.acc }}'
-#           list: '{{ secrets.trakt.OnHold }}'
-
-#possible user-ratings:
-
-# trakt_series_user_rating
-# trakt_season_user_rating
-# trakt_ep_user_rating
-# trakt_movie_user_rating
-
-#   Trakt_Rating_Movie_Capture_Delete:
-#     manual: yes
-#     template:
-#       - no_seen
-#     trakt_list:
-#       account: '{{ secrets.trakt.acc }}'
-#       list: watched
-#       type: movies                      
-#     crossmatch:
-#       from:
-#         - trakt_list:
-#             account: '{{ secrets.trakt.acc }}'
-#             list: watched
-#             type: movies
-#       action: accept
-#       fields: [imdb_id]
-#     if:
-#       - "'trakt_movie_user_rating' <= 2": accept
-#     filesystem:
-#       path: 
-#         - '{{ secrets.Filesystem.MoviesWatchlist }}'
-#       recursive: yes
-#     delete:
-#       clean_source: 1
-#       along:
-#         files:
-#           - sub
-#           - srt
-#         subdirs:
-#           - Subs
-# 
-# 
-#   Trakt_Rating_Movie_Capture_Archive:
-#     manual: yes
-#     template:
-#       - no_seen
-#     trakt_list:
-#       account: '{{ secrets.trakt.acc }}'
-#       list: collection
-#       type: movies                   
-#     crossmatch:
-#       from:
-#         - trakt_list:
-#             account: '{{ secrets.trakt.acc }}'
-#             list: watched
-#             type: movies
-#       action: accept
-#       fields: [imdb_id]
-#     list_add:
-#       - entry_list: Movie_Move_to_Archive   
-#     if:
-#       - "'trakt_movie_user_rating' == 3 or 'trakt_movie_user_rating' == 4": accept
-# 
-# 
-# 
-#   Trakt_Rating_Movie_Capture_Archive5Star:
-#     manual: yes
-#     template:
-#       - no_seen
-#     trakt_list:
-#       account: '{{ secrets.trakt.acc }}'
-#       list: watched
-#       type: movies                     
-#     crossmatch:
-#       from:
-#         - trakt_list:
-#             account: '{{ secrets.trakt.acc }}'
-#             list: watched
-#             type: movies
-#       action: accept
-#       fields: [imdb_id]
-#     if:
-#       - "'trakt_movie_user_rating' == 5": accept
-#     filesystem:
-#       path: 
-#         - '{{ secrets.Filesystem.MoviesWatchlist }}'
-#       recursive: yes
-#     move:
-#       to: '{{ secrets.Filesystem.SeriesArchive }}/'
-#       along:
-#         files:
-#           - sub
-#           - srt
-#         subdirs:
-#           - Subs
-# 
-# 
-#   Trakt_Rating_Movie_Move_Archive:
-#     manual: yes
-#     entry_list: Movie_Move_to_Archive
-#     filesystem:
-#       path: 
-#         - '{{ secrets.Filesystem.MoviesWatchlist }}'
-#       recursive: yes
-#     move:
-#       to: '{{ secrets.Filesystem.SeriesArchive }}/'
-#       along:
-#         files:
-#           - sub
-#           - srt
-#         subdirs:
-#           - Subs
-
-
-#   Series_Collection_DE_test:
-#     priority: 6
-#     template:
-#       - '{{ secrets.handler }}'
-#       - '{{ secrets.DownloadManager }}-Defaults'
-#       - '{{ secrets.DownloadManager }}-Archive-Series'
-#       - '{{ secrets.DownloadManager }}-{{ secrets.DownloadManagerQueue }}-Queue'
-#       - 'Discover-{{ secrets.series.backfill }}-Backfill'
-#       - German
-#       - series_lookup
-#       - main_quality
-# #     seen:
-# #       fields:
-# #         - title
-#     inputs:
-#       - rss: '{{ secrets.flexget.path }}/External-Plugins/Serienjunkies-Feed/rss.xml'
-#     serienjunkies:
-#       language: '{{ secrets.Serienjunkies.Language }}'
-#     # Crossmatch for Series on HOLD - and double check for Episodes already existing
-#     crossmatch:
-#       from:
-#         - trakt_list:
-#             account: '{{ secrets.trakt.acc }}'
-#             list: '{{ secrets.trakt.OnHold }}'
-#             type: shows
-#         - trakt_list:
-#             account: '{{ secrets.trakt.acc }}'
-#             list: collection
-#             type: episodes
-#       fields:
-#         - imdb_id
-#       action: reject
-#     series:
-#       # Series with Localized-Titles - HUGE Problem. Searching for a better solution
-#       - Die.Simpsons:
-#           name_regexp: ^The.Simpsons?
-#       - Akte.X:
-#           name_regexp: ^The.X.Files?
-#       - Chaos.City:
-#           name_regexp: ^Spin.City?
-#       - House.of.Cards.(US):
-#           name_regexp: ^House.of.Cards?
-#     if:
-#       - "'trakt_languages' or 'imdb_languages' or 'trakt_translations.language' == ['german']": accept
-#         exec:
-#           - echo "{{title}} accepted by language test" >> "{{ secrets.DLFolder }}/test_{{title}}.txt"  
-
-            
-#   cleanup:
-#     manual: yes
-#     filesystem:
-#       path:
-#         - '{{ secrets.DLFolder }}/{{ secrets.DLFolderWatchlist }}'
-#         - '{{ secrets.DLFolder }}/{{ secrets.DLFolderArchive }}'
-#       recursive: yes
-#     age:
-#       field: created
-#       action: accept
-#       age: 600 days
-#     delete:
-#       clean_source: 1
-#       along:
-#         files:
-#           - sub
-#           - srt
-#   TEST:
-#     manual: yes
-#     filesystem:
-#       path:
-#         - /media/snikay/Series/Archiv
-#       recursive: yes
-#       retrieve: files
-#     duplicates:
-#       field: tmdb_id
-#       action: accept
-
-#   ######################################## Search based on Stream
-#   Movies_Watchlist_Stream_EN_HDA:
-#     priority: 6
-#     seen: local
-#     template:
-#       - '{{ secrets.DownloadManager }}-Defaults'
-#       - '{{ secrets.DownloadManager }}-Watchlist'
-#       - '{{ secrets.DownloadManager }}-{{ secrets.DownloadManagerQueue }}-Queue'
-#       - '{{ secrets.English }}-English' #enable/disable this Task
+#       - '{? DownloadManager ?}-Defaults'
+#       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
+#       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
+#       - '{? disable_enable_tasks.Download_Best_on_IMDb ?}-Download_Best_on_IMDb'
 #       - movies_lookup
-#       - English
-#       - main_quality
-#     list_match:
-#       from:
-#         - movie_list: '{{ secrets.queue.movie }}'
-#       single_match: no
-#       remove_on_match: no
-#     inputs:
-#       - rss: '{{ secrets.flexget.path }}/External-Plugins/HDArea-Feed/HDArea.xml'
+#       - German            #differentiation not possible with this feed right now - feed is pre-filtered for German - needs fix
+#       - Movie_Streams
+#     quality: '{? quality.main ?}'
+#     imdb:
+#       min_year: 1980
+#     if:
+#       - trakt_collected: reject
+#       - "'horror' in (imdb_genres or [])": reject
+#       - "'musical' in (imdb_genres or [])": reject
+#       - "'documentary' in (imdb_genres or [])": reject
+#       - imdb_year > now.year - 2:
+#           imdb:
+#             min_score: 8.0
+#             min_votes: 100000
+#       - imdb_year > now.year - 5:
+#           imdb:
+#             min_score: 7.7
+#             min_votes: 200000
+#       - imdb_year > now.year - 10:
+#           imdb:
+#             min_score: 7.4
+#             min_votes: 350000
+#       - imdb_year < now.year - 20:
+#           imdb:
+#             min_score: 7.2
+#             min_votes: 500000
+#             min_year: 1980
+#     require_field:
+#       - imdb_id
+#       - imdb_name
+#       - imdb_year
+#       - imdb_url
+#       - imdb_genres
+
+  Specials: #(Interviews, Trailer, Behind the scenes etc)
+    template:
+      - '{? disable_enable_tasks.Download_Specials ?}-Download_Specials'
+      - Movie_Streams
+    include: Specials.yml
+
+
+
+
+  hdw1:
+    html:
+      url: "http://hd-world.org/category/serien/page/{{i}}/"
+      dump: hdw_names.html
+      increment: 
+        from: 1
+        to: 1
+      title_from: link
+#    regexp:
+#      accept:
+#        - share-online.biz
+    manual: yes
+  hdw2:
+    html:
+      url: http://localhost/hdw_names.html 
+      increment: 
+        from: 1
+        to: 2
+      links_re:
+        - ncrypt\.in
+        - share-links\.biz
+        - filecrypt\.cc
+      title_from: url  
+    manual: yes
+###############################################################################################################################################
+## MISC ################################################################################################config#by#snickers2k###################
+###############################################################################################################################################
+
 
 # Run every task on given schedule, except tasks with own interval:
 schedules:
   - tasks: '*'
     schedule:
-      hour: '{{ secrets.flexget.scheduler }}'
+      hour: '{? flexget.scheduler ?}'
+  - tasks: 'Movies_Watchlist_Search*'
+    schedule:
+      hour: '0-6/3'
 ###############
-#web_server: yes
+web_server: yes

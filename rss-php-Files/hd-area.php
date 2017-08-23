@@ -6,12 +6,12 @@ function crawl_site($u) {
   $html = file_get_html("http://www.hd-area.org/?s=search&q=".$u);
   $content = $html->find('div[id=content]');
 
-  $rss_head = "<rss version=\"2.0\"><channel>";
-  $rss_title = "<title>HD-Area Suche</title>";
-  $rss_desc = "<description>HD-Area-RSS-Feed-Generator</description>";
-  $rss_link = "<link>http://www.hd-area.org/?s=search&q=".$u."/</link>";
+  $rss_head = "<rss version=\"2.0\"><channel><br>";
+  $rss_title = "<title>HD-Area Suche</title><br>";
+  $rss_desc = "<description>HD-Area-RSS-Feed-Generator</description><br>";
+  $rss_link = "<link>http://www.hd-area.org/?s=search&q=".$u."/</link><br>";
   $rss_item = "";
-  $rss_tail = "</channel></rss>";
+  $rss_tail = "</channel></rss><br>";
 
   foreach($html->find('div[id=content]') as $element) {
     $urls = $element->find('a');
@@ -20,10 +20,10 @@ function crawl_site($u) {
       $link = $url->href;
 
       if (!empty($title)) {
-	$rss_item = $rss_item."<item>";
-	$rss_item = $rss_item."<title>".$title."</title>";
-	$rss_item = $rss_item."<link>".$link."</link>";
-	$rss_item = $rss_item."</item>";
+	$rss_item = $rss_item."<item><br>";
+	$rss_item = $rss_item."<title>".$title."</title><br>";
+	$rss_item = $rss_item."<link>".$link."</link><br>";
+	$rss_item = $rss_item."</item><br>";
       }
     }
   }

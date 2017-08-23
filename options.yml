@@ -1,0 +1,112 @@
+## Folgendes ist zu beachten:
+## - Die Config basiert auf entweder Plex.tv und Trakt.tv, oder Trakt alleine. 
+##     - In jedem Fall muss Takt über den Stand der Collection informiert werden!
+##        - Plex: https://github.com/trakt/Plex-Trakt-Scrobbler
+##        - Kodi: http://kodi.wiki/view/Add-on:Trakt
+##     - Flexget-Trakt: Authentication: http://flexget.com/wiki/Plugins/trakt
+
+
+
+## Eigene Daten eintragen
+
+ArchiveOrWatchlist: Archive ## "Watchlist" and "Archive" are possible values. Use Watchlist to split your Archive from your Watchlist
+
+########### Download-Manager
+DownloadManager: jdownloader # "jdownloader" and "pyload" are possible values. USE LOWER CASES !
+DownloadManagerQueue: 'enable' # disable = collector -- "enable" = Queue
+
+
+DLFolder: 'cd ~/Downloads' #Do not put an "/" at the end
+DLFolderArchive: '---Archiv'       #Name of your Archive Folder inside your Downloads Folder
+DLFolderWatchlist: '---Watchlist' #Name of your Watchlist Folder inside your Downloads Folder
+DLFolderYouTube: '--YouTube'  #Name of your YouTube Folder inside your Downloads Folder
+DLFolderEBooks: '-eBooks'  #Name of your eBooks Folder inside your Downloads Folder
+DLFolderSports: '--Sports' #Name of your YouTube Folder inside your Downloads Folder
+DLFolder3D: '--3D' #Name of your YouTube Folder inside your Downloads Folder
+
+#-------------------
+JDownloader: #JDownloaders Path
+  path: '~/jd2' #Do not put an "/" at the end
+#-------------------
+pyload: #pyload.org
+  usr: 'XXXX'
+  pwd: 'XXXX'
+  ip: 'localhost' # localhost (when running flexget on the same PC), Hostname , URL and IP-Adresses are possible values # ALWAYS WITHOUT "HTTP(S)://"
+  hoster: UploadedTo # "ShareOnlineBiz" and "UploadedTo" are possible values                       
+  protocol: 'http' # "http" and "https" are possible values
+  port: '8000' #Webinterface port
+  
+########## flexget
+flexget: 
+  path: '~/.flexget' # Windows "C:/path/to/flexget" , Linux "/home/username/.flexget" ---->>> Do not put an "/" at the end !!
+  scheduler: 5-17/2 # ONLY HOURS ARE POSSIBLE VALUES ! Example: Run every 2 hours between 5am and 5pm (http://flexget.com/wiki/Plugins/Daemon/scheduler)
+    
+########## RSS
+rss: 
+  HDAreaSearch: "http://localhost/hd-area.php?var={{search_term}}" 
+  HDWorldSearch: "http://flexget.square7.ch/hd-world.php?var={{search_term}}" 
+  MovieBlogSearch: ""
+
+########## SJ
+Serienjunkies:
+  Hoster: share-online.biz # "uploaded.to" or "share-online.biz" are possible values // Uploaded is dead....
+  Language: german # "german" , "english" are possible values
+
+
+########## LOGINS
+
+imdb: #imdb.com
+  usrID: '' ## MAIN USER ## USER-ID can be found here: http://www.imdb.com/list/watchlist (copy your ID from URL)
+  pwd: ''
+  ###
+  usr2: '' ## SecondUser ## NOT SUPPORTED YET
+  pwd2: ''
+  
+System: #Operating System ## NOT SUPPORTED YET
+  OS: Linux #Windows and Linux are possible values
+  usr: ''
+  pwd: ''
+
+trakt: #trakt.tv
+  acc: ''
+  pwd: ''
+  #
+  Favorite_List: Favorites #Type in the Name of your Favorites-List. Movies inside this list will load in "high-quality" - eg 1080p instead of 720p. 
+                           #THIS LIST MUST ALREADY EXIST ! FLEXGET CAN'T CREATE IT
+
+  OnHold: OnHold #Type in the Name of your OnHold-List. Series in this List will stop loading after first 3 Episodes. Otherwise Watchlist entries will load continuously 
+                 #and makes the Watchlist obsolete. If  you then want to load a Series continuously, simply remove it from that list.
+
+
+disable_enable_tasks: #default is disabled! NO Support for these tasks! VALUES: enable/disable
+  Download_Second_IMDb_Movies: disable
+  Sync_Main_IMDb_to_Second: disable
+  Studio_Downloads: disable
+  Download_Best_on_IMDb: disable
+  YouTube_Downloads: disable   
+  Download_Specials: disable
+  Download_Sports: disable
+############ QUALITY:         ### For possible values look: http://flexget.com/wiki/Plugins/quality
+quality: ## This will target your "main" quality, but falls back to "low" quality, if main quality is not available. "High" is for your Trakt Favorite_List
+  low: 720p+ #webrip+ #h264-h265 #Type in your prefered low quality
+  main: 1080p+ #webrip+ #h264-h265 #Type in your prefered main quality
+  high: 1080p+ webdl+ h264+ dd5.1+ #Type in your prefered high quality
+ 
+
+Minimum_Movie_Size: 2000 ## Size in MB  (NOT WORKING WELL -> DISABLED)
+Maximum_Movie_Size: 12000 ## Size in MB (NOT WORKING WELL -> DISABLED)
+
+############ ENGLISH:
+English: 'enable' # "enable" and "disable" are possible values
+############ BACKFILL ("backfill and "yes" to activate -- "no" and "no" to deactivate)
+series:
+  tracking: backfill # "True" "False" and "backfill" are possible values
+  backfill: enable # "enable" and "disable" are possible values
+  upgrade: enable #  "enable" and "disable" are possible values
+  ## The Watchlist_Counter stops at given "Stop"-Number and Starts again, only when the given "Start"-Number is marked WATCHED in trakt
+  Stop_watchlist_counter: 1|2|3|4|5|6 # 6 is relatively ideal. but choose what you want. 0 to disable the HOLD-Feature completely and load everything straight away.
+  Start_Collection_counter: 03 # 03 is relatively ideal. but choose what you want.
+  
+########### YouTube-Playlist: 
+YouTube:
+  Playlist: ''
