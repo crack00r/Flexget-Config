@@ -27,17 +27,17 @@ Paypal: koenig_m@me.com  <br>
 
 
  # Installation :
-`sudo apt-get install unzip python3.5 python-beautifulsoup python-pip <br>
-sudo pip install --upgrade pip setuptools <br>
-sudo pip install flexget`<br>
+`sudo apt-get install unzip python3.5 python-beautifulsoup python-pip` <br>
+`sudo pip install --upgrade pip setuptools` <br>
+`sudo pip install flexget`<br>
 <br>
-`cd /tmp/ && wget https://github.com/crack00r/Flexget-Config/archive/master.zip<br>
-unzip  master.zip<br>
-mkdir ~/.flexget && cp -r master/* ~/.flexget/`<br>
+`cd /tmp/ && wget https://github.com/crack00r/Flexget-Config/archive/master.zip`<br>
+`unzip  master.zip`<br>
+`mkdir ~/.flexget && cp -r master/* ~/.flexget/`<br>
 <br>
 
 Für die PHP-Plugins (funktionieren aktuell nicht)<br>
 LAMP installieren https://wiki.ubuntuusers.de/LAMP/ <br>
 
-`sudo cp ~/.flexget/rss-php-Files/* /var/www/html/<br>
+`sudo cp ~/.flexget/rss-php-Files/* /var/www/html/`<br>
 sudo service apache2 restart`<br>
