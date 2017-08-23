@@ -40,4 +40,4 @@ Für die PHP-Plugins (funktionieren aktuell nicht)<br>
 LAMP installieren https://wiki.ubuntuusers.de/LAMP/ <br>
 
 `sudo cp ~/.flexget/rss-php-Files/* /var/www/html/`<br>
-sudo service apache2 restart`<br>
+`sudo service apache2 restart`<br>
