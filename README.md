@@ -26,10 +26,18 @@ Paypal: koenig_m@me.com  <br>
 
 
 
- # search_serienjunkies :
- -In den Flexget Ordner unter "plugins" kopieren.
- -Nutzbar zB mit discover unter "from:" via: <br>
- - searchSerienjunkies: <br>
- -  hoster: uploaded.to # oder share-online.biz <br>
- -  language: german # oder english" <br>
- +search_Serienjunkies.py aus dem Ordner "Search-Plugins" nach "python/site-packages/flexget/plugins/*.py" verschieben.
+ # Installation :
+`sudo apt-get install unzip python3.5 python-beautifulsoup python-pip
+sudo pip install --upgrade pip setuptools
+sudo pip install flexget`
+
+`cd /tmp/ && wget https://github.com/crack00r/Flexget-Config/archive/master.zip
+unzip  master.zip
+mkdir ~/.flexget && cp -r master/* ~/.flexget/`
+
+
+Für die PHP-Plugins (funktionieren aktuell nicht)
+LAMP installieren https://wiki.ubuntuusers.de/LAMP/ 
+
+`sudo cp ~/.flexget/rss-php-Files/* /var/www/html/
+sudo service apache2 restart`
