@@ -16,7 +16,7 @@ DownloadManager: jdownloader # "jdownloader" and "pyload" are possible values. U
 DownloadManagerQueue: 'enable' # disable = collector -- "enable" = Queue
 
 
-DLFolder: 'cd ~/Downloads' #Do not put an "/" at the end
+DLFolder: 'cd /home/USER/Downloads' #Do not put an "/" at the end
 DLFolderArchive: '---Archiv'       #Name of your Archive Folder inside your Downloads Folder
 DLFolderWatchlist: '---Watchlist' #Name of your Watchlist Folder inside your Downloads Folder
 DLFolderYouTube: '--YouTube'  #Name of your YouTube Folder inside your Downloads Folder
@@ -26,7 +26,7 @@ DLFolder3D: '--3D' #Name of your YouTube Folder inside your Downloads Folder
 
 #-------------------
 JDownloader: #JDownloaders Path
-  path: '~/jd2' #Do not put an "/" at the end
+  path: '/home/USER/jd2' #Do not put an "/" at the end
 #-------------------
 pyload: #pyload.org
   usr: 'XXXX'
@@ -38,7 +38,7 @@ pyload: #pyload.org
   
 ########## flexget
 flexget: 
-  path: '~/.flexget' # Windows "C:/path/to/flexget" , Linux "/home/username/.flexget" ---->>> Do not put an "/" at the end !!
+  path: '/home/USER/.flexget' # Windows "C:/path/to/flexget" , Linux "/home/username/.flexget" ---->>> Do not put an "/" at the end !!
   scheduler: 5-17/2 # ONLY HOURS ARE POSSIBLE VALUES ! Example: Run every 2 hours between 5am and 5pm (http://flexget.com/wiki/Plugins/Daemon/scheduler)
     
 ########## RSS
