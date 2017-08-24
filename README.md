@@ -29,7 +29,7 @@ Paypal: koenig_m@me.com  <br>
  # Installation :
 `sudo apt-get install unzip python3.5 python-beautifulsoup python-pip` <br>
 `sudo pip install --upgrade pip setuptools` <br>
-`sudo pip install flexget`<br>
+`sudo pip install flexget guessit`<br>
 <br>
 `cd /tmp/ && wget https://github.com/crack00r/Flexget-Config/archive/master.zip`<br>
 `unzip  master.zip`<br>
