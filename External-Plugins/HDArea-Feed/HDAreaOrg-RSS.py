@@ -37,7 +37,7 @@ def get_download(soup1, title):
     for title in soup1.findAll("div", {"class" : "title"}):
         hda_url = title.a["href"].replace("https","http")
         req_page = requests.get(hda_url).text
-        soup_ = BeautifulSoup(req_page)
+        soup_ = BeautifulSoup(req_page, "lxml")
         links = soup_.findAll("span", {"style":"display:inline;"})
         for link in links:
             url = link.a["href"]
@@ -69,7 +69,7 @@ def get_year(soup1, dlLink, rls_title):
 for site in ('top-rls','movies','Old_Stuff','Cinedubs'): #
     address = ('http://hd-area.org/index.php?s=' + site)
     page = urllib2.urlopen(address).read()
-    soup = BeautifulSoup(page)
+    soup = BeautifulSoup(page, "lxml")
     for all in soup.findAll("div", {"class" : "topbox"}):
         for title in all.findAll("div", {"class" : "title"}):
             title = title.getText()
