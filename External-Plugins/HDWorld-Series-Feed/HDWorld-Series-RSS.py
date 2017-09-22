@@ -43,10 +43,10 @@ def replaceUmlauts(title):
             # print link
 
 
-for site in ('1','2','3','4','5','6','7','8','9'):
+for site in ('page/1','page/2','page/3','page/4','page/5','page/6','page/7','page/8','page/9'):
     opener = urllib2.build_opener()
     opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-    url = ('http://hd-world.org/category/serien/page/' + site)
+    url = ('http://hd-world.org/category/serien/' + site)
     response = opener.open(url)
     page = response.read()
     soup = BeautifulSoup(page, "lxml")
