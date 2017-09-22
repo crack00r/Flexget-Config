@@ -48,7 +48,7 @@ for site in ('1','2','3','4','5','6','7','8','9'):
     url = ('http://hd-world.org/category/1080p/page/' + site)
     response = opener.open(url)
     page = response.read()
-    soup = BeautifulSoup(page, "lxml")
+    soup = BeautifulSoup("page", "lxml")
     for post in soup.findAll("div", {"class" : "post"}):
         for all in post.findAll("h1", {"id" : re.compile('post.*')}):
             for title in all.findAll('a'):
