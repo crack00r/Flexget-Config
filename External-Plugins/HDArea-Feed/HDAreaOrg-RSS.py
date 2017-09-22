@@ -69,7 +69,7 @@ def get_year(soup1, dlLink, rls_title):
 for site in ('top-rls','movies','Old_Stuff','Cinedubs'): #
     address = ('http://hd-area.org/index.php?s=' + site)
     page = urllib2.urlopen(address).read()
-    soup = BeautifulSoup(page, "lxml")
+    soup = BeautifulSoup("page", "lxml")
     for all in soup.findAll("div", {"class" : "topbox"}):
         for title in all.findAll("div", {"class" : "title"}):
             title = title.getText()
