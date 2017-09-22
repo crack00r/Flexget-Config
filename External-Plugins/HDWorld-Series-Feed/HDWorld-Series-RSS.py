@@ -49,7 +49,7 @@ for site in ('page/1','page/2','page/3','page/4','page/5','page/6','page/7','pag
     url = ('http://hd-world.org/category/serien/' + site)
     response = opener.open(url)
     page = response.read()
-    soup = BeautifulSoup(page, "lxml")
+    soup = BeautifulSoup("page", "lxml")
     for post in soup.findAll("div", {"class" : "post"}):
         for all in post.findAll("h1", {"id" : re.compile('post.*')}):
             for title in all.findAll('a'):
