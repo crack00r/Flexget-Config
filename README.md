@@ -40,5 +40,9 @@ LAMP installieren https://wiki.ubuntuusers.de/LAMP/ <br>
 
 `sudo cp ~/.flexget/rss-php-Files/* /var/www/html/`<br>
 `sudo service apache2 restart`<br>
-
-Options.yml editieren - fertig.
+<br>
+Options.yml editieren - fertig.<br>
+<br>
+Anschließend per Cron oder Daemon starten:<br>
+- `flexget execute` <br>
+- `/usr/local/bin/flexget daemon start -d` (https://flexget.com/Daemon) <br>
