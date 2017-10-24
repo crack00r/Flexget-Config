@@ -34,6 +34,9 @@ Paypal: koenig_m@me.com  <br>
 `unzip  master.zip`<br>
 `mkdir ~/.flexget && cp -r master/* ~/.flexget/`<br>
 
+`flexget trakt auth USER`<br>
+
+
 <br>
 Options.yml editieren - fertig.<br>
 <br>
