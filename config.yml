@@ -539,10 +539,6 @@ tasks:
       account: '{? trakt.acc ?}'
       list: watchlist
       type: shows
-    imdb_list:
-      login: '{? imdb.usr ?}'
-      password: '{? imdb.pwd ?}'
-      list: watchlist
     if:
       - trakt_series_status == 'canceled': accept
     list_remove:
@@ -570,10 +566,6 @@ tasks:
       account: '{? trakt.acc ?}'
       list: watchlist
       type: shows
-    imdb_list:
-      login: '{? imdb.usr ?}'
-      password: '{? imdb.pwd ?}'
-      list: watchlist 
     crossmatch:
       from:
         - trakt_list:
@@ -588,10 +580,6 @@ tasks:
           account: '{? trakt.acc ?}'
           list: watchlist
           type: shows
-      - imdb_list:
-          login: '{? imdb.usr ?}'
-          password: '{? imdb.pwd ?}'
-          list: watchlist
   ######################################## Remove Collected trakt-Watchlist
   Remove_CollectedMoviesFromWatchlist:
     priority: 1
@@ -618,10 +606,6 @@ tasks:
           list: watchlist
           type: movies
       - movie_list: Default
-      - imdb_list:
-          login: '{? imdb.usr ?}'
-          password: '{? imdb.pwd ?}'
-          list: watchlist
 
   ######################################## Remove Series from OnHold automatically, if Episode 3 is already watched - so it starts Downloading again
   Remove_Watched_OnHold:
@@ -738,10 +722,6 @@ tasks:
           account: '{? trakt.acc ?}'
           list: watchlist
           type: movies
-      - imdb_list:
-          login: '{? imdb.usr ?}'
-          password: '{? imdb.pwd ?}'
-          list: watchlist
     regexp:
       reject:
         - \b3D\b
@@ -1024,10 +1004,6 @@ tasks:
         - imdb_id
       action: reject
     list_add:
-      - imdb_list:
-          login: '{? imdb.usr ?}'
-          password: '{? imdb.pwd ?}'
-          list: watchlist     
       - trakt_list:
           account: '{? trakt.acc ?}'
           list: collection
