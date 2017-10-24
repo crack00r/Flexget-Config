@@ -1,7 +1,7 @@
 # Flexget-Config
 
 Flexget-Config by snickers2k<br>
-thanks to crack00r for testing<br>
+thanks to @topy for Plugins <br>
 
 
 Easy to use Flexget config with support of secrets file. You only need to fill in your credentials. <br>
