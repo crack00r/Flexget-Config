@@ -7,9 +7,8 @@ variables: options.yml # Includes Options.yml file (put in flexget folder beside
 templates:
   global:
     ######################################## Misc
-    verify_ssl_certificates: yes
-    proper_movies: yes  #accept Quality-fixes (Proper means there was a bug in the release before)
-    magnets: no
+    verify_ssl_certificates: no
+#    magnets: no
     plugin_priority:
       regexp: 250
 #    assume_quality:
@@ -24,18 +23,22 @@ templates:
     headers:
       User-Agent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36"
     retry_failed:
-      retry_time: 20 seconds
-      retry_time_multiplier: 2
+      retry_time: 60 seconds
+      retry_time_multiplier: 4
       max_retries: 6
     ######## Naming-Fixes
     pathscrub: windows  # Use Windows conform filenames
     manipulate:
-    ## Fix for Serienjunkies.org
+    ## Fixes for Settings.org
       - title:
           replace:            
             regexp: '.(Deutsch|Englisch).'
             format: ''
-    ## other name-fixes
+      - title:
+          replace:
+            regexp: '!|tv-film|,'
+            format: ''
+    ## German-Locale-fixes
       - title:
           replace:
             regexp: 'ö'
@@ -50,8 +53,8 @@ templates:
             format: 'ue'
       - title:
           replace:
-            regexp: '!|tv-film|,'
-            format: ''
+            regexp: 'ß'
+            format: 'ss'
     ######################################## Global Exclude  (For testing: https://regex101.com)
     regexp:
       reject:
@@ -71,10 +74,11 @@ templates:
         - \b(un|)sub(|s|bed)\b # Subtitles (Sub / Subs / Subbed / Unsubbed)
         - \b(hc|hardcoded)\b # Subtitles (HC / Hardcoded)
         - \b(web|)blur(\b|rt|red)\b # Blurred-Subtitles
+        - \biso\b: {from: description} # ISO-Files
 #        - \bread.nfo\b # usually means there is something in the nfo-file, mostly about hardcoded subs or other "bad"-Info
       # Audio
         - \bflac\b   # flac
-        - \b((ac3|)md|mic.dubbed)\b
+        - \bac3md|md|mic|mic.dubbed\b
 ###############################################################################################################################################
 ### Templates #################################################################################################################################
 ###############################################################################################################################################
@@ -122,7 +126,8 @@ templates:
     inputs:
 #      - rss: '{? flexget.path ?}/External-Plugins/HDArea-Feed/HDArea.xml' #not working right now
       - rss: '{? flexget.path ?}/External-Plugins/HDWorld-Movies-Feed/HDWorld.xml'
-                      
+      - rss: 'https://nima4k.org/rss_movies.xml'
+
   Series_Streams:
     inputs:
       - rss: '{? flexget.path ?}/External-Plugins/HDWorld-Series-Feed/HDWorld.xml'    
@@ -145,8 +150,8 @@ templates:
             from_start: yes
       from:
         - searchSerienjunkies:
-            hoster: '{? Serienjunkies.Hoster ?}'
-            language: '{? Serienjunkies.Language ?}'
+            hoster: '{? Settings.Hoster ?}'
+            language: '{? Settings.Language ?}'
     no_entries_ok: yes
 
   Discover-disable-Backfill:
@@ -156,11 +161,12 @@ templates:
             backfill: no
       from:
         - searchSerienjunkies:
-            hoster: '{? Serienjunkies.Hoster ?}'
-            language: '{? Serienjunkies.Language ?}'
+            hoster: '{? Settings.Hoster ?}'
+            language: '{? Settings.Language ?}'
     no_entries_ok: yes
 
   ######################################## Enable/Disable Upgrade
+
   enable-Upgrade:
     configure_series:
       settings:
@@ -170,12 +176,14 @@ templates:
         timeframe: 24 hours
         identified_by: ep
         tracking: '{? series.tracking ?}'
-        upgrade: yes #'{? series.upgrade ?}' 
+        upgrade: yes 
+        season_packs: yes
       from:
         trakt_list:
           account: '{? trakt.acc ?}'
           list: collection
           type: shows
+          strip_dates: yes
 
   disable-Upgrade:
     configure_series:
@@ -186,12 +194,14 @@ templates:
         timeframe: 24 hours
         identified_by: ep
         tracking: '{? series.tracking ?}'
-        upgrade: no #'{? series.upgrade ?}' 
+        upgrade: no
+        season_packs: yes
       from:
         trakt_list:
           account: '{? trakt.acc ?}'
           list: collection
           type: shows
+          strip_dates: yes
 
   ######################################## Enable/Disable Special (Author) Tasks
   enable-Download_Second_IMDb_Movies:
@@ -224,10 +234,16 @@ templates:
   disable-Download_Specials: 
     manual: yes
 
+  enable-Download_Specials2: 
+    manual: no
+  disable-Download_Specials2: 
+    manual: yes
+
   enable-Download_Sports: 
     manual: no
   disable-Download_Sports: 
     manual: yes
+
   ######################################## Languages
   German:
   # Accept Only German, by Title
@@ -303,33 +319,123 @@ templates:
 
 #   ################## pyLoad (buggy? needs testing, i'm not a pyLoad-User anymore)
 #   ######## Defaults
-#   pyload-Defaults:
-#     pyload:
-#       api: '{? pyload.protocol ?}://{? pyload.ip ?}:{? pyload.port ?}/api'
-#       username: '{? pyload.usr ?}'
-#       password: '{? pyload.pwd ?}'
-#       hoster: '{? pyload.hoster ?}'
-#       parse_url: yes
+  pyload-Defaults:
+    exec:
+      - echo "Downloading with pyLoad"
+#   ######## Archive-Movies
+  pyload-Archive-Movies:
+    pyload:
+      enabled: yes
+      folder: '{? DLFolder ?}/{? DLFolderArchive ?}/Movies/{{title}}'
+      api: '{? pyload.protocol ?}://{? pyload.ip ?}:{? pyload.port ?}/api'
+      username: '{? pyload.usr ?}'
+      password: '{? pyload.pwd ?}'
+      multiple_hoster: yes
+      queue: yes
+      hoster:
+        - '{? pyload.hoster1 ?}'
+        - '{? pyload.hoster2 ?}'
+#   ######## Archive-Movies
+  pyload-Archive-Series:
+    pyload:
+      enabled: yes
+      folder: '{? DLFolder ?}/{? DLFolderArchive ?}/Series/{{title}}'
+      package: '{{series_name}} - {{series_id}}'
+      api: '{? pyload.protocol ?}://{? pyload.ip ?}:{? pyload.port ?}/api'
+      username: '{? pyload.usr ?}'
+      password: '{? pyload.pwd ?}'
+      multiple_hoster: yes
+      queue: yes
+      hoster:
+        - '{? pyload.hoster1 ?}'
+        - '{? pyload.hoster2 ?}'
 #   ######## Watchlist
-#   pyload-Watchlist:
-#     pyload:
-#       folder: '{? DLFolder ?}/{? DLFolderWatchlist ?}/{{title}}'
-#   ######## Archive
-#   pyload-Archive:
-#     pyload:
-#       folder: '{? DLFolder ?}/{? DLFolderArchive ?}/{{title}}'
+  pyload-Watchlist-Movies:
+    pyload:
+      enabled: yes
+      folder: '{? DLFolder ?}/{? DLFolderWatchlist ?}/Movies/{{title}}'
+      api: '{? pyload.protocol ?}://{? pyload.ip ?}:{? pyload.port ?}/api'
+      username: '{? pyload.usr ?}'
+      password: '{? pyload.pwd ?}'
+      multiple_hoster: yes
+      queue: yes
+      hoster:
+        - '{? pyload.hoster1 ?}'
+        - '{? pyload.hoster2 ?}'
+#   ######## Watchlist
+  pyload-Watchlist-Series:
+    pyload:
+      enabled: yes
+      folder: '{? DLFolder ?}/{? DLFolderWatchlist ?}/Series/{{title}}'
+      package: '{{series_name}} - {{series_id}}'
+      api: '{? pyload.protocol ?}://{? pyload.ip ?}:{? pyload.port ?}/api'
+      username: '{? pyload.usr ?}'
+      password: '{? pyload.pwd ?}'
+      multiple_hoster: yes
+      queue: yes
+      hoster:
+        - '{? pyload.hoster1 ?}'
+        - '{? pyload.hoster2 ?}'
+#   ######## 3D
+  pyload-3D:
+    pyload:
+      enabled: yes
+      folder: '{? DLFolder ?}/{? DLFolder3D ?}/{{title}}'
+      api: '{? pyload.protocol ?}://{? pyload.ip ?}:{? pyload.port ?}/api'
+      username: '{? pyload.usr ?}'
+      password: '{? pyload.pwd ?}'
+      multiple_hoster: yes
+      queue: yes
+      hoster:
+        - '{? pyload.hoster1 ?}'
+        - '{? pyload.hoster2 ?}'
+#   ######## Ebooks
+  pyload-EBooks:
+    pyload:
+      enabled: yes
+      folder: '{? DLFolder ?}/{? DLFolderEBooks ?}/{{title}}'
+      api: '{? pyload.protocol ?}://{? pyload.ip ?}:{? pyload.port ?}/api'
+      username: '{? pyload.usr ?}'
+      password: '{? pyload.pwd ?}'
+      multiple_hoster: yes
+      queue: yes
+      hoster:
+        - '{? pyload.hoster1 ?}'
+        - '{? pyload.hoster2 ?}'
+#   ######## 3D
+  pyload-Sports:
+    pyload:
+      enabled: yes
+      folder: '{? DLFolder ?}/{? DLFolderSports ?}/{{title}}'
+      api: '{? pyload.protocol ?}://{? pyload.ip ?}:{? pyload.port ?}/api'
+      username: '{? pyload.usr ?}'
+      password: '{? pyload.pwd ?}'
+      multiple_hoster: yes
+      queue: yes
+      hoster:
+        - '{? pyload.hoster1 ?}'
+        - '{? pyload.hoster2 ?}'
 #   ######## YouTube
-#   pyload-Youtube:
-#     pyload:
-#       folder: '{? DLFolder ?}/{? DLFolderYouTube ?}/{{title}}'
+  pyload-Youtube:
+    pyload:
+      enabled: yes
+      folder: '{? DLFolder ?}/{? DLFolderYouTube ?}/{{title}}'
+      api: '{? pyload.protocol ?}://{? pyload.ip ?}:{? pyload.port ?}/api'
+      username: '{? pyload.usr ?}'
+      password: '{? pyload.pwd ?}'
+      multiple_hoster: yes
+      queue: yes
+      hoster:
+        - '{? pyload.hoster1 ?}'
+        - '{? pyload.hoster2 ?}'
 #   ######## Queue-Enable
-#   pyload-enable-Queue:
-#     pyload:
-#       queue: yes
+  pyload-enable-Queue:
+    exec:
+      - echo "Queue globally enabled for pyload"
 #   ######## Queue-Disable
-#   pyload-disable-Queue:
-#     pyload:
-#       queue: no
+  pyload-disable-Queue:
+    exec:
+      - echo "Queue globally enabled for pyload"
 ###############################################################################################################################################
 ### Tasks #####################################################################################################################################
 ###############################################################################################################################################
@@ -346,14 +452,15 @@ tasks:
     template:
       - no_seen
       - no_global
-    priority: 2
+    priority: 1
+    no_entries_ok: yes
     exec:
       on_start:
         phase: 
-          - "cd {? flexget.path ?}/External-Plugins/HDArea-Feed/ && rm *.xml && python ./HDAreaOrg-RSS.py"
-          - "cd {? flexget.path ?}/External-Plugins/HDWorld-Movies-Feed/ && rm *.xml && python ./HDWorld-Movies-RSS.py"
-          - "cd {? flexget.path ?}/External-Plugins/HDWorld-Series-Feed/ && rm *.xml && python ./HDWorld-Series-RSS.py"
-          - "cd {? flexget.path ?}/External-Plugins/Serienjunkies-Feed/ && rm *.xml && python ./Serienjunkies-RSS.py"          
+          - "cd {? flexget.path ?}/External-Plugins/HDArea-Feed/ && rm *.xml; python ./HDAreaOrg-RSS.py"
+          - "cd {? flexget.path ?}/External-Plugins/HDWorld-Movies-Feed/ && rm *.xml; python ./HDWorld-Movies-RSS.py"
+          - "cd {? flexget.path ?}/External-Plugins/HDWorld-Series-Feed/ && rm *.xml; python ./HDWorld-Series-RSS.py"
+          - "cd {? flexget.path ?}/External-Plugins/Serienjunkies-Feed/ && rm *.xml; python ./Serienjunkies-RSS.py"          
   #
   ######################################## Sync Trakt/IMDb Movie-Watchlist to Flexget-Queue
   Update_Movies_to_Flexget:
@@ -421,7 +528,7 @@ tasks:
 #           type: movies
   ############################################################## Removings
   #
-  ######################################## Remove canceled Series (Nobody wants to start watching canceled Series)
+  ######################################## Remove canceled Series (Nobody wants to start watching canceled Series, or ?!)
   Remove_Canceled:
     priority: 1
     template:
@@ -432,10 +539,10 @@ tasks:
       account: '{? trakt.acc ?}'
       list: watchlist
       type: shows
-#     imdb_list:
-#       login: '{? imdb.usr ?}'
-#       password: '{? imdb.pwd ?}'
-#       list: watchlist
+    imdb_list:
+      login: '{? imdb.usr ?}'
+      password: '{? imdb.pwd ?}'
+     list: watchlist
     if:
       - trakt_series_status == 'canceled': accept
     list_remove:
@@ -463,10 +570,10 @@ tasks:
       account: '{? trakt.acc ?}'
       list: watchlist
       type: shows
-#     imdb_list:
-#       login: '{? imdb.usr ?}'
-#       password: '{? imdb.pwd ?}'
-#       list: watchlist 
+   imdb_list:
+     login: '{? imdb.usr ?}'
+     password: '{? imdb.pwd ?}'
+     list: watchlist 
     crossmatch:
       from:
         - trakt_list:
@@ -481,10 +588,10 @@ tasks:
           account: '{? trakt.acc ?}'
           list: watchlist
           type: shows
-#       - imdb_list:
-#           login: '{? imdb.usr ?}'
-#           password: '{? imdb.pwd ?}'
-#           list: watchlist
+     - imdb_list:
+         login: '{? imdb.usr ?}'
+         password: '{? imdb.pwd ?}'
+         list: watchlist
   ######################################## Remove Collected trakt-Watchlist
   Remove_CollectedMoviesFromWatchlist:
     priority: 1
@@ -511,10 +618,10 @@ tasks:
           list: watchlist
           type: movies
       - movie_list: Default
-#       - imdb_list:
-#           login: '{? imdb.usr ?}'
-#           password: '{? imdb.pwd ?}'
-#           list: watchlist
+      - imdb_list:
+          login: '{? imdb.usr ?}'
+          password: '{? imdb.pwd ?}'
+          list: watchlist
 
   ######################################## Remove Series from OnHold automatically, if Episode 3 is already watched - so it starts Downloading again
   Remove_Watched_OnHold:
@@ -542,8 +649,9 @@ tasks:
 
 ############################################################################################################ Movies ############################################################################################################
 
- ######################################## Search for queued Movies on hdarea with the help of a custom  pipe
+ ######################################## Search for queued Movies
   Movies_Watchlist_Search_DE_Main:
+#    proper_movies: yes  #accept Quality-fixes (Proper means there was a bug in the release before) TOO MANY BUGS
     priority: 4
     template:
       - '{? DownloadManager ?}-Defaults'
@@ -560,29 +668,25 @@ tasks:
         - movie_list:
             list_name: Default
             strip_year: yes
-#         - trakt_list:
-#             account: '{? trakt.acc ?}'
-#             list: UpgradeQuality
-#             type: movies
       from:
-#        - search_rss: "{? rss.HDAreaSearch ?}"
-        - search_rss: "{? rss.HDWorldSearch ?}"        
-#        - search_rss: "{? rss.MovieBlog ?}"
+        - searchHdarea:
+            hoster: '{? Settings.Hoster ?}'
+        - searchHdworld:
+            hoster: '{? Settings.Hoster ?}'
+        - searchMovieBlog:
+            hoster: '{? Settings.Hoster ?}'
     list_remove:
       - trakt_list:
           account: '{? trakt.acc ?}'
           list: watchlist
           type: movies
-#       - imdb_list:
-#           login: '{? imdb.usr ?}'
-#           password: '{? imdb.pwd ?}'
-#           list: watchlist
       - trakt_list:
           account: '{? trakt.acc ?}'
           list: UpgradeQuality
           type: movies
  ######################################## Search for queued Movies on hdarea with the help of a custom  pipe
   Movies_Watchlist_Search_DE_Low:
+#    proper_movies: yes  #accept Quality-fixes (Proper means there was a bug in the release before)  TOO MANY BUGS
     delay: 24 hours
     priority: 5
     template:
@@ -600,25 +704,16 @@ tasks:
         - movie_list:
             list_name: Default
             strip_year: yes
-#         - trakt_list:
-#             account: '{? trakt.acc ?}'
-#             list: UpgradeQuality
-#             type: movies
       from:
-#        - search_rss: "{? rss.HDAreaSearch ?}"
-        - search_rss: "{? rss.HDWorldSearch ?}"        
-#        - search_rss: "{? rss.MovieBlog ?}"
-#    list_remove:
-#      - trakt_list:
-#          account: '{? trakt.acc ?}'
-#          list: watchlist
-#          type: movies
-#       - imdb_list:
-#           login: '{? imdb.usr ?}'
-#           password: '{? imdb.pwd ?}'
-#           list: watchlist
+        - searchHdarea:
+            hoster: shareonline
+        - searchHdworld:
+            hoster: shareonline
+        - searchMovieBlog:
+            hoster: shareonline
   ######################################## Search based on Stream
   Movies_Watchlist_Stream_DE_Main:
+#    proper_movies: yes  #accept Quality-fixes (Proper means there was a bug in the release before) ##buggy
     priority: 4
     template:
       - '{? DownloadManager ?}-Defaults'
@@ -643,10 +738,10 @@ tasks:
           account: '{? trakt.acc ?}'
           list: watchlist
           type: movies
-#       - imdb_list:
-#           login: '{? imdb.usr ?}'
-#           password: '{? imdb.pwd ?}'
-#           list: watchlist
+      - imdb_list:
+          login: '{? imdb.usr ?}'
+          password: '{? imdb.pwd ?}'
+          list: watchlist
     regexp:
       reject:
         - \b3D\b
@@ -682,18 +777,10 @@ tasks:
     regexp:
       reject:
         - \b3D\b
-#    list_remove:
-#      - trakt_list:
-#          account: '{? trakt.acc ?}'
-#          list: watchlist
-#          type: movies
-#       - imdb_list:
-#           login: '{? imdb.usr ?}'
-#           password: '{? imdb.pwd ?}'
-#           list: watchlist
             
   ######################################## 3D
   Movies_3D_Stream:
+#    proper_movies: yes  #accept Quality-fixes (Proper means there was a bug in the release before)
     priority: 3
     template:
       - '{? DownloadManager ?}-Defaults'
@@ -711,7 +798,7 @@ tasks:
             list: collection
             type: movies  
     regexp:
-      accept:
+      reject_excluding:
         - \b3D\b
     seen: local
   ######################################## Search based on Stream
@@ -947,36 +1034,6 @@ tasks:
           type: movies
     if:
       - trakt_collected: reject
-  ######################################## Search based on Stream
-  Download_Second_IMDb_Movies:
-    priority: 9
-    template:
-      - '{? DownloadManager ?}-Defaults'
-      - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
-      - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
-#      - movies_lookup
-      - German
-      - Movie_Streams
-      - '{? disable_enable_tasks.Download_Second_IMDb_Movies ?}-Download_Second_IMDb_Movies'
-    quality: '{? quality.main ?}'
-    imdb_list:
-      login: '{? imdb.usr2 ?}'
-      password: '{? imdb.pwd2 ?}'
-      list: watchlist
-      force_language: de-de
-    crossmatch:
-      from:
-        - imdb_list:
-            login: '{? imdb.usr ?}'
-            password: '{? imdb.pwd ?}'
-            list: watchlist
-        - trakt_list:
-            account: '{? trakt.acc ?}'
-            list: collection
-            type: movies
-      fields:
-        - imdb_id
-      action: reject
 
   ######################################## Download IMDb's Best-Rated
 #   Movies_Best_on_IMDb:
@@ -1021,39 +1078,16 @@ tasks:
 #       - imdb_url
 #       - imdb_genres
 
-  Specials: #(Interviews, Trailer, Behind the scenes etc)
+  Specials: #(Second IMDB-User Task - not supported)
     template:
       - '{? disable_enable_tasks.Download_Specials ?}-Download_Specials'
-      - Movie_Streams
     include: Specials.yml
 
+  Specials2: #(Third IMDB-User Task - not supported)
+    template:
+      - '{? disable_enable_tasks.Download_Specials2 ?}-Download_Specials2'
+    include: Specials2.yml
 
-
-
-  hdw1:
-    html:
-      url: "http://hd-world.org/category/serien/page/{{i}}/"
-      dump: hdw_names.html
-      increment: 
-        from: 1
-        to: 1
-      title_from: link
-#    regexp:
-#      accept:
-#        - share-online.biz
-    manual: yes
-  hdw2:
-    html:
-      url: http://localhost/hdw_names.html 
-      increment: 
-        from: 1
-        to: 2
-      links_re:
-        - ncrypt\.in
-        - share-links\.biz
-        - filecrypt\.cc
-      title_from: url  
-    manual: yes
 ###############################################################################################################################################
 ## MISC ################################################################################################config#by#snickers2k###################
 ###############################################################################################################################################
