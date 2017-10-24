@@ -33,13 +33,7 @@ Paypal: koenig_m@me.com  <br>
 `cd /tmp/ && wget https://github.com/crack00r/Flexget-Config/archive/master.zip`<br>
 `unzip  master.zip`<br>
 `mkdir ~/.flexget && cp -r master/* ~/.flexget/`<br>
-<br>
 
-Für die PHP-Plugins (funktionieren aktuell nicht)<br>
-LAMP installieren https://wiki.ubuntuusers.de/LAMP/ <br>
-
-`sudo cp ~/.flexget/rss-php-Files/* /var/www/html/`<br>
-`sudo service apache2 restart`<br>
 <br>
 Options.yml editieren - fertig.<br>
 <br>
