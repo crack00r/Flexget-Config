@@ -542,7 +542,7 @@ tasks:
     imdb_list:
       login: '{? imdb.usr ?}'
       password: '{? imdb.pwd ?}'
-     list: watchlist
+      list: watchlist
     if:
       - trakt_series_status == 'canceled': accept
     list_remove:
@@ -570,10 +570,10 @@ tasks:
       account: '{? trakt.acc ?}'
       list: watchlist
       type: shows
-   imdb_list:
-     login: '{? imdb.usr ?}'
-     password: '{? imdb.pwd ?}'
-     list: watchlist 
+    imdb_list:
+      login: '{? imdb.usr ?}'
+      password: '{? imdb.pwd ?}'
+      list: watchlist 
     crossmatch:
       from:
         - trakt_list:
@@ -588,10 +588,10 @@ tasks:
           account: '{? trakt.acc ?}'
           list: watchlist
           type: shows
-     - imdb_list:
-         login: '{? imdb.usr ?}'
-         password: '{? imdb.pwd ?}'
-         list: watchlist
+      - imdb_list:
+          login: '{? imdb.usr ?}'
+          password: '{? imdb.pwd ?}'
+          list: watchlist
   ######################################## Remove Collected trakt-Watchlist
   Remove_CollectedMoviesFromWatchlist:
     priority: 1
