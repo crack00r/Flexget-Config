@@ -693,11 +693,11 @@ tasks:
             strip_year: yes
       from:
         - searchHdarea:
-            hoster: shareonline
+            hoster: '{? Settings.Hoster ?}'
         - searchHdworld:
-            hoster: shareonline
+            hoster: '{? Settings.Hoster ?}'
         - searchMovieBlog:
-            hoster: shareonline
+            hoster: '{? Settings.Hoster ?}'
     list_match:
       from:
         - movie_list: Default
