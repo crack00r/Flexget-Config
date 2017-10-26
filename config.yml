@@ -659,6 +659,9 @@ tasks:
             hoster: '{? Settings.Hoster ?}'
         - searchMovieBlog:
             hoster: '{? Settings.Hoster ?}'
+    list_match:
+      from:
+        - movie_list: Default
     list_remove:
       - trakt_list:
           account: '{? trakt.acc ?}'
@@ -695,6 +698,9 @@ tasks:
             hoster: shareonline
         - searchMovieBlog:
             hoster: shareonline
+    list_match:
+      from:
+        - movie_list: Default
   ######################################## Search based on Stream
   Movies_Watchlist_Stream_DE_Main:
 #    proper_movies: yes  #accept Quality-fixes (Proper means there was a bug in the release before) ##buggy
@@ -865,6 +871,13 @@ tasks:
       action: reject
     if:     
       - trakt_series_status == 'canceled': reject
+    list_match:
+      from:
+        - trakt_list:
+            account: '{? trakt.acc ?}'
+            list: collection
+            type: shows
+
   ######################################## Stream and Search for Serienunkies
 
   Series_Collection_DE_Stream:
