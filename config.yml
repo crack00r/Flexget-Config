@@ -59,7 +59,7 @@ templates:
     regexp:
       reject:
       # Release
-        - \b(duo|tri|quadri|tetra|penta)logy\b # Movie-Collections (often we already have some of those in our Library)
+        - \b(duo|tri|quadri|tetra|penta)logy\b # Movie-Collections (often we already have some single ones in our Library)
         - \bcomplete\b   # Complete (usually stands for complete series - not working well with flexget)
         - \bcollection\b   # Collections (usually stands for complete series - not working well with flexget)
         - \buntouched\b   # Untouched (usually complete BDs with extras - incompatible with Plex/Kodi etc.)
@@ -75,7 +75,7 @@ templates:
         - \b(hc|hardcoded)\b # Subtitles (HC / Hardcoded)
         - \b(web|)blur(\b|rt|red)\b # Blurred-Subtitles
         - \biso\b: {from: description} # ISO-Files
-#        - \bread.nfo\b # usually means there is something in the nfo-file, mostly about hardcoded subs or other "bad"-Info
+        - \bread.nfo\b # usually means there is something in the nfo-file, mostly about hardcoded subs or other "bad"-Info
       # Audio
         - \bflac\b   # flac
         - \bac3md|md|mic|mic.dubbed\b
@@ -125,30 +125,32 @@ templates:
   Movie_Streams:
     inputs:
 #      - rss: '{? flexget.path ?}/External-Plugins/HDArea-Feed/HDArea.xml' #not working right now
-      - rss: '{? flexget.path ?}/External-Plugins/HDWorld-Movies-Feed/HDWorld.xml'
+#      - rss: '{? flexget.path ?}/External-Plugins/HDWorld-Movies-Feed/HDWorld.xml'
       - rss: 'https://nima4k.org/rss_movies.xml'
+      - rss: 'https://scenedownloads.pw/RSS-Movies?results=filecrypt&filter=1k'
 
   Series_Streams:
     inputs:
-      - rss: '{? flexget.path ?}/External-Plugins/HDWorld-Series-Feed/HDWorld.xml'    
-      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_1.xml'
-      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_2.xml'
-      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_3.xml'
-      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_4.xml'
-      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_5.xml'
-      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_6.xml'
-      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_7.xml'
-      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_8.xml'
-      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_9.xml'
+      - rss: 'https://scenedownloads.pw/RSS-TV-German-1080p?results=filecrypt&filter=1k'
+      - rss: 'https://scenedownloads.pw/RSS-TV-German-720p?results=filecrypt&filter=1k'
+#      - rss: '{? flexget.path ?}/External-Plugins/HDWorld-Series-Feed/HDWorld.xml'
+#      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_*.xml' #SJ not working well with JD2 right now..
       
   ######################################## Enable/Disable Discover
   Discover-enable-Backfill:
     discover:
       what:
-        - next_series_episodes:
-            backfill: yes
-            from_start: yes
+#        - next_series_episodes:
+#            backfill: yes
+#            from_start: yes
+        - next_trakt_episodes:
+            account: '{? trakt.acc ?}'
+            context: collected
+            list: collection
+            position: next
+            strip_dates: yes
       from:
+        - search_rss: https://scenedownloads.pw/RSS-TV-German-HD?results=filecrypt&filter=1k&search={{search_term}}
         - searchSerienjunkies:
             hoster: '{? Settings.Hoster ?}'
             language: '{? Settings.Language ?}'
@@ -157,9 +159,16 @@ templates:
   Discover-disable-Backfill:
     discover:
       what:
-        - next_series_episodes:
-            backfill: no
+#        - next_series_episodes:
+#            backfill: no
+        - next_trakt_episodes:
+            account: '{? trakt.acc ?}'
+            context: collected
+            list: collection
+            position: next
+            strip_dates: yes
       from:
+        - search_rss: https://scenedownloads.pw/RSS-TV-German-HD?results=filecrypt&filter=1k&search={{search_term}}
         - searchSerienjunkies:
             hoster: '{? Settings.Hoster ?}'
             language: '{? Settings.Language ?}'
@@ -242,6 +251,11 @@ templates:
   enable-Download_Sports: 
     manual: no
   disable-Download_Sports: 
+    manual: yes
+
+  enable-Download_3D: 
+    manual: no
+  disable-Download_3D:
     manual: yes
 
   ######################################## Languages
@@ -488,6 +502,7 @@ tasks:
       action: reject
     list_add:
       - movie_list: Default
+
   ######################################## Set_Series_Begin based on "Collected" in Trakt - for every show
   Update_Series_Begin:
     interval: 24 hours
@@ -583,7 +598,7 @@ tasks:
   ######################################## Remove Collected trakt-Watchlist
   Remove_CollectedMoviesFromWatchlist:
     priority: 1
-    interval: 24 hours
+    interval: 1 hours
     seen: local
     template:
       - no_global
@@ -636,23 +651,25 @@ tasks:
  ######################################## Search for queued Movies
   Movies_Watchlist_Search_DE_Main:
 #    proper_movies: yes  #accept Quality-fixes (Proper means there was a bug in the release before) TOO MANY BUGS
-    priority: 4
+    interval: 24 hours
+    priority: 9
     template:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
-#      - movies_lookup
+      - movies_lookup
       - German
     quality: '{? quality.main ?}'
-#    content_size: (not working well - too often, size can't be fetched at all and results in errors
-#      min: 2500 #'{? Minimum_Movie_Size ?}'
-#      max: 20000  #'{? Maximum_Movie_Size ?}'
+#    content_size:
+#      min: '{? Minimum_Movie_Size_Main ?}'
+#      max: '{? Maximum_Movie_Size_Main ?}'
     discover:
       what:
         - movie_list:
             list_name: Default
             strip_year: yes
       from:
+        - search_rss: https://scenedownloads.pw/RSS-Movies-German-1080p?results=filecrypt&filter=1k&search={{search_term}}
         - searchHdarea:
             hoster: '{? Settings.Hoster ?}'
         - searchHdworld:
@@ -662,36 +679,33 @@ tasks:
     list_match:
       from:
         - movie_list: Default
-    list_remove:
-      - trakt_list:
-          account: '{? trakt.acc ?}'
-          list: watchlist
-          type: movies
-      - trakt_list:
-          account: '{? trakt.acc ?}'
-          list: UpgradeQuality
-          type: movies
+      remove_on_match: no
+    regexp:
+      reject:
+        - \b3D\b
  ######################################## Search for queued Movies on hdarea with the help of a custom  pipe
   Movies_Watchlist_Search_DE_Low:
 #    proper_movies: yes  #accept Quality-fixes (Proper means there was a bug in the release before)  TOO MANY BUGS
+    interval: 24 hours
     delay: 24 hours
-    priority: 5
+    priority: 9
     template:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
-#      - movies_lookup
+      - movies_lookup
       - German
     quality: '{? quality.low ?}'
-#    content_size:  (not working well - too often, size can't be fetched at all and results in errors
-#      min: 2000 #'{? Minimum_Movie_Size ?}'
-#      max: 12000  #'{? Maximum_Movie_Size ?}'
+#    content_size:
+#      min: "'{? Minimum_Movie_Size_Low ?}'"
+#      max: "'{? Maximum_Movie_Size_Low ?}'"
     discover:
       what:
         - movie_list:
             list_name: Default
             strip_year: yes
       from:
+        - search_rss: https://scenedownloads.pw/RSS-Movies-German-720p?results=filecrypt&filter=1k&search={{search_term}}
         - searchHdarea:
             hoster: '{? Settings.Hoster ?}'
         - searchHdworld:
@@ -701,21 +715,25 @@ tasks:
     list_match:
       from:
         - movie_list: Default
+      remove_on_match: no
+    regexp:
+      reject:
+        - \b3D\b
   ######################################## Search based on Stream
   Movies_Watchlist_Stream_DE_Main:
-#    proper_movies: yes  #accept Quality-fixes (Proper means there was a bug in the release before) ##buggy
+    proper_movies: yes  #accept Quality-fixes (Proper means there was a bug in the release before) ##buggy
     priority: 4
     template:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
-#      - movies_lookup
-      - German            #differentiation not possible with this feed right now - feed is pre-filtered for German - needs fix
+      - movies_lookup
+      - German
       - Movie_Streams
     quality: '{? quality.main ?}'
-#    content_size: (not working well - too often, size can't be fetched at all and results in errors
-#      min: 2000 #'{? Minimum_Movie_Size ?}'
-#      max: 20000  #'{? Maximum_Movie_Size ?}'
+#    content_size:
+#      min: '{? Minimum_Movie_Size_Main ?}'
+#      max: '{? Maximum_Movie_Size_Main ?}'
     list_match:
       from:
         - movie_list: Default
@@ -739,13 +757,13 @@ tasks:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
-#      - movies_lookup
-      - German            #differentiation not possible with this feed right now - feed is pre-filtered for German - needs fix
+      - movies_lookup
+      - German
       - Movie_Streams
     quality: '{? quality.low ?}'
-#    content_size: (not working well - too often, size can't be fetched at all and results in errors
-#      min: 2000 #'{? Minimum_Movie_Size ?}'
-#      max: 12000  #'{? Maximum_Movie_Size ?}'
+#    content_size:
+#      min: '{? Minimum_Movie_Size_Low ?}'
+#      max: '{? Maximum_Movie_Size_Low ?}'
     if:
       - trakt_collected: reject
     list_match:
@@ -766,14 +784,15 @@ tasks:
             
   ######################################## 3D
   Movies_3D_Stream:
-#    proper_movies: yes  #accept Quality-fixes (Proper means there was a bug in the release before)
+    proper_movies: yes  #accept Quality-fixes (Proper means there was a bug in the release before)
     priority: 3
     template:
+      - '{? disable_enable_tasks.Download_3D ?}-Download_3D'    
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
-      - jdownloader-3D
+      - '{? DownloadManager ?}-3D'
       - movies_lookup
-      - German            #differentiation not possible with this feed right now - feed is pre-filtered for German - needs fix
+      - German
       - Movie_Streams
     quality: '{? quality.main ?}'
     list_match:
@@ -783,6 +802,7 @@ tasks:
             account: '{? trakt.acc ?}'
             list: collection
             type: movies  
+      remove_on_match: no
     regexp:
       reject_excluding:
         - \b3D\b
@@ -850,7 +870,8 @@ tasks:
   ######################################## Stream and Search for Serienunkies
 
   Series_Collection_DE_Search:
-    priority: 7
+    interval: 24 hours
+    priority: 9
     template:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Series'
@@ -858,7 +879,7 @@ tasks:
       - 'Discover-{? series.backfill ?}-Backfill'
       - '{? series.backfill ?}-Upgrade'
       - German
-#      - series_lookup
+      - series_lookup
     # Crossmatch for Series on HOLD
     crossmatch:
       from:
@@ -888,7 +909,7 @@ tasks:
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
       - '{? series.backfill ?}-Upgrade'
       - German
-#      - series_lookup
+      - series_lookup
       - Series_Streams
     # Crossmatch for Series on HOLD
     crossmatch:
@@ -924,16 +945,16 @@ tasks:
   Series_Watchlist:
     plugin_priority:
       regexp: 250
-#     series_premiere:
-#       allow_teasers: no
-#       allow_seasonless: yes
+    series_premiere:
+     allow_teasers: no
+     allow_seasonless: yes
     priority: 8
     template:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Series'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
       - 'Discover-{? series.backfill ?}-Backfill'
-#      - series_lookup
+      - series_lookup
       - German
       - Series_Streams
     list_match:
@@ -1033,7 +1054,7 @@ tasks:
 #       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
 #       - '{? disable_enable_tasks.Download_Best_on_IMDb ?}-Download_Best_on_IMDb'
 #       - movies_lookup
-#       - German            #differentiation not possible with this feed right now - feed is pre-filtered for German - needs fix
+#       - German 
 #       - Movie_Streams
 #     quality: '{? quality.main ?}'
 #     imdb:
@@ -1069,13 +1090,44 @@ tasks:
 
   Specials: #(Second IMDB-User Task - not supported)
     template:
+      - no_global
       - '{? disable_enable_tasks.Download_Specials ?}-Download_Specials'
+    priority: 10
     include: Specials.yml
 
   Specials2: #(Third IMDB-User Task - not supported)
     template:
+      - no_global
       - '{? disable_enable_tasks.Download_Specials2 ?}-Download_Specials2'
+    priority: 10
     include: Specials2.yml
+
+  ######################################## Sync Trakt/IMDb Movie-Watchlist to Flexget-Queue
+  Update_Movies_to_Flexget:
+    interval: 24 hours
+    template: no_global
+    priority: 2
+    trakt_list:
+      account: '{? trakt.acc ?}'
+      list: watchlist
+      type: movies
+    imdb_watchlist:
+      user_id: '{? imdb.usrID ?}'
+      list: watchlist
+      force_language: de-de
+    accept_all: yes
+    seen: local
+    crossmatch:
+      from:
+        - trakt_list:
+            account: '{? trakt.acc ?}'
+            list: collection
+            type: movies
+      fields:
+        - imdb_id
+      action: reject
+    list_add:
+      - movie_list: Default
 
 ###############################################################################################################################################
 ## MISC ################################################################################################config#by#snickers2k###################
@@ -1087,8 +1139,5 @@ schedules:
   - tasks: '*'
     schedule:
       hour: '{? flexget.scheduler ?}'
-  - tasks: 'Movies_Watchlist_Search*'
-    schedule:
-      hour: '0-6/3'
 ###############
 web_server: yes
