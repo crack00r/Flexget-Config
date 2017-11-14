@@ -102,8 +102,11 @@ class SearchSerienjunkies(BaseSearchPlugin):
                 size = p.find("strong", text="Größe:").next_sibling
                 
                 ## experimental
-                size = re.findall('([\d]+ [\w]+)',size.replace("|","").strip())[0]
-                filesize = parse_filesize(size)
+                size = re.sub(' +',' ',size) # remove multiple whitespaces
+                size = size.replace("|","").strip() # remove | and strip whitespaces
+                size = re.findall('([\d]+ [\w]+)',size)
+                if len(size) > 0:
+                    filesize = parse_filesize(size[0])
                 
         ## check for more result pages
         next_link = entry_page.find("a", text="»")

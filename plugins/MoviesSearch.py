@@ -163,7 +163,7 @@ class SearchHdworld(BaseSearchPlugin):
             return [SearchResultEntry(title, size, dl_links, imdb_url)]
         except Exception:
             log.error("Got unexpected result page - maybe no valid search results on that page?")
-            self.log_soup_to_file(entry_page)
+            #self.log_soup_to_file(entry_page)
         finally:
             return []
         
