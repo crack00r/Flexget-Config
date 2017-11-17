@@ -17,8 +17,8 @@ templates:
 #      AmazonHD: bluray
 #      iTunesHD: bluray
     parsing:
-      movie: guessit
-      series: guessit
+      movie: '{? Parser.Movies ?}'
+      series: '{? Parser.Series ?}'
     ######## Some HTML setup
     headers:
       User-Agent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36"
@@ -131,8 +131,8 @@ templates:
 
   Series_Streams:
     inputs:
-      - rss: 'https://scenedownloads.pw/RSS-TV-German-1080p?results=filecrypt&filter=1k'
-      - rss: 'https://scenedownloads.pw/RSS-TV-German-720p?results=filecrypt&filter=1k'
+      - rss: 'https://scenedownloads.pw/RSS-TV-German-1080p?results=filecrypt&filter=24h'
+      - rss: 'https://scenedownloads.pw/RSS-TV-German-720p?results=filecrypt&filter=24h'
 #      - rss: '{? flexget.path ?}/External-Plugins/HDWorld-Series-Feed/HDWorld.xml'
 #      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_*.xml' #SJ not working well with JD2 right now..
       
@@ -258,6 +258,11 @@ templates:
   disable-Download_3D:
     manual: yes
 
+  enable-Download_eBooks: 
+    manual: no
+  disable-Download_eBooks:
+    manual: yes
+
   ######################################## Languages
   German:
   # Accept Only German, by Title
@@ -316,7 +321,7 @@ templates:
   ######## YouTube
   jdownloader-EBooks:
     exec:
-      - echo "downloadFolder={? DLFolder ?}/{? DLFolderEBooks ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
+      - echo "downloadFolder={? DLFolder ?}/{? DLFoldereBooks ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
   ######## Sports
   jdownloader-Sports:
     exec:
@@ -404,7 +409,7 @@ templates:
         - '{? pyload.hoster1 ?}'
         - '{? pyload.hoster2 ?}'
 #   ######## Ebooks
-  pyload-EBooks:
+  pyload-eBooks:
     pyload:
       enabled: yes
       folder: '{? DLFolder ?}/{? DLFolderEBooks ?}/{{title}}'
@@ -502,7 +507,6 @@ tasks:
       action: reject
     list_add:
       - movie_list: Default
-
   ######################################## Set_Series_Begin based on "Collected" in Trakt - for every show
   Update_Series_Begin:
     interval: 24 hours
@@ -606,6 +610,7 @@ tasks:
       account: '{? trakt.acc ?}'
       list: watchlist
       type: movies
+    movie_list: Default
     crossmatch:
       from:
         - trakt_list:
@@ -683,6 +688,8 @@ tasks:
     regexp:
       reject:
         - \b3D\b
+    include: Movie_Size_Main.yml
+
  ######################################## Search for queued Movies on hdarea with the help of a custom  pipe
   Movies_Watchlist_Search_DE_Low:
 #    proper_movies: yes  #accept Quality-fixes (Proper means there was a bug in the release before)  TOO MANY BUGS
@@ -719,6 +726,9 @@ tasks:
     regexp:
       reject:
         - \b3D\b
+    include: Movie_Size_Low.yml
+
+
   ######################################## Search based on Stream
   Movies_Watchlist_Stream_DE_Main:
     proper_movies: yes  #accept Quality-fixes (Proper means there was a bug in the release before) ##buggy
@@ -749,6 +759,8 @@ tasks:
     regexp:
       reject:
         - \b3D\b
+    include: Movie_Size_Main.yml
+
   ######################################## Search based on Stream
   Movies_Watchlist_Stream_DE_Low:
     delay: 24 hours
@@ -781,6 +793,7 @@ tasks:
     regexp:
       reject:
         - \b3D\b
+    include: Movie_Size_Low.yml
             
   ######################################## 3D
   Movies_3D_Stream:
@@ -807,6 +820,8 @@ tasks:
       reject_excluding:
         - \b3D\b
     seen: local
+    include: Movie_Size_3D.yml
+
   ######################################## Search based on Stream
 #   Movies_Watchlist_Stream_EN_Sceper:
 #     priority: 6
@@ -1102,6 +1117,20 @@ tasks:
     priority: 10
     include: Specials2.yml
 
+
+  ######################################## eBooks
+
+  eBooks:
+    template:
+      - no_global
+      - '{? disable_enable_tasks.Download_eBooks ?}-Download_eBooks'
+      - '{? DownloadManager ?}-Defaults'
+      - '{? DownloadManager ?}-eBooks'
+    priority: 10
+    include: eBooks.yml
+    rss: https://scenedownloads.pw/RSS-Ebooks-German?results=filecrypt&filter=1k
+    seen: local
+    
   ######################################## Sync Trakt/IMDb Movie-Watchlist to Flexget-Queue
   Update_Movies_to_Flexget:
     interval: 24 hours
