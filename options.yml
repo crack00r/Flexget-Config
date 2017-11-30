@@ -88,7 +88,7 @@ series:
   ## The Watchlist_Counter stops at given "Stop"-Number and Starts again, only when the given "Start"-Number is marked WATCHED in trakt
   Stop_watchlist_counter: 1|2|3|4|5|6 # Must be this exact format. 6 is relatively ideal. but choose what you want. 0 to disable the watchlist completely and load everything straight away.
   Start_Collection_counter: 03 # 03 is relatively ideal. but choose what you want. 0 to disable the watchlist completely and load everything straight away.
-  packs: always # READ THIS https://flexget.com/Plugins/series/season_packs to fill in your values. Default is disabled - but should be enabled by your preferences.
+  packs: no # READ THIS https://flexget.com/Plugins/series/season_packs to fill in your values. Default is disabled - but should be enabled by your preferences.
   
 ########### YouTube-Playlist: 
 YouTube:
