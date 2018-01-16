@@ -157,9 +157,9 @@ templates:
             strip_dates: yes
       from:
         - search_rss: https://scenedownloads.pw/RSS-TV-German-HD?results=filecrypt&filter=1k&search={{search_term}}
-#        - searchSerienjunkies:
-#            hoster: '{? Settings.Hoster ?}'
-#            language: '{? Settings.Language ?}'
+        - searchSerienjunkies:
+            hoster: '{? Settings.Hoster ?}'
+            language: '{? Settings.Language ?}'
     no_entries_ok: yes
 
   Discover-disable-Backfill:
@@ -173,9 +173,9 @@ templates:
             strip_dates: yes
       from:
         - search_rss: https://scenedownloads.pw/RSS-TV-German-HD?results=filecrypt&filter=1k&search={{search_term}}
-#        - searchSerienjunkies:
-#            hoster: '{? Settings.Hoster ?}'
-#            language: '{? Settings.Language ?}'
+        - searchSerienjunkies:
+            hoster: '{? Settings.Hoster ?}'
+            language: '{? Settings.Language ?}'
     no_entries_ok: yes
 
   ######################################## Enable/Disable Upgrade
@@ -1194,27 +1194,6 @@ tasks:
     include: eBooks.yml
     rss: https://scenedownloads.pw/RSS-Ebooks-German?results=filecrypt&filter=1k
     seen: local
-
-
-
-  Sync_Christmas_Movies:
-    interval: 9 weeks
-    template: 
-      - no_global
-      - no_seen
-    priority: 8
-    accept_all: yes
-    imdb_watchlist:
-      user_id: ur9197672
-      list: ls000096828
-      force_language: de-de
-    accept_all: yes
-    list_add:
-      - trakt_list:
-          account: '{? trakt.acc ?}'
-          list: Christmas
-          type: movies
-      
 
 ###############################################################################################################################################
 ## MISC ################################################################################################config#by#snickers2k###################
