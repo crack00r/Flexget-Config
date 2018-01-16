@@ -1,6 +1,6 @@
 ## Folgendes ist zu beachten:
 ## - Die Config basiert auf entweder Plex.tv und Trakt.tv, oder Trakt alleine. 
-##     - In jedem Fall muss Takt über den Stand der Collection informiert werden!
+##     - In jedem Fall muss Takt Ã¼ber den Stand der Collection informiert werden!
 ##        - Plex: https://github.com/trakt/Plex-Trakt-Scrobbler
 ##        - Kodi: http://kodi.wiki/view/Add-on:Trakt
 ##     - Flexget-Trakt: Authentication: http://flexget.com/wiki/Plugins/trakt
@@ -41,11 +41,14 @@ flexget:
   path: '/home/USER/.flexget' # Windows "C:/path/to/flexget" , Linux "/home/username/.flexget" ---->>> Do not put an "/" at the end !!
   scheduler: 5-17/2 # ONLY HOURS ARE POSSIBLE VALUES ! Example: Run every 2 hours between 5am and 5pm (http://flexget.com/wiki/Plugins/Daemon/scheduler)
 
+filesystem: 
+  mountpoint: 
+    series: /path/to/Series #---->>> Do not put an "/" at the end !! (ABSOLUTE PATH)
+    movies: /path/to/Movies #---->>> Do not put an "/" at the end !! (ABSOLUTE PATH)
 ########## Settings
 Settings:
   Hoster: zippyshare;uploaded;shareonline;rapidgator # Supported hosters - shareonline uploaded rapidgator filer oboom zippyshare - also combined "uploaded;shareonline"
   Language: german # "german" , "english" are possible values
-
 
 Parser:
   Series: internal # guessit and internal are possible values
@@ -62,24 +65,23 @@ System: #Operating System ## NOT SUPPORTED YET
   pwd: ''
 
 trakt: #trakt.tv
-  acc: ''
-  pwd: ''
-  #
-  Favorite_List: Favorites #Type in the Name of your Favorites-List. Movies inside this list will load in "high-quality" - eg 1080p instead of 720p. 
-                           #THIS LIST MUST ALREADY EXIST ! FLEXGET CAN'T CREATE IT
+  acc: 'XXXX'
+  pwd: 'XXXX'
 
   OnHold: OnHold #Type in the Name of your OnHold-List. Series in this List will stop loading after first 3 Episodes. Otherwise Watchlist entries will load continuously 
                  #and makes the Watchlist obsolete. If  you then want to load a Series continuously, simply remove it from that list.
 
+  English:
+    Series: Foreign_Series #THIS LIST MUST ALREADY EXIST ! FLEXGET CAN'T CREATE IT #CREATE ON TRAKT WEBSITE
+    Movies: Foreign_Movies #THIS LIST MUST ALREADY EXIST ! FLEXGET CAN'T CREATE IT #CREATE ON TRAKT WEBSITE
+    
 ############ QUALITY:         ### For possible values look: http://flexget.com/wiki/Plugins/quality
 quality: ## This will target your "main" quality, but falls back to "low" quality, if main quality is not available. "High" is for your Trakt Favorite_List
-  low: 720p+ #webrip+ #h264-h265 #Type in your prefered low quality
-  main: 1080p+ #webrip+ #h264-h265 #Type in your prefered main quality
+  low: 720p+                       #Type in your prefered low quality
+  main: 1080p+                     #Type in your prefered main quality
   high: 1080p+ webdl+ h264+ dd5.1+ #Type in your prefered high quality
- 
 
-############ ENGLISH:
-English: 'enable' # "enable" and "disable" are possible values
+
 ############ BACKFILL ("backfill and "yes" to activate -- "no" and "no" to deactivate)
 series:
   tracking: backfill # "True" "False" and "backfill" are possible values
@@ -88,17 +90,19 @@ series:
   ## The Watchlist_Counter stops at given "Stop"-Number and Starts again, only when the given "Start"-Number is marked WATCHED in trakt
   Stop_watchlist_counter: 1|2|3|4|5|6 # Must be this exact format. 6 is relatively ideal. but choose what you want. 0 to disable the watchlist completely and load everything straight away.
   Start_Collection_counter: 03 # 03 is relatively ideal. but choose what you want. 0 to disable the watchlist completely and load everything straight away.
-  packs: no # READ THIS https://flexget.com/Plugins/series/season_packs to fill in your values. Default is disabled - but should be enabled by your preferences.
+  packs: no # READ THIS https://flexget.com/Plugins/series/season_packs to fill in your values. Default is disabled - but can be enabled by your preferences.
   
 ########### YouTube-Playlist: 
 YouTube:
-  Playlist: 'XXXX'
-  
-##############################################################################################################
-##############################################################################################################
+  Playlist: 'PLRgsvGSeQMKwXmZq37i1GUs3DfZ2Hhaac'
+
+
+############ ENGLISH:
+English: 'enable' # "enable" and "disable" are possible values
+
+############ Enable / Disable certain tasks:
 disable_enable_tasks: 
   Download_3D: enable 
-  Download_eBooks: enable
   
   #from here on default is disabled! NO Support for these tasks!
   Download_Second_IMDb_Movies: disable 
@@ -109,3 +113,4 @@ disable_enable_tasks:
   Download_Specials: disable
   Download_Specials2: disable
   Download_Sports: disable
+  Download_eBooks: disable
