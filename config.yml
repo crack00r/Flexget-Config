@@ -127,21 +127,21 @@ templates:
 #      - rss: '{? flexget.path ?}/External-Plugins/HDArea-Feed/HDArea.xml' #not working right now
 #      - rss: '{? flexget.path ?}/External-Plugins/HDWorld-Movies-Feed/HDWorld.xml'
       - rss: 'https://nima4k.org/rss_movies.xml'
-      - rss: 'https://scenedownloads.pw/RSS-Movies-German-HD?results=filecrypt&filter=1k'
+      - rss: 'https://scenefiles.to/RSS-Movies-German-HD?results=filecrypt&filter=1k'
 
   Series_Streams:
     inputs:
-      - rss: 'https://scenedownloads.pw/RSS-TV-German-HD?results=filecrypt&filter=1k'
-#      - rss: '{? flexget.path ?}/External-Plugins/HDWorld-Series-Feed/HDWorld.xml'
+      - rss: 'https://scenefiles.to/RSS-TV-German-HD?results=filecrypt&filter=1k'
+      - rss: '{? flexget.path ?}/External-Plugins/HDWorld-Series-Feed/HDWorld.xml'
 #      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_*.xml' #SJ not working well with JD2 right now..
 
   Series_Streams_English:
     inputs:
-      - rss: 'https://scenedownloads.pw/RSS-TV-English-HD?results=filecrypt&filter=1k'
+      - rss: 'https://scenefiles.to/RSS-TV-English-HD?results=filecrypt&filter=1k'
 
   Movie_Streams_English:
     inputs:
-      - rss: 'https://scenedownloads.pw/RSS-Movies-English-HD?results=filecrypt&filter=1k'      
+      - rss: 'https://scenefiles.to/RSS-Movies-English-HD?results=filecrypt&filter=1k'      
   ######################################## Enable/Disable Discover
   Discover-enable-Backfill:
     discover:
@@ -156,7 +156,7 @@ templates:
             position: next
             strip_dates: yes
       from:
-        - search_rss: https://scenedownloads.pw/RSS-TV-German-HD?results=filecrypt&filter=1k&search={{search_term}}
+        - search_rss: https://scenefiles.to/RSS-TV-German-HD?results=filecrypt&filter=1k&search={{search_term}}
         - searchSerienjunkies:
             hoster: '{? Settings.Hoster ?}'
             language: '{? Settings.Language ?}'
@@ -172,7 +172,7 @@ templates:
             position: next
             strip_dates: yes
       from:
-        - search_rss: https://scenedownloads.pw/RSS-TV-German-HD?results=filecrypt&filter=1k&search={{search_term}}
+        - search_rss: https://scenefiles.to/RSS-TV-German-HD?results=filecrypt&filter=1k&search={{search_term}}
         - searchSerienjunkies:
             hoster: '{? Settings.Hoster ?}'
             language: '{? Settings.Language ?}'
@@ -198,7 +198,7 @@ templates:
           type: shows
           strip_dates: yes
     exists_series:
-      path: '{? filesystem.mountpoint.series ?}/{{ tvdb_series_name|trakt_series_name	 }}'
+      path: '{? filesystem.mountpoint.series ?}/{{ series_name|tvdb_series_name|trakt_series_name }}'
       allow_different_qualities: no
 
   disable-Upgrade:
@@ -526,7 +526,7 @@ tasks:
           list: watchlist
           type: movies
 
-  ######################################## offline check
+  ######################################## offline check/delay - add back to watchlist, if the movie is not trakt-collected within 2 weeks
   Offline_Check:
     interval: 24 hours
     delay: 2 weeks
@@ -581,7 +581,7 @@ tasks:
       list: collection
       type: movies
     if:
-      - trakt_movie_user_rating > 9: accept
+      - trakt_movie_user_rating > 8: accept
     list_add:
       - movie_list: favorites
   ############################################################## Removings
@@ -713,7 +713,7 @@ tasks:
             list_name: Default
             strip_year: yes
       from:
-        - search_rss: https://scenedownloads.pw/RSS-Movies-German-1080p?results=filecrypt&filter=1k&search={{search_term}}
+        - search_rss: https://scenefiles.to/RSS-Movies-German-1080p?results=filecrypt&filter=1k&search={{search_term}}
         - searchHdarea:
             hoster: '{? Settings.Hoster ?}'
         - searchHdworld:
@@ -754,7 +754,7 @@ tasks:
             list_name: Default
             strip_year: yes
       from:
-        - search_rss: https://scenedownloads.pw/RSS-Movies-German-720p?results=filecrypt&filter=1k&search={{search_term}}
+        - search_rss: https://scenefiles.to/RSS-Movies-German-720p?results=filecrypt&filter=1k&search={{search_term}}
         - searchHdarea:
             hoster: '{? Settings.Hoster ?}'
         - searchHdworld:
@@ -912,7 +912,7 @@ tasks:
       what:
         - movie_list: favorites
       from:
-        - search_rss: https://scenedownloads.pw/RSS-Movies-German-720p?results=filecrypt&filter=1k&search={{search_term}}
+        - search_rss: https://scenefiles.to/RSS-Movies-German-720p?results=filecrypt&filter=1k&search={{search_term}}
         - searchHdarea:
             hoster: '{? Settings.Hoster ?}'
         - searchHdworld:
@@ -1009,7 +1009,7 @@ tasks:
             position: next
             strip_dates: yes
       from:
-        - search_rss: https://scenedownloads.pw/RSS-TV-English-HD?results=filecrypt&filter=1k&search={{search_term}}
+        - search_rss: https://scenefiles.to/RSS-TV-English-HD?results=filecrypt&filter=1k&search={{search_term}}
     list_add:
       - trakt_list:
           account: '{? trakt.acc ?}'
@@ -1192,8 +1192,29 @@ tasks:
       - '{? DownloadManager ?}-eBooks'
     priority: 10
     include: eBooks.yml
-    rss: https://scenedownloads.pw/RSS-Ebooks-German?results=filecrypt&filter=1k
+    rss: https://scenefiles.to/RSS-Ebooks-German?results=filecrypt&filter=1k
     seen: local
+
+
+
+  Sync_Christmas_Movies:
+    interval: 9 weeks
+    template: 
+      - no_global
+      - no_seen
+    priority: 8
+    accept_all: yes
+    imdb_watchlist:
+      user_id: ur9197672
+      list: ls000096828
+      force_language: de-de
+    accept_all: yes
+    list_add:
+      - trakt_list:
+          account: '{? trakt.acc ?}'
+          list: Christmas
+          type: movies
+      
 
 ###############################################################################################################################################
 ## MISC ################################################################################################config#by#snickers2k###################
