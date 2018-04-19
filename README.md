@@ -31,7 +31,7 @@ bitcoin: 12vHS4h6patf4Ne6og4BHcDxRma3g2URUK  <br>
 <br>
 `cd /tmp/ && wget https://github.com/crack00r/Flexget-Config/archive/master.zip`<br>
 `unzip  master.zip`<br>
-`mkdir ~/.flexget && cp -r master/* ~/.flexget/`<br>
+`mkdir ~/.flexget && cp -r *master/* ~/.flexget/`<br>
 
 `flexget trakt auth USER`<br>
 
