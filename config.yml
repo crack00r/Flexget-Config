@@ -27,9 +27,9 @@ templates:
       retry_time_multiplier: 4
       max_retries: 6
     ######## Naming-Fixes
-    pathscrub: windows  # Use Windows conform filenames
+    pathscrub: windows  # Use Windows conform filenames (since Windows is the worst of all OS, what's working on Windows, should always work on Linux/Mac)
     manipulate:
-    ## Fixes for Settings.org
+    ## Fixes for SerienJ...s.org
       - title:
           replace:            
             regexp: '.(Deutsch|Englisch).'
@@ -74,21 +74,22 @@ templates:
         - \b(un|)sub(|s|bed)\b # Subtitles (Sub / Subs / Subbed / Unsubbed)
         - \b(hc|hardcoded)\b # Subtitles (HC / Hardcoded)
         - \b(web|)blur(\b|rt|red)\b # Blurred-Subtitles
-        - \biso\b: {from: description} # ISO-Files
+        - \biso\b # ISO-Files
         - \bread.nfo\b # usually means there is something in the nfo-file, mostly about hardcoded subs or other "bad"-Info
       # Audio
         - \bflac\b   # flac
-        - \bac3md|md|mic|mic.dubbed\b
+        - \b(ac3(.|))md|(mic(.|))dubbed\b ## theater-recorded-audio
 ###############################################################################################################################################
 ### Templates #################################################################################################################################
 ###############################################################################################################################################
 
   ######################################## Movie-Global
   movies_lookup:
-    imdb_lookup: yes
-    trakt_lookup:
-      account: '{? trakt.acc ?}'
-#    tmdb_lookup: yes
+    tmdb_lookup:
+      language: de
+#    imdb_lookup: yes
+#    trakt_lookup:
+#      account: '{? trakt.acc ?}'
 #    rottentomatoes_lookup: yes
   ######################################## Series-Global
   series_lookup:
@@ -98,8 +99,8 @@ templates:
     metainfo_series: yes
     thetvdb_lookup:
       language: de
-    trakt_lookup:
-      account: '{? trakt.acc ?}' 
+#    trakt_lookup:
+#      account: '{? trakt.acc ?}' 
     set:
       tvdb_language: de
     manipulate:
@@ -1088,45 +1089,45 @@ tasks:
         title: 1
         quality: 2
         url: 3
-  ######################################## Search based on Stream (THIS PLUGIN IS BASED ON https://flexget.com/Plugins/from_imdb AND NEEDS "pip install imdbpy")
-  Studio_Downloads:
-    priority: 1
-    seen: local
-    template:
-      - no_global
-      - '{? disable_enable_tasks.Studio_Downloads ?}-Studio_Downloads'
-    from_imdb: 
-      content_types: movie
-      id:
-        # Best Animation Studios
-        - co0047265 ## Blue Sky Studios (e.g. Ice Age)
-        - co0179259 ## Twentieth Century Fox Animation (e.g. Ice Age, Rio)
-        - co0074039 ## Walt Disney Animation Studios (e.g. Frozen)
-        - co0129164 ## DreamWorks Animation (e.g. Shrek)
-        - co0072491 ## Industrial Light & Magic (e.g. Indiana Jones)
-        - co0103818 ## Framestore (e.g. JungleBook)
-      max_entries: 99999
-    crossmatch:
-      from:
-        - trakt_list:
-            account: '{? trakt.acc ?}'
-            list: collection
-            type: movies
-      fields:
-        - imdb_id
-      action: reject
-    list_add:
-      - trakt_list:
-          account: '{? trakt.acc ?}'
-          list: collection
-          type: movies
-    if:
-      - trakt_collected: reject
+#   ######################################## Search based on Stream (THIS PLUGIN IS BASED ON https://flexget.com/Plugins/from_imdb AND NEEDS "pip install imdbpy")
+#   Studio_Downloads:
+#     priority: 1
+#     seen: local
+#     template:
+#       - no_global
+#       - '{? disable_enable_tasks.Studio_Downloads ?}-Studio_Downloads'
+#     from_imdb: 
+#       content_types: movie
+#       id:
+#         # Best Animation Studios
+#         - co0047265 ## Blue Sky Studios (e.g. Ice Age)
+#         - co0179259 ## Twentieth Century Fox Animation (e.g. Ice Age, Rio)
+#         - co0074039 ## Walt Disney Animation Studios (e.g. Frozen)
+#         - co0129164 ## DreamWorks Animation (e.g. Shrek)
+#         - co0072491 ## Industrial Light & Magic (e.g. Indiana Jones)
+#         - co0103818 ## Framestore (e.g. JungleBook)
+#       max_entries: 99999
+#     crossmatch:
+#       from:
+#         - trakt_list:
+#             account: '{? trakt.acc ?}'
+#             list: collection
+#             type: movies
+#       fields:
+#         - imdb_id
+#       action: reject
+#     list_add:
+#       - trakt_list:
+#           account: '{? trakt.acc ?}'
+#           list: collection
+#           type: movies
+#     if:
+#       - trakt_collected: reject
 
   ######################################## Download IMDb's Best-Rated
   Movies_Best_on_IMDb:
     priority: 8
-    manual: yes
+    manual: yes ##testing
     template:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
