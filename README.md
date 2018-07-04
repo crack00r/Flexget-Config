@@ -22,6 +22,7 @@ https://board.jdownloader.org/showthread.php?t=67579  <br>
 
 #### Donations / Spenden:
 bitcoin: 12vHS4h6patf4Ne6og4BHcDxRma3g2URUK  <br>
+Paypal: paypal.me/MadK <br>
 
 
 
