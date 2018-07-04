@@ -12,9 +12,9 @@ Mainly for German Users <br>
 https://board.jdownloader.org/showthread.php?t=67579  <br>
 
 #
-#### Best Uploaded.to Multi-Hoster
+#### Best Multi-Hoster
 [Premiumize](https://www.premiumize.me/ref/709558658) <br>
-- Best All-In-One Provider <br>
+- Best All-In-One Provider (VPN, Torrent, Share-Hoster, cloud-space) <br>
 
 [DebridItalia](http://www.debriditalia.com/?ref=ref68473) <br>
 - Cheapest UNLIMITED-Traffic for Uploaded.to<br>
