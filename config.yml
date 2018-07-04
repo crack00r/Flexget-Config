@@ -87,7 +87,7 @@ templates:
   movies_lookup:
     tmdb_lookup:
       language: de
-#    imdb_lookup: yes
+    imdb_lookup: yes
 #    trakt_lookup:
 #      account: '{? trakt.acc ?}'
 #    rottentomatoes_lookup: yes
