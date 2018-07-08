@@ -45,6 +45,8 @@ filesystem:
   mountpoint: 
     series: /path/to/Series #---->>> Do not put an "/" at the end !! (ABSOLUTE PATH)
     movies: /path/to/Movies #---->>> Do not put an "/" at the end !! (ABSOLUTE PATH)
+
+    htmlpath: /var/www/html ## Path to your html folder, needed for imdb_watchlist (if you do not use imdb_watchlist, leave it blank)
 ########## Settings
 Settings:
   Hoster: zippyshare;uploaded;shareonline;rapidgator # Supported hosters - shareonline uploaded rapidgator filer oboom zippyshare - also combined "uploaded;shareonline"
@@ -56,7 +58,7 @@ Parser:
 ########## LOGINS
 
 imdb: #imdb.com
-  usrID: '' ## MAIN USER ## USER-ID can be found here: http://www.imdb.com/list/watchlist (copy your ID from URL)
+  usrID: '' ## DO NOT USE ANYTHING BEFORE THE NUMBER (e.g. "ur") ## USER-ID can be found here: http://www.imdb.com/list/watchlist (copy your ID from URL)
   pwd: ''
   
 System: #Operating System ## NOT SUPPORTED YET
