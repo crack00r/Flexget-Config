@@ -58,7 +58,7 @@ Parser:
 ########## LOGINS
 
 imdb: #imdb.com
-  usrID: '' ## DO NOT USE ANYTHING BEFORE THE NUMBER (e.g. "ur") ## USER-ID can be found here: http://www.imdb.com/list/watchlist (copy your ID from URL)
+  usrID: 'ONLY-NUMBER' ## DO NOT USE ANYTHING BEFORE THE NUMBER (e.g. "ur") ## USER-ID can be found here: http://www.imdb.com/list/watchlist (copy your ID from URL)
   pwd: ''
   
 System: #Operating System ## NOT SUPPORTED YET
