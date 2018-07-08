@@ -178,7 +178,7 @@ templates:
             language: '{? Settings.Language ?}'
     no_entries_ok: yes
 
-  ######################################## Enable/Disable Upgrade
+  ######################################## Enable/Disable SERIES Upgrade
 
   enable-Upgrade:
     configure_series:
@@ -198,7 +198,7 @@ templates:
           type: shows
           strip_dates: yes
     exists_series:
-      path: '{? filesystem.mountpoint.series ?}/{{ series_name|tvdb_series_name|trakt_series_name }}'
+      path: '{? filesystem.mountpoint.series ?}/{{ series_name|tvdb_series_name }}'
       allow_different_qualities: no
 
   disable-Upgrade:
@@ -218,6 +218,19 @@ templates:
           list: collection
           type: shows
           strip_dates: yes
+
+  ######################################## Enable/Disable MOVIES Upgrade
+
+  enable-Upgrade-Movies:
+    exists_movie:
+      path: {? filesystem.mountpoint.movies ?}/
+      allow_different_qualities: better
+      lookup: imdb
+
+  disable-Upgrade-Movies:
+    exec:
+      - echo "Movie Upgrade Disabled"
+
 
   ######################################## Enable/Disable Special (Author) Tasks
   enable-Download_Second_IMDb_Movies:
@@ -586,6 +599,7 @@ tasks:
       account: '{? trakt.acc ?}'
       context: collected
       list: collection
+      strip_dates: yes
     accept_all: yes
     set_series_begin: yes   
 
@@ -755,7 +769,6 @@ tasks:
 
  ######################################## Search for queued Movies on hdarea with the help of a custom  pipe
   Movies_Watchlist_Search_DE_Low:
-#    proper_movies: yes  #accept Quality-fixes (Proper means there was a bug in the release before)  TOO MANY BUGS
     interval: 24 hours
     delay: 24 hours
     priority: 9
@@ -796,12 +809,12 @@ tasks:
 
   ######################################## Search based on Stream
   Movies_Watchlist_Stream_DE_Main:
-    proper_movies: yes  #accept Quality-fixes (Proper means there was a bug in the release before) ##buggy
     priority: 4
     template:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
+      - '{? disable_enable_tasks.Upgrade_Movies ?}-Upgrade-Movies'
       - movies_lookup
       - German
       - Movie_Streams
@@ -927,6 +940,7 @@ tasks:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-Archive-Movies'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
+      - '{? disable_enable_tasks.Upgrade_Movies ?}-Upgrade-Movies'
       - movies_lookup
       - German
     discover:
