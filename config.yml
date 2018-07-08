@@ -125,16 +125,15 @@ templates:
   ######################################## Download Streams
   Movie_Streams:
     inputs:
-      - rss: '{? flexget.path ?}/External-Plugins/HDArea-Feed/HDArea.xml' #not working right now
       - rss: '{? flexget.path ?}/External-Plugins/HDWorld-Movies-Feed/HDWorld.xml'
       - rss: 'https://nima4k.org/rss_movies.xml'
-#      - rss: 'https://scenefiles.to/RSS-Movies-German-HD?results=filecrypt&filter=1k' ##  OFFLINE
+      - rss: '{? flexget.path ?}/External-Plugins/HDWorld-3D-Feed/HDWorld.xml'
+#      - rss: '{? flexget.path ?}/External-Plugins/HDArea-Feed/HDArea.xml' #not working right now
 
   Series_Streams:
     inputs:
-#      - rss: 'https://scenefiles.to/RSS-TV-German-HD?results=filecrypt&filter=1k' ##  OFFLINE
-      - rss: '{? flexget.path ?}/External-Plugins/HDWorld-Series-Feed/HDWorld.xml'
-      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_1.xml'
+      - rss: '{? flexget.path ?}/External-Plugins/HDWorld-Series-Feed/HDWorld.xml' # HDWorld
+      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_1.xml' # SJ
       - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_2.xml'
       - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_3.xml'
       - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_4.xml'
@@ -143,6 +142,7 @@ templates:
       - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_7.xml'
       - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_8.xml'
       - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_9.xml'
+      
 
   ######################################## Enable/Disable Discover
   Discover-enable-Backfill:
@@ -158,7 +158,6 @@ templates:
             position: next
             strip_dates: yes
       from:
-#        - search_rss: https://scenefiles.to/RSS-TV-German-HD?results=filecrypt&filter=1k&search={{search_term}} ##  OFFLINE
         - searchSerienjunkies:
             hoster: '{? Settings.Hoster ?}'
             language: '{? Settings.Language ?}'
@@ -174,7 +173,6 @@ templates:
             position: next
             strip_dates: yes
       from:
-#        - search_rss: https://scenefiles.to/RSS-TV-German-HD?results=filecrypt&filter=1k&search={{search_term}} ##  OFFLINE
         - searchSerienjunkies:
             hoster: '{? Settings.Hoster ?}'
             language: '{? Settings.Language ?}'
