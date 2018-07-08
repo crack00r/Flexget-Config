@@ -933,14 +933,13 @@ tasks:
       what:
         - movie_list: favorites
       from:
-#        - search_rss: https://scenefiles.to/RSS-Movies-German-720p?results=filecrypt&filter=1k&search={{search_term}} ## OFFLINE
         - searchHdarea:
             hoster: '{? Settings.Hoster ?}'
         - searchHdworld:
             hoster: '{? Settings.Hoster ?}'
         - searchMovieBlog:
             hoster: '{? Settings.Hoster ?}'
-#     quality: '{? quality.high ?}'
+    quality: '{? quality.high ?}'
     list_match:
       from:
         - movie_list: favorites
@@ -963,6 +962,7 @@ tasks:
       - '{? series.backfill ?}-Upgrade'
       - German
       - series_lookup
+    quality: '{? quality.main ?}'
     # Crossmatch for Series on HOLD
     crossmatch:
       from:
@@ -994,6 +994,7 @@ tasks:
       - German
       - series_lookup
       - Series_Streams
+    quality: '{? quality.main ?}'
     # Crossmatch for Series on HOLD
     crossmatch:
       from:
@@ -1054,6 +1055,7 @@ tasks:
      allow_teasers: no
      allow_seasonless: yes
     priority: 8
+    quality: '{? quality.main ?}'
     template:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Series'
