@@ -105,6 +105,7 @@ English: 'enable' # "enable" and "disable" are possible values
 ############ Enable / Disable certain tasks:
 disable_enable_tasks: 
   Download_3D: enable 
+  Upgrade_Movies: enable ## enable/disable
   
   #from here on default is disabled! NO Support for these tasks!
   Download_Second_IMDb_Movies: disable 
