@@ -223,7 +223,7 @@ templates:
 
   enable-Upgrade-Movies:
     exists_movie:
-      path: {? filesystem.mountpoint.movies ?}/
+      path: "{? filesystem.mountpoint.movies ?}/"
       allow_different_qualities: better
       lookup: imdb
 
