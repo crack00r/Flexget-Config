@@ -28,7 +28,7 @@ Paypal: paypal.me/MadK <br>
 
  # Installation :
 `sudo apt-get install unzip python python-beautifulsoup python3-bs4 python-pip` <br>
-`sudo pip install --upgrade pip setuptools flexget rebulk BeautifulSoup4`<br>
+`sudo pip install --upgrade pip setuptools flexget rebulk`<br>
 <br>
 `cd /tmp/ && wget https://github.com/crack00r/Flexget-Config/archive/master.zip`<br>
 `unzip  master.zip`<br>
