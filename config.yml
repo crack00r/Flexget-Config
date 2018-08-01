@@ -180,7 +180,7 @@ templates:
 
   ######################################## Enable/Disable SERIES Upgrade
 
-  enable-Upgrade:
+  enable-Upgrade-Series:
     configure_series:
       settings:
         target: '{? quality.main ?}'
@@ -201,7 +201,7 @@ templates:
       path: '{? filesystem.mountpoint.series ?}/{{ series_name|tvdb_series_name }}'
       allow_different_qualities: no
 
-  disable-Upgrade:
+  disable-Upgrade-Series:
     configure_series:
       settings:
         target: '{? quality.main ?}'
@@ -287,6 +287,13 @@ templates:
     manual: no
   disable-Download_Christmas:
     manual: yes
+
+  enable-IMDb_Actors: 
+    include: Actress.yml
+#    include: Actors.yml
+  disable-IMDb_Actors:
+    exec:
+      - echo "no Actors to consider"
 
   ######################################## Languages
   German:
@@ -508,7 +515,6 @@ tasks:
           - "cd {? flexget.path ?}/External-Plugins/HDWorld-Series-Feed/ && rm *.xml; python ./HDWorld-Series-RSS.py"
           - "cd {? flexget.path ?}/External-Plugins/Serienjunkies-Feed/ && rm *.xml; python ./Serienjunkies-RSS.py"          
 
-
   ######################################## Get imdb watchlist
   ## imdb API (used by imdb_list-plugin) is now restricted to 250 entries - everything above results in error
   ## CSV workaround:
@@ -522,8 +528,10 @@ tasks:
     exec:
       on_start:
         phase: 
-          - "cd {? filesystem.htmlpath ?} && rm WATCHLIST.csv; wget http://www.imdb.com/list/ls{? imdb.usrID ?}/export && chmod +x WATCHLIST.csv"
-          
+          - "mkdir {? filesystem.htmlpath ?}/{? imdb.listID1 ?}/; cd {? filesystem.htmlpath ?}/{? imdb.listID1 ?}/ && rm export; wget http://www.imdb.com/list/{? imdb.listID1 ?}/export && mv ./export ./WATCHLIST.csv; chmod +x *"
+          - "mkdir {? filesystem.htmlpath ?}/{? imdb.listID2 ?}/; cd {? filesystem.htmlpath ?}/{? imdb.listID2 ?}/ && rm export; wget http://www.imdb.com/list/{? imdb.listID2 ?}/export && mv ./export ./WATCHLIST.csv; chmod +x *"
+          - "mkdir {? filesystem.htmlpath ?}/{? imdb.listID3 ?}/; cd {? filesystem.htmlpath ?}/{? imdb.listID3 ?}/ && rm export; wget http://www.imdb.com/list/{? imdb.listID3 ?}/export && mv ./export ./WATCHLIST.csv; chmod +x *"
+         
   ######################################## Sync Trakt/IMDb Movie-Watchlist to Flexget-Queue
   ## imdb API (used by imdb_list-plugin) is now restricted to 250 entries - everything above results in error
   ## CSV workaround:
@@ -532,11 +540,11 @@ tasks:
     template: no_global
     priority: 2
 #    imdb_watchlist:
-#      user_id: 'ur{? imdb.usrID ?}'
+#      user_id: 'ur{? imdb.usrID1 ?}'
 #      list: watchlist
 #      force_language: de-de
     csv:
-      url: http://localhost/WATCHLIST.csv
+      url: http://localhost/{? imdb.listID1 ?}/WATCHLIST.csv
       values:
         title: 6
         imdb_id: 2
@@ -616,7 +624,7 @@ tasks:
       list: collection
       type: movies
     if:
-      - trakt_movie_user_rating > 8: accept
+      - trakt_movie_user_rating > 9: accept ## 9-10 is ideal for usage with Plex (4 Plex Stars = 8 trakt/imdb Stars ---- 5 Plex Stars = 10 trakt/imdb Stars)
     list_add:
       - movie_list: favorites
   ############################################################## Removings
@@ -815,6 +823,7 @@ tasks:
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
       - '{? disable_enable_tasks.Upgrade_Movies ?}-Upgrade-Movies'
+      - '{? disable_enable_tasks.IMDb_Actors ?}-IMDb_Actors'
       - movies_lookup
       - German
       - Movie_Streams
@@ -827,7 +836,7 @@ tasks:
         - movie_list: Default
         - trakt_list:
             account: '{? trakt.acc ?}'
-            list: UpgradeQuality
+            list: '{? trakt.favorites ?}'
             type: movies
       single_match: yes
       remove_on_match: yes
@@ -849,6 +858,7 @@ tasks:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
+      - '{? disable_enable_tasks.IMDb_Actors ?}-IMDb_Actors'
       - movies_lookup
       - German
       - Movie_Streams
@@ -973,7 +983,7 @@ tasks:
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Series'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
       - 'Discover-{? series.backfill ?}-Backfill'
-      - '{? series.backfill ?}-Upgrade'
+      - '{? series.backfill ?}-Upgrade-Series'
       - German
       - series_lookup
     quality: '{? quality.main ?}'
@@ -1004,7 +1014,7 @@ tasks:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Series'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
-      - '{? series.backfill ?}-Upgrade'
+      - '{? series.backfill ?}-Upgrade-Series'
       - German
       - series_lookup
       - Series_Streams
@@ -1030,7 +1040,7 @@ tasks:
       - '{? DownloadManager ?}-Archive-Series'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
 #      - 'Discover-{? series.backfill ?}-Backfill'
-#      - '{? series.backfill ?}-Upgrade'
+#      - '{? series.backfill ?}-Upgrade-Series'
       - series_lookup
       - English
 #      - Series_Streams_English
@@ -1213,6 +1223,7 @@ tasks:
   Specials: #(Second IMDB-User Task - not supported)
     template:
       - no_global
+      - no_seen
       - '{? disable_enable_tasks.Download_Specials ?}-Download_Specials'
     priority: 10
     include: Specials.yml
@@ -1220,6 +1231,7 @@ tasks:
   Specials2: #(Third IMDB-User Task - not supported)
     template:
       - no_global
+      - no_seen     
       - '{? disable_enable_tasks.Download_Specials2 ?}-Download_Specials2'
     priority: 10
     include: Specials2.yml
