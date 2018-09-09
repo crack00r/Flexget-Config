@@ -16,10 +16,6 @@ https://board.jdownloader.org/showthread.php?t=67579  <br>
 [Premiumize](https://www.premiumize.me/ref/709558658) <br>
 - Best All-In-One Provider (VPN, Torrent, Share-Hoster, cloud-space) <br>
 
-[DebridItalia](http://www.debriditalia.com/?ref=ref68473) <br>
-- Cheapest UNLIMITED-Traffic for Uploaded.to<br>
-
-
 #### Donations / Spenden:
 bitcoin: 12vHS4h6patf4Ne6og4BHcDxRma3g2URUK  <br>
 Paypal: paypal.me/MadK <br>
