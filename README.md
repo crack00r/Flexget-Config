@@ -28,7 +28,7 @@ Paypal: paypal.me/MadK <br>
 <br>
 `cd /tmp/ && wget https://github.com/crack00r/Flexget-Config/archive/master.zip`<br>
 `unzip  master.zip`<br>
-`mkdir ~/.flexget && cp -r master/* ~/.flexget/`<br>
+`mkdir ~/.flexget && cp -r Flexget-Config-master/* ~/.flexget/`<br>
 
 `flexget trakt auth USER`<br>
 
