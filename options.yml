@@ -1,101 +1,108 @@
-## Folgendes ist zu beachten:
-## - Die Config basiert auf entweder Plex.tv und Trakt.tv, oder Trakt alleine. 
-##     - In jedem Fall muss Takt Ã¼ber den Stand der Collection informiert werden!
+##
+## - Die Config basiert auf Trakt.tv 
+##     - In jedem Fall muss Takt über den Stand der Collection informiert werden!
 ##        - Plex: https://github.com/trakt/Plex-Trakt-Scrobbler
 ##        - Kodi: http://kodi.wiki/view/Add-on:Trakt
 ##     - Flexget-Trakt: Authentication: http://flexget.com/wiki/Plugins/trakt
-
-
-
+##
+## - Keinen Tabulator nutzen!
+##
+##
 ## Eigene Daten eintragen
 
 ArchiveOrWatchlist: Archive ## "Watchlist" and "Archive" are possible values. Use Watchlist to split your Archive from your Watchlist
 
 ########### Download-Manager
-DownloadManager: jdownloader # "jdownloader" and "pyload" are possible values. USE LOWER CASES !
-DownloadManagerQueue: 'enable' # disable = collector -- "enable" = Queue
+DownloadManager: jdownloader # "jdownloader" or "pyload" are possible values. USE LOWER CASES ! PYLOAD NOT SUPPORTED
+DownloadManagerQueue: 'enable' # disable = colslector -- "enable" = Queue
 
 
 DLFolder: '/home/USER/Downloads' #Do not put an "/" at the end
 DLFolderArchive: '---Archiv'       #Name of your Archive Folder inside your Downloads Folder
-DLFolderWatchlist: '---Watchlist' #Name of your Watchlist Folder inside your Downloads Folder
-DLFolderYouTube: '--YouTube'  #Name of your YouTube Folder inside your Downloads Folder
-DLFoldereBooks: '-eBooks'  #Name of your eBooks Folder inside your Downloads Folder
-DLFolderSports: '--Sports' #Name of your YouTube Folder inside your Downloads Folder
-DLFolder3D: '--3D' #Name of your YouTube Folder inside your Downloads Folder
+DLFolderWatchlist: '---Watchlist'  #Name of your Watchlist Folder inside your Downloads Folder
+DLFolderYouTube: '--YouTube'       #Name of your YouTube Folder inside your Downloads Folder
+DLFoldereBooks: '-eBooks'          #Name of your eBooks Folder inside your Downloads Folder
+DLFolderSports: '--Sports'         #Name of your YouTube Folder inside your Downloads Folder
+DLFolder3D: '--3D'                 #Name of your YouTube Folder inside your Downloads Folder
 
 #-------------------
 JDownloader: #JDownloaders Path
-  path: '/home/USER/jd2' #Do not put an "/" at the end
-#-------------------
+  path: '/home/USER/jd2' #Do not put an "/" at the end (ABSOLUTE PATH)
+  
+#------------------- ## NOT SUPPORTED - I'M NOT A PYLOAD USER ANYMORE!
 pyload: #pyload.org
-  usr: 'XXXX'
-  pwd: 'XXXX'
-  ip: 'localhost' # localhost (when running flexget on the same PC), Hostname , URL and IP-Adresses are possible values # ALWAYS WITHOUT "HTTP(S)://"
-  hoster: UploadedTo # "ShareOnlineBiz" and "UploadedTo" are possible values                       
+  usr: 'USER'
+  pwd: 'PASSWORD'
+  ip: 'localhost' # localhost (when running flexget on the same machine), Hostname , URL and IP-Adresses are possible values # ALWAYS WITHOUT "HTTP(S)://"
   protocol: 'http' # "http" and "https" are possible values
   port: '8000' #Webinterface port
   
 ########## flexget
 flexget: 
-  path: '/home/USER/.flexget' # Windows "C:/path/to/flexget" , Linux "/home/username/.flexget" ---->>> Do not put an "/" at the end !!
+  path: '/home/USER/.flexget' # Windows "C:/path/to/flexget" , Linux "/home/username/.flexget" ---->>> Do not put an "/" at the end !! (ABSOLUTE PATH)
   scheduler: 5-17/2 # ONLY HOURS ARE POSSIBLE VALUES ! Example: Run every 2 hours between 5am and 5pm (http://flexget.com/wiki/Plugins/Daemon/scheduler)
 
 filesystem: 
   mountpoint: 
-    series: /path/to/Series #---->>> Do not put an "/" at the end !! (ABSOLUTE PATH)
-    movies: /path/to/Movies #---->>> Do not put an "/" at the end !! (ABSOLUTE PATH)
-
-    htmlpath: /var/www/html ## Path to your html folder, needed for imdb_watchlist (if you do not use imdb_watchlist, leave it blank)
+    series: /PATH/TO/SERIES # Do not put an "/" at the end !! (ABSOLUTE PATH)
+    movies: /PATH/TO/MOVIES # Do not put an "/" at the end !! (ABSOLUTE PATH)
+  
+  htmlpath: /var/www/html ## Path to your html folder, needed for imdb_watchlist (if you do not use imdb_watchlist, leave it blank) #---->>> Do not put an "/" at the end !! (ABSOLUTE PATH)
+  
 ########## Settings
 Settings:
-  Hoster: zippyshare;uploaded;shareonline;rapidgator # Supported hosters - shareonline uploaded rapidgator filer oboom zippyshare - also combined "uploaded;shareonline"
+  Hoster: zippyshare;uploaded;shareonline;rapidgator # Supported hosters - shareonline uploaded rapidgator filer oboom zippyshare - also combined "uploaded;shareonline;rapidgator"
   Language: german # "german" , "english" are possible values
 
 Parser:
-  Series: internal # guessit and internal are possible values
-  Movies: internal # guessit and internal are possible values
-########## LOGINS
-
-imdb: #imdb.com
-  listID: 'ONLY-NUMBER' ## DO NOT USE ANYTHING BEFORE THE NUMBER (e.g. "ur") ## USER-ID can be found here: http://www.imdb.com/list/watchlist (copy your ID from URL) #must be public
+  Series: guessit # guessit and internal are possible values
+  Movies: guessit # guessit and internal are possible values
   
-System: #Operating System ## NOT SUPPORTED YET
-  OS: Linux #Windows and Linux are possible values
-  usr: ''
-  pwd: ''
-
+########## LOGINS
+imdb: #imdb.com
+  listID1: 'ls050XXXX26' ## DO NOT USE USER-ID - WONT WORK ! list ID can be found here: http://www.imdb.com/list/watchlist -> scroll down -> copy "export"-link -> copy your list ID (ls2324xxxxx)
+  listID2: 'ls0252XXXX9' ## NOT SUPPORTED YET
+  listID3: ## NOT SUPPORTED YET
+  
 trakt: #trakt.tv
-  acc: 'XXXX'
-  pwd: 'XXXX'
+  acc: 'USER'
+  pwd: 'PASSWORD'
 
-  OnHold: OnHold #Type in the Name of your OnHold-List. Series in this List will stop loading after first 3 Episodes. Otherwise Watchlist entries will load continuously 
-                 #and makes the Watchlist obsolete. If  you then want to load a Series continuously, simply remove it from that list.
+  OnHold: OnHold #Type in the Name of your OnHold-List. Everything on this List stops downloading entries after the given "Stop_Watchlist_Counter".
 
-  English:
-    Series: Foreign_Series #THIS LIST MUST ALREADY EXIST ! FLEXGET CAN'T CREATE IT #CREATE ON TRAKT WEBSITE
-    Movies: Foreign_Movies #THIS LIST MUST ALREADY EXIST ! FLEXGET CAN'T CREATE IT #CREATE ON TRAKT WEBSITE
+  English: ## This Feature adds Movies/Series to a special List, to load them again if your prefered language is online
+    Series: Foreign_Series #THIS LIST MUST ALREADY EXIST ON TRAKT ! FLEXGET CAN'T CREATE IT -- CREATE IT ON TRAKT WEBSITE
+    Movies: Foreign_Movies #THIS LIST MUST ALREADY EXIST ON TRAKT! FLEXGET CAN'T CREATE IT -- CREATE IT ON TRAKT WEBSITE
+
+  Favorites: Favorites ## Optional ## Name of your trakt-favorites list. Works without as well, just a visual thing inside trakt
     
 ############ QUALITY:         ### For possible values look: http://flexget.com/wiki/Plugins/quality
 quality: ## This will target your "main" quality, but falls back to "low" quality, if main quality is not available. "High" is for your Trakt Favorite_List
-  low: 720p+                       #Type in your prefered low quality
-  main: 1080p+                     #Type in your prefered main quality
+  low: 720p+ #Type in your prefered low quality
+  main: 1080p #Type in your prefered main quality
   high: 1080p+ webdl+ h264+ dd5.1+ #Type in your prefered high quality
 
+############ Movies
+movies:   
+  different_qualities: better # "no" and "better" are possible values
+  
 
-############ BACKFILL ("backfill and "yes" to activate -- "no" and "no" to deactivate)
+############ Series
 series:
   tracking: backfill # "True" "False" and "backfill" are possible values
   backfill: enable # "enable" and "disable" are possible values
   upgrade: enable #  "enable" and "disable" are possible values
-  ## The Watchlist_Counter stops at given "Stop"-Number and Starts again, only when the given "Start"-Number is marked WATCHED in trakt
-  Stop_watchlist_counter: 1|2|3|4|5|6 # Must be this exact format. 6 is relatively ideal. but choose what you want. 0 to disable the watchlist completely and load everything straight away.
-  Start_Collection_counter: 03 # 03 is relatively ideal. but choose what you want. 0 to disable the watchlist completely and load everything straight away.
-  packs: no # READ THIS https://flexget.com/Plugins/series/season_packs to fill in your values. Default is disabled - but can be enabled by your preferences.
+  different_qualities: better # "no" and "better" are possible values
+  
+  ## The Watchlist_Counter stops at given "Stop"-Number and Starts again, only when the given "Start"-Number is marked WATCHED in trakt. 
+  ## So it downloads for example 7 Episodes, and after you watch 4 of it, there is a high chance you want to watch more. So it downloads anything else.
+  Stop_watchlist_counter: 1|2|3|4|5|6|7 # Must be this exact format. 7 is relatively ideal. but choose what you want. 0 to disable the watchlist completely and load everything straight away.
+  Start_Collection_counter: 04 # 04 is relatively ideal. but choose what you want. 0 to disable the watchlist completely and load everything straight away.
+  packs: always # READ THIS https://flexget.com/Plugins/series/season_packs to fill in your values. Default is disabled - but can be enabled by your preferences.
   
 ########### YouTube-Playlist: 
 YouTube:
-  Playlist: 'PLRgsvGSeQMKwXmZq37i1GUs3DfZ2Hhaac'
+  Playlist: 'PLRgsvGSeQMKXXXXXXXXXX1GUs3DfZ2Hhaac'
 
 
 ############ ENGLISH:
@@ -116,3 +123,4 @@ disable_enable_tasks:
   Download_Specials2: disable
   Download_Sports: disable
   Download_eBooks: disable
+  IMDb_Actors: disable
