@@ -7,18 +7,13 @@ variables: options.yml # Includes Options.yml file (put in flexget folder beside
 templates:
   global:
     ######################################## Misc
-    verify_ssl_certificates: no
-#    magnets: no
+    redirect_url: yes
     plugin_priority:
       regexp: 250
-#    assume_quality:
-#      NetflixUHD: bluray
-#      NetflixHD: bluray
-#      AmazonHD: bluray
-#      iTunesHD: bluray
     parsing:
       movie: '{? Parser.Movies ?}'
       series: '{? Parser.Series ?}'
+#    magnets: no
     ######## Some HTML setup
     headers:
       User-Agent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36"
@@ -60,11 +55,13 @@ templates:
       reject:
       # Release
         - \b(duo|tri|quadri|tetra|penta)logy\b # Movie-Collections (often we already have some single ones in our Library)
-        - \bcomplete\b   # Complete (usually stands for complete series - not working well with flexget)
-        - \bcollection\b   # Collections (usually stands for complete series - not working well with flexget)
-        - \buntouched\b   # Untouched (usually complete BDs with extras - incompatible with Plex/Kodi etc.)
-        - \bdirectors.cut\b   # usually nerdish, too long Versions of a Movie
-        - \bextended\b # usually nerdish, too long Versions of a Movie
+#        - \bcomplete\b   # Complete (usually stands for complete series - not working well with flexget)
+#        - \bcollection\b   # Collections (usually stands for complete series - not working well with flexget)
+        - \buntouched\b   # Untouched (usually complete BDs with extras - incompatible with Plex/Emby etc.)
+        - \bdirectors.cut\b   # too often the extended Version has  parts without foreign language
+        - \bextended\b # too often the extended Version has  parts without foreign language
+        - \bread.nfo\b # usually means there is something in the nfo-file to read about, mostly likely about hardcoded subs or other "bad"-Info
+#        - \bhdtv\b # HDTV
       # Video
         - \b((hd|)ts|telesync)\b   # Bad-Quality
         - \b((hd|)cam)\b   # Bad-Quality
@@ -75,10 +72,10 @@ templates:
         - \b(hc|hardcoded)\b # Subtitles (HC / Hardcoded)
         - \b(web|)blur(\b|rt|red)\b # Blurred-Subtitles
         - \biso\b # ISO-Files
-        - \bread.nfo\b # usually means there is something in the nfo-file, mostly about hardcoded subs or other "bad"-Info
       # Audio
         - \bflac\b   # flac
-        - \b(ac3(.|))md|(mic(.|))dubbed\b ## theater-recorded-audio
+        - \b(ac3(.|))md|(mic(.|))dubbed\b # LD/Line-Dubbed (we want original Dubbed-Line (DL)
+        - \b(ac3(.|))ld|(line(.|))dubbed\b # LD/Line-Dubbed (we want original Dubbed-Line (DL)
 ###############################################################################################################################################
 ### Templates #################################################################################################################################
 ###############################################################################################################################################
@@ -198,8 +195,8 @@ templates:
           type: shows
           strip_dates: yes
     exists_series:
-      path: '{? filesystem.mountpoint.series ?}/{{ series_name|tvdb_series_name }}'
-      allow_different_qualities: no
+      path: "{? filesystem.mountpoint.series ?}/{{ tvdb_series_name|default(series_name)|replace('/', '_')|replace(':', ' -')|replace(',', '') }}"
+      allow_different_qualities: '{? series.different_qualities ?}'
 
   disable-Upgrade-Series:
     configure_series:
@@ -223,8 +220,8 @@ templates:
 
   enable-Upgrade-Movies:
     exists_movie:
-      path: "{? filesystem.mountpoint.movies ?}/"
-      allow_different_qualities: better
+      path: "{? filesystem.mountpoint.movies ?}/{{ imdb_name|replace('/', '_')|replace(':', ' -')|replace(',', '') }} ({{ imdb_year }})"
+      allow_different_qualities: '{? movies.different_qualities ?}'
       lookup: imdb
 
   disable-Upgrade-Movies:
@@ -259,15 +256,15 @@ templates:
     manual: yes
 
   enable-Download_Specials: 
-    manual: no
+    include: Specials.yml
   disable-Download_Specials: 
     manual: yes
-
+    
   enable-Download_Specials2: 
-    manual: no
+    include: Specials2.yml
   disable-Download_Specials2: 
     manual: yes
-
+    
   enable-Download_Sports: 
     manual: no
   disable-Download_Sports: 
@@ -279,7 +276,7 @@ templates:
     manual: yes
 
   enable-Download_eBooks: 
-    manual: no
+    include: eBooks.yml
   disable-Download_eBooks:
     manual: yes
 
@@ -288,10 +285,9 @@ templates:
   disable-Download_Christmas:
     manual: yes
 
-  enable-IMDb_Actors: 
-    include: Actress.yml
-#    include: Actors.yml
-  disable-IMDb_Actors:
+  enable-IMDb_Persons: 
+    include: Persons.yml
+  disable-IMDb_Persons:
     exec:
       - echo "no Actors to consider"
 
@@ -352,8 +348,8 @@ templates:
   jdownloader-3D:
     exec:
       - echo "downloadFolder={? DLFolder ?}/{? DLFolder3D ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
-  ######## YouTube
-  jdownloader-EBooks:
+  ######## eBooks
+  jdownloader-eBooks:
     exec:
       - echo "downloadFolder={? DLFolder ?}/{? DLFoldereBooks ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
   ######## Sports
@@ -528,10 +524,11 @@ tasks:
     exec:
       on_start:
         phase: 
-          - "mkdir {? filesystem.htmlpath ?}/{? imdb.listID1 ?}/; cd {? filesystem.htmlpath ?}/{? imdb.listID1 ?}/ && rm export; wget http://www.imdb.com/list/{? imdb.listID1 ?}/export && mv ./export ./WATCHLIST.csv; chmod +x *"
-          - "mkdir {? filesystem.htmlpath ?}/{? imdb.listID2 ?}/; cd {? filesystem.htmlpath ?}/{? imdb.listID2 ?}/ && rm export; wget http://www.imdb.com/list/{? imdb.listID2 ?}/export && mv ./export ./WATCHLIST.csv; chmod +x *"
-          - "mkdir {? filesystem.htmlpath ?}/{? imdb.listID3 ?}/; cd {? filesystem.htmlpath ?}/{? imdb.listID3 ?}/ && rm export; wget http://www.imdb.com/list/{? imdb.listID3 ?}/export && mv ./export ./WATCHLIST.csv; chmod +x *"
-         
+          - "mkdir {? filesystem.htmlpath ?}/{? imdb.listID1 ?}/; cd {? filesystem.htmlpath ?}/{? imdb.listID1 ?}/ && rm WATCHLIST.csv; wget http://www.imdb.com/list/{? imdb.listID1 ?}/export && mv ./export ./WATCHLIST.csv; chmod +x *"
+          - "mkdir {? filesystem.htmlpath ?}/{? imdb.listID2 ?}/; cd {? filesystem.htmlpath ?}/{? imdb.listID2 ?}/ && rm WATCHLIST.csv; wget http://www.imdb.com/list/{? imdb.listID2 ?}/export && mv ./export ./WATCHLIST.csv; chmod +x *"
+          - "mkdir {? filesystem.htmlpath ?}/{? imdb.listID3 ?}/; cd {? filesystem.htmlpath ?}/{? imdb.listID3 ?}/ && rm WATCHLIST.csv; wget http://www.imdb.com/list/{? imdb.listID3 ?}/export && mv ./export ./WATCHLIST.csv; chmod +x *"
+          - echo "Download IMDb Watchlists successful"
+        
   ######################################## Sync Trakt/IMDb Movie-Watchlist to Flexget-Queue
   ## imdb API (used by imdb_list-plugin) is now restricted to 250 entries - everything above results in error
   ## CSV workaround:
@@ -539,10 +536,6 @@ tasks:
     interval: 24 hours
     template: no_global
     priority: 2
-#    imdb_watchlist:
-#      user_id: 'ur{? imdb.usrID1 ?}'
-#      list: watchlist
-#      force_language: de-de
     csv:
       url: http://localhost/{? imdb.listID1 ?}/WATCHLIST.csv
       values:
@@ -550,6 +543,7 @@ tasks:
         imdb_id: 2
         imdb_url: 7
         url: 7
+    verify_ssl_certificates: no
     accept_all: yes
     seen: local
     crossmatch:
@@ -823,7 +817,7 @@ tasks:
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
       - '{? disable_enable_tasks.Upgrade_Movies ?}-Upgrade-Movies'
-      - '{? disable_enable_tasks.IMDb_Actors ?}-IMDb_Actors'
+      - '{? disable_enable_tasks.IMDb_Persons ?}-IMDb_Persons'
       - movies_lookup
       - German
       - Movie_Streams
@@ -858,7 +852,7 @@ tasks:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
-      - '{? disable_enable_tasks.IMDb_Actors ?}-IMDb_Actors'
+      - '{? disable_enable_tasks.IMDb_Persons ?}-IMDb_Persons'
       - movies_lookup
       - German
       - Movie_Streams
@@ -1055,7 +1049,6 @@ tasks:
             position: next
             strip_dates: yes
       from:
-#        - search_rss: https://scenefiles.to/RSS-TV-English-HD?results=filecrypt&filter=1k&search={{search_term}} ##OFFLINE
         - searchHdarea:
             hoster: '{? Settings.Hoster ?}'
         - searchHdworld:
@@ -1135,6 +1128,7 @@ tasks:
       - '{? DownloadManager ?}-Sports'
       - no_global
     seen: local
+    verify_ssl_certificates: no
     csv:
       url: 'file://{? flexget.path ?}/External-Plugins/TVRex/TVRex.csv'
       values:
@@ -1193,7 +1187,6 @@ tasks:
       min_year: 1980
     if:
       - trakt_collected: reject
-      - "'horror' in (imdb_genres or [])": reject
       - "'musical' in (imdb_genres or [])": reject
       - "'documentary' in (imdb_genres or [])": reject
       - imdb_year > now.year - 2:
@@ -1215,10 +1208,6 @@ tasks:
             min_year: 1980
     require_field:
       - imdb_id
-      - imdb_name
-      - imdb_year
-      - imdb_url
-      - imdb_genres
 
   Specials: #(Second IMDB-User Task - not supported)
     template:
@@ -1226,7 +1215,7 @@ tasks:
       - no_seen
       - '{? disable_enable_tasks.Download_Specials ?}-Download_Specials'
     priority: 10
-    include: Specials.yml
+
 
   Specials2: #(Third IMDB-User Task - not supported)
     template:
@@ -1234,42 +1223,42 @@ tasks:
       - no_seen     
       - '{? disable_enable_tasks.Download_Specials2 ?}-Download_Specials2'
     priority: 10
-    include: Specials2.yml
+ #   include: Specials2.yml
 
 
   ######################################## eBooks
-
-  eBooks:
-    template:
-      - no_global
-      - '{? disable_enable_tasks.Download_eBooks ?}-Download_eBooks'
-      - '{? DownloadManager ?}-Defaults'
-      - '{? DownloadManager ?}-eBooks'
-    priority: 10
-    include: eBooks.yml
-    rss: https://scenefiles.to/RSS-Ebooks-German?results=filecrypt&filter=1k
-    seen: local
-
-
-
-  Sync_Christmas_Movies:
-    interval: 9 weeks
-    template: 
-      - no_global
-      - no_seen
-    priority: 8
-    accept_all: yes
-    imdb_watchlist:
-      user_id: ur9197672
-      list: ls000096828
-      force_language: de-de
-    accept_all: yes
-    list_add:
-      - trakt_list:
-          account: '{? trakt.acc ?}'
-          list: Christmas
-          type: movies
-      
+# 
+#   eBooks:
+#     template:
+#       - no_global
+#       - '{? disable_enable_tasks.Download_eBooks ?}-Download_eBooks'
+#       - '{? DownloadManager ?}-Defaults'
+#       - '{? DownloadManager ?}-eBooks'
+#     priority: 10
+##     include: eBooks.yml
+#     rss: https://scenefiles.to/RSS-Ebooks-German?results=filecrypt&filter=1k
+#     seen: local
+# 
+# 
+# 
+#   Sync_Christmas_Movies:
+#     interval: 9 weeks
+#     template: 
+#       - no_global
+#       - no_seen
+#     priority: 8
+#     accept_all: yes
+#     imdb_watchlist:
+#       user_id: ur9197672
+#       list: ls000096828
+#       force_language: de-de
+#     accept_all: yes
+#     list_add:
+#       - trakt_list:
+#           account: '{? trakt.acc ?}'
+#           list: Christmas
+#           type: movies
+#       
 
 ###############################################################################################################################################
 ## MISC ################################################################################################config#by#snickers2k###################
