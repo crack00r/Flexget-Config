@@ -5,6 +5,8 @@ from flexget import plugin
 from flexget.event import event
 from flexget.utils.tools import parse_filesize
 from .BaseSearchPlugin import BaseSearchPlugin, SearchResultEntry
+from flexget.components.sites.utils import normalize_unicode
+
 
 #CATEGORIES = {
 #    # Hoster

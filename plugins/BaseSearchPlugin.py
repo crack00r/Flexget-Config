@@ -4,7 +4,7 @@ import logging, json, datetime, time #, urllib, urllib2, re, , HTMLParser, reque
 from bs4 import BeautifulSoup
 from flexget import plugin
 from flexget.entry import Entry
-from flexget.utils.search import normalize_unicode
+from flexget.components.sites.utils import normalize_unicode
 from flexget.utils import requests
 
 #from flexget.event import event

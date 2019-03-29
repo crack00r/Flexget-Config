@@ -4,7 +4,7 @@ import logging, re, HTMLParser #, urllib, urllib2, json, requests
 from flexget import plugin
 from flexget.event import event
 from flexget.utils.tools import parse_filesize
-from flexget.utils.search import normalize_unicode
+from flexget.components.sites.utils import normalize_unicode
 from .BaseSearchPlugin import BaseSearchPlugin, SearchResultEntry
 
 log = logging.getLogger("SeriesSearchPlugin")
@@ -118,7 +118,7 @@ class SearchSerienjunkies(BaseSearchPlugin):
 
 @event('plugin.register')
 def register_plugin():
-    plugin.register(SearchSerienjunkies, 'searchSerienjunkies', groups=['search'], api_ver=2)
+    plugin.register(SearchSerienjunkies, 'searchSerienjunkies', interfaces=['search'], api_ver=2)
     
 class SearchDokujunkies(SearchSerienjunkies):
     name = "searchDokujunkies"
@@ -146,4 +146,4 @@ class SearchDokujunkies(SearchSerienjunkies):
     
 @event('plugin.register')
 def register_plugin():
-    plugin.register(SearchDokujunkies, 'searchDokujunkies', groups=['search'], api_ver=2)
+    plugin.register(SearchDokujunkies, 'searchDokujunkies', interfaces=['search'], api_ver=2)
