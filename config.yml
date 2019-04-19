@@ -13,7 +13,7 @@ templates:
     parsing:
       movie: '{? Parser.Movies ?}'
       series: '{? Parser.Series ?}'
-#    magnets: no
+    magnets: no
     ######## Some HTML setup
     headers:
       User-Agent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36"
@@ -24,16 +24,36 @@ templates:
     ######## Naming-Fixes
     pathscrub: windows  # Use Windows conform filenames (since Windows is the worst of all OS, what's working on Windows, should always work on Linux/Mac)
     manipulate:
-    ## Fixes for SerienJ...s.org
+    # fix nonsense
       - title:
           replace:            
             regexp: '.(Deutsch|Englisch).'
             format: ''
       - title:
           replace:
-            regexp: '!|tv-film|,'
+            regexp: '^\[[^\]]*\][^a-z0-9]*'
             format: ''
-    ## German-Locale-fixes
+      - title:
+          replace:
+            regexp: '^{[^\]]*}[^a-z0-9]*'
+            format: ''
+      - title:
+          replace:
+            regexp: '^\([^\]]*\)[^a-z0-9]*'
+            format: ''
+      - title:
+          replace:
+            regexp: '\s?\]\[\s?'
+            format: '@@'
+      - title:
+          replace:
+            regexp: '\W?@@.*'
+            format: ''
+      - title:
+          replace:
+            regexp: 'tv-film|!|,|´|`|[|]'
+            format: ''
+    ## Locale-fixes
       - title:
           replace:
             regexp: 'ö'
@@ -50,6 +70,10 @@ templates:
           replace:
             regexp: 'ß'
             format: 'ss'
+      - title:
+          replace:
+            regexp: 'é'
+            format: 'e'
     ######################################## Global Exclude  (For testing: https://regex101.com)
     regexp:
       reject:
@@ -82,6 +106,9 @@ templates:
 
   ######################################## Movie-Global
   movies_lookup:
+    plugin_priority:
+      manipulate: 255       # manipulate must fix the titles before metainfo_series.
+    metainfo_movie: yes
     tmdb_lookup:
       language: de
     imdb_lookup: yes
@@ -91,8 +118,7 @@ templates:
   ######################################## Series-Global
   series_lookup:
     plugin_priority:
-      # manipulate must fix the titles before metainfo_series.
-      manipulate: 255
+      manipulate: 255       # manipulate must fix the titles before metainfo_series.
     metainfo_series: yes
     thetvdb_lookup:
       language: de
@@ -100,19 +126,6 @@ templates:
       account: '{? trakt.acc ?}' 
     set:
       tvdb_language: de
-    manipulate:
-      - title:
-          replace:
-            regexp: '^\[[^\]]*\][^a-z0-9]*'
-            format: ''
-      - title:
-          replace:
-            regexp: '^{[^\]]*}[^a-z0-9]*'
-            format: ''
-      - title:
-          replace:
-            regexp: '^\([^\]]*\)[^a-z0-9]*'
-            format: ''
   ######################################## No_Seen
   no_seen:
     disable:
@@ -158,11 +171,15 @@ templates:
         - searchSerienjunkies:
             hoster: '{? Settings.Hoster ?}'
             language: '{? Settings.Language ?}'
+            staffelpack: '{? series.Staffelpack ?}'
     no_entries_ok: yes
 
   Discover-disable-Backfill:
     discover:
       what:
+        - next_series_episodes:
+            backfill: no
+            from_start: no
         - next_trakt_episodes:
             account: '{? trakt.acc ?}'
             context: collected
@@ -173,6 +190,7 @@ templates:
         - searchSerienjunkies:
             hoster: '{? Settings.Hoster ?}'
             language: '{? Settings.Language ?}'
+            staffelpack: '{? series.Staffelpack ?}'
     no_entries_ok: yes
 
   ######################################## Enable/Disable SERIES Upgrade
@@ -187,15 +205,16 @@ templates:
         identified_by: ep
         tracking: '{? series.tracking ?}'
         upgrade: yes 
-        season_packs: yes
+        season_packs: '{? series.season_packs ?}'
       from:
         trakt_list:
           account: '{? trakt.acc ?}'
           list: collection
           type: shows
           strip_dates: yes
+          language: de
     exists_series:
-      path: "{? filesystem.mountpoint.series ?}/{{ tvdb_series_name|default(series_name)|replace('/', '_')|replace(':', ' -')|replace(',', '') }}"
+      path: "{? filesystem.mountpoint.series ?}/{{series_name}}"
       allow_different_qualities: '{? series.different_qualities ?}'
 
   disable-Upgrade-Series:
@@ -208,19 +227,22 @@ templates:
         identified_by: ep
         tracking: '{? series.tracking ?}'
         upgrade: no
-        season_packs: yes
+        season_packs: '{? series.season_packs ?}'
       from:
         trakt_list:
           account: '{? trakt.acc ?}'
           list: collection
           type: shows
           strip_dates: yes
+          language: de
 
   ######################################## Enable/Disable MOVIES Upgrade
 
   enable-Upgrade-Movies:
     exists_movie:
-      path: "{? filesystem.mountpoint.movies ?}/{{ imdb_name|replace('/', '_')|replace(':', ' -')|replace(',', '') }} ({{ imdb_year }})"
+      path: 
+       - "{? filesystem.mountpoint.movies ?}/"
+       - "{? DLFolder ?}/{? DLFolderArchive ?}/"
       allow_different_qualities: '{? movies.different_qualities ?}'
       lookup: imdb
 
@@ -245,6 +267,22 @@ templates:
   disable-Studio_Downloads:
     manual: yes 
 
+  enable-Movie_Size_Main:
+    content_size:
+      min: 2000 #"'{? Minimum_Movie_Size_Main ?}'"
+      max: 30000 #"'{? Maximum_Movie_Size_Main ?}'"
+  disable-Movie_Size_Main:
+    exec:
+      - echo "no Movie-Size" 
+
+  enable-Movie_Size_Low:
+    content_size:
+      min: 1500 #"'{? Minimum_Movie_Size_Low ?}'"
+      max: 10000 #"'{? Maximum_Movie_Size_Low ?}'"
+  disable-Movie_Size_Low:
+    exec:
+      - echo "no Movie-Size" 
+
   enable-Download_Best_on_IMDb:
     manual: no
   disable-Download_Best_on_IMDb:
@@ -256,12 +294,12 @@ templates:
     manual: yes
 
   enable-Download_Specials: 
-    include: Specials.yml
+    include: '{? Specials1 ?}.yml'
   disable-Download_Specials: 
     manual: yes
     
   enable-Download_Specials2: 
-    include: Specials2.yml
+    include: '{? Specials2 ?}.yml'
   disable-Download_Specials2: 
     manual: yes
     
@@ -270,26 +308,130 @@ templates:
   disable-Download_Sports: 
     manual: yes
 
-  enable-Download_3D: 
-    manual: no
-  disable-Download_3D:
-    manual: yes
-
   enable-Download_eBooks: 
     include: eBooks.yml
   disable-Download_eBooks:
     manual: yes
 
-  enable-Download_Christmas: 
-    manual: no
-  disable-Download_Christmas:
-    manual: yes
+  enable-Download_Trending_Movies: 
+    exec:
+      - echo "Crawling Trending Movies"
+    trakt_list:
+      list: popular
+      type: movies
+    trakt_list:
+      list: trending
+      type: movies
 
-  enable-IMDb_Persons: 
-    include: Persons.yml
-  disable-IMDb_Persons:
+  disable-Download_Trending_Movies:
+    exec:
+      - echo "no Trending Movies to consider"
+
+  enable-Download_Popular_Movies: 
+    exec:
+      - echo "Crawling Popular Movies"
+    trakt_list:
+      list: popular
+      type: movies
+    trakt_list:
+      list: popular
+      type: movies
+
+  disable-Download_Popular_Movies:
+    exec:
+      - echo "no Popular Movies to consider"
+
+  enable-Download_Popular_Shows: 
+    exec:
+      - echo "Crawling Popular Shows"
+    trakt_list:
+      list: popular
+      type: shows
+    trakt_list:
+      list: popular
+      type: shows
+
+  disable-Download_Popular_Shows:
+    exec:
+      - echo "no Popular Shows to consider"
+
+  enable-Download_Trending_Shows: 
+    exec:
+      - echo "Crawling Trending Shows"
+    trakt_list:
+      list: trending
+      type: shows
+    trakt_list:
+      list: trending
+      type: shows
+
+  disable-Download_Trending_Shows:
+    exec:
+      - echo "no Trending Shows to consider"
+
+
+
+  enable-IMDb_Actress: 
+    include: Actress.yml
+  disable-IMDb_Actress:
+    exec:
+      - echo "no Actress's to consider"
+
+  enable-IMDb_Actors: 
+    include: Actors.yml
+  disable-IMDb_Actors:
     exec:
       - echo "no Actors to consider"
+
+  enable-3D: 
+    if:
+      - "'3D' in title":
+          exec: echo "packageName={{title}}-({{imdb_name}})-({{imdb_year}})-{{imdb_id}}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+          disable: seen
+          list_add:
+            - movie_list: 3D
+  disable-3D:
+    exec:
+      - echo "no 3D to consider"
+    regexp:
+      reject:
+      # Release
+        - \b3D\b
+
+  Movie_Global:
+    if:
+      - trakt_movie_user_rating > 9: ## 9-10 is ideal for usage with Plex (4 Plex Stars = 8 trakt/imdb Stars ---- 5 Plex Stars = 10 trakt/imdb Stars)
+          quality: '{? quality.high ?}'
+
+
+  enable-Download_Best_on_IMDb:
+    if:
+      - "'musical' in (imdb_genres or [])": reject
+      - "'documentary' in (imdb_genres or [])": reject
+      - imdb_year < now.year - 2:
+          imdb:
+            min_score: 5.0
+            min_votes: 150000
+      - imdb_year < now.year - 5:
+          imdb:
+            min_score: 5.5
+            min_votes: 200000
+      - imdb_year < now.year - 15:
+          imdb:
+            min_score: 6.0
+            min_votes: 350000
+      - imdb_year < now.year - 100:
+          imdb:
+            min_score: 7.0
+            min_votes: 500000
+      - "set(['animation', 'family']).issubset(set(imdb_genres or []))":
+          imdb:
+            min_score: 6
+            min_votes: 50000
+
+  disable-Download_Best_on_IMDb:
+    exec:
+      - echo "no Top-Movies to consider"
 
   ######################################## Languages
   German:
@@ -315,57 +457,96 @@ templates:
   ######## Defaults
   jdownloader-Defaults:
     exec:
-      - echo " " >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
-      - echo "text={{url}}" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
-      - echo "autoConfirm=TRUE" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
-      - echo "priority=LOWER" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
-      - echo "packageName={{title}}" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
-
-
+      - echo " " >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+      - echo "text={{url}}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+      - echo "autoConfirm=TRUE" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+      - echo "priority=LOWER" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+      - echo "addOfflineLink=false" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
   ######## Archive-Series
   jdownloader-Archive-Series:
     exec:
-      - echo "downloadFolder={? DLFolder ?}/{? DLFolderArchive ?}/Series/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
-      - echo "downloadPassword=serienjunkies.org"  >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
+      - echo "downloadPassword=serienjunkies.org"  >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+      - echo "extractPasswords=serienjunkies.org"  >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+    if:
+      - trakt_ep_id:
+          exec: 
+            - echo "packageName={{title}}-({{trakt_series_name}})-{{trakt_ep_id}}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+            - echo "downloadFolder={? DLFolder ?}/{? DLFolderArchive ?}/Series/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+      - not trakt_ep_id:
+          exec: 
+            - echo "packageName={{title}}-({{series_name}})-({{series_id}})" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+            - echo "downloadFolder={? DLFolder ?}/{? DLFolderArchive ?}/Series/{{title}}-({{series_name}})-({{series_id}})/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
   ######## Archive-Movies
   jdownloader-Archive-Movies:
-    exec:
-      - echo "downloadFolder={? DLFolder ?}/{? DLFolderArchive ?}/Movies/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
+    if:
+      - imdb_id:
+          exec: 
+            - echo "packageName={{title}}-({{imdb_name}})-({{imdb_year}})-{{imdb_id}}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+            - echo "downloadFolder={? DLFolder ?}/{? DLFolderArchive ?}/Movies/{{title}}-({{imdb_name}})-({{imdb_year}})-{{imdb_id}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+
+      - not imdb_id:
+          exec: 
+            - echo "packageName={{title}}-({{movie_name}})" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+            - echo "downloadFolder={? DLFolder ?}/{? DLFolderArchive ?}/Movies/{{title}}-({{movie_name}})/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+
   ######## Watchlist
   jdownloader-Watchlist-Series:
     exec:
-      - echo "downloadFolder={? DLFolder ?}/{? DLFolderWatchlist ?}/Series/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
-      - echo "downloadPassword=serienjunkies.org"  >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
+      - echo "downloadPassword=serienjunkies.org"  >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+      - echo "extractPasswords=serienjunkies.org"  >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+    if:
+      - trakt_ep_id:
+          exec: 
+            - echo "packageName={{title}}-({{trakt_series_name}})-{{trakt_ep_id}}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+            - echo "downloadFolder={? DLFolder ?}/{? DLFolderWatchlist ?}/Series/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+      - not trakt_ep_id:
+          exec: 
+            - echo "packageName={{title}}-({{series_name}})-({{series_id}})" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+            - echo "downloadFolder={? DLFolder ?}/{? DLFolderWatchlist ?}/Series/{{title}}-({{series_name}})-({{series_id}})/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
   ######## Watchlist
   jdownloader-Watchlist-Movies:
-    exec:
-      - echo "downloadFolder={? DLFolder ?}/{? DLFolderWatchlist ?}/Movies/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
+    if:
+      - imdb_id:
+          exec: 
+            - echo "packageName={{title}}-({{imdb_name}})-({{imdb_year}})-{{imdb_id}}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+            - echo "downloadFolder={? DLFolder ?}/{? DLFolderWatchlist ?}/Movies/{{title}}-({{imdb_name}})-({{imdb_year}})-{{imdb_id}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+
+      - not imdb_id:
+          exec: 
+            - echo "packageName={{title}}-({{movie_name}})" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+            - echo "downloadFolder={? DLFolder ?}/{? DLFolderWatchlist ?}/Movies/{{title}}-({{movie_name}})/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
   ######## YouTube
   jdownloader-YouTube:
     exec:
-      - echo "downloadFolder={? DLFolder ?}/{? DLFolderYouTube ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
+      - echo "downloadFolder={? DLFolder ?}/{? DLFolderYouTube ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
   ######## 3D
   jdownloader-3D:
     exec:
-      - echo "downloadFolder={? DLFolder ?}/{? DLFolder3D ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
+      - echo "downloadFolder={? DLFolder ?}/{? DLFolder3D ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+    if:
+      - imdb_id:
+          exec: echo "packageName={{title}}-({{imdb_name}})-({{imdb_year}})-{{imdb_id}}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+      - not imdb_id:
+          exec: echo "packageName={{title}}-({{movie_name}})" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
   ######## eBooks
   jdownloader-eBooks:
     exec:
-      - echo "downloadFolder={? DLFolder ?}/{? DLFoldereBooks ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
+      - echo "downloadFolder={? DLFolder ?}/{? DLFoldereBooks ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
   ######## Sports
   jdownloader-Sports:
     exec:
-      - echo "downloadFolder={? DLFolder ?}/{? DLFolderSports ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
+      - echo "downloadFolder={? DLFolder ?}/{? DLFolderSports ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
   ######## Queue-enable
   jdownloader-enable-Queue:
     exec:
-      - echo "autoStart=TRUE" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
-      - echo "forcedStart=TRUE" >> "{? JDownloader.path ?}/folderwatch/{{title}}.crawljob"
+      - echo "autoStart=TRUE" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+      - echo "forcedStart=TRUE" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
   ######## Queue-Disable
   jdownloader-disable-Queue:
     exec:
       - echo "Queue-Disabled -> Downloads parked"
-
+      - echo "autoStart=FALSE" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+      - echo "forcedStart=FALSE" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
 #   ################## pyLoad (buggy? needs testing, i'm not a pyLoad-User anymore)
 #   ######## Defaults
   pyload-Defaults:
@@ -528,61 +709,166 @@ tasks:
           - "mkdir {? filesystem.htmlpath ?}/{? imdb.listID2 ?}/; cd {? filesystem.htmlpath ?}/{? imdb.listID2 ?}/ && rm WATCHLIST.csv; wget http://www.imdb.com/list/{? imdb.listID2 ?}/export && mv ./export ./WATCHLIST.csv; chmod +x *"
           - "mkdir {? filesystem.htmlpath ?}/{? imdb.listID3 ?}/; cd {? filesystem.htmlpath ?}/{? imdb.listID3 ?}/ && rm WATCHLIST.csv; wget http://www.imdb.com/list/{? imdb.listID3 ?}/export && mv ./export ./WATCHLIST.csv; chmod +x *"
           - echo "Download IMDb Watchlists successful"
-        
+
+
   ######################################## Sync Trakt/IMDb Movie-Watchlist to Flexget-Queue
   ## imdb API (used by imdb_list-plugin) is now restricted to 250 entries - everything above results in error
   ## CSV workaround:
   Sync_Movies:
     interval: 24 hours
-    template: no_global
-    priority: 2
-    csv:
-      url: http://localhost/{? imdb.listID1 ?}/WATCHLIST.csv
-      values:
-        title: 6
-        imdb_id: 2
-        imdb_url: 7
-        url: 7
-    verify_ssl_certificates: no
+    only_new: yes
+    template: 
+      - no_global
+      - '{? disable_enable_tasks.Download_Popular_Movies ?}-Download_Popular_Movies'
+      - '{? disable_enable_tasks.Download_Trending_Movies ?}-Download_Trending_Movies'
+      - movies_lookup
+    priority: 1
+#     csv:
+#       url: http://localhost/{? imdb.listID1 ?}/WATCHLIST.csv
+#       values:
+#         title: 6
+#         imdb_id: 2
+#         imdb_url: 7
+#         url: 0
     accept_all: yes
+    trakt_list:
+      account: '{? trakt.acc ?}'
+      list: watchlist
+      type: movies
     seen: local
-    crossmatch:
+#     crossmatch:
+#       from:
+#         - trakt_list:
+#             account: '{? trakt.acc ?}'
+#             list: collection
+#             type: movies
+#       fields:
+#         - imdb_id
+#       action: reject
+#     if:
+#       - trakt_collected: reject
+    list_match:
       from:
         - trakt_list:
             account: '{? trakt.acc ?}'
             list: collection
             type: movies
-      fields:
-        - imdb_id
-      action: reject
+      action: reject 
+      remove_on_match: yes
     list_add:
+      - trakt_list:
+          account: '{? trakt.acc ?}'
+          list: watchlist
+          type: movies        
       - movie_list: Default
+
+#   ######################################## Sync Trakt/IMDb Movie-Watchlist to Flexget-Queue
+#   ## imdb API (used by imdb_list-plugin) is now restricted to 250 entries - everything above results in error
+#   ## CSV workaround:
+#   Get_New_Movies:
+#     interval: 12 hours
+#     template: 
+#       - no_global
+#       - '{? disable_enable_tasks.Download_Popular_Movies ?}-Download_Popular_Movies'
+#     priority: 1
+#     csv:
+#       url: http://localhost/{? imdb.listID1 ?}/WATCHLIST.csv
+#       values:
+#         title: 6
+#         imdb_id: 2
+#         imdb_url: 7
+#         url: 0
+#     verify_ssl_certificates: no
+#     accept_all: yes
+#     trakt_list:
+#       account: '{? trakt.acc ?}'
+#       list: watchlist
+#       type: movies
+#     seen: local
+#     accept_all: yes
+#     list_match:
+#       from:
+#         - trakt_list:
+#             account: '{? trakt.acc ?}'
+#             list: watchlist
+#             type: movies
+#       action: accept 
+#       remove_on_match: no
+#     if:
+#       - trakt_collected: reject
+#     list_add:
+#       - trakt_list:
+#           account: '{? trakt.acc ?}'
+#           list: Sync
+#           type: movies
+#   ######################################## Sync Trakt/IMDb Movie-Watchlist to Flexget-Queue
+#   ## imdb API (used by imdb_list-plugin) is now restricted to 250 entries - everything above results in error
+#   ## CSV workaround:
+#   Sync_New_Movies:
+#     interval: 48 hours #this task is very slow with trakt-language-translation enabled.
+#     template: 
+#       - no_global
+#       - movies_lookup
+#       - no_seen
+#     priority: 1
+#     accept_all: yes
+#     trakt_list:
+#       account: '{? trakt.acc ?}'
+#       list: Sync
+#       type: movies
+#       language: de
+#     seen: local
+#     accept_all: yes
+#     list_add:
+#       - movie_list: Default
+#     list_remove:
+#       - trakt_list:
+#           account: '{? trakt.acc ?}'
+#           list: Sync
+#           type: movies
+  ######################################## Sync Movist-Popular to own Playlist (FOR PLEX VISUAL ONLY) - Populars has other input task
+  Add_Popular_Movies_To_Trakt_List:
+    template: 
+      - no_global
+      - no_seen
+    trakt_list:
+      list: trending
+      type: movies
+    trakt_list:
+      list: popular
+      type: movies
+    list_match:
+      from:
+        - trakt_list:
+            account: '{? trakt.acc ?}'
+            list: collection
+            type: movies
+      action: reject 
+      remove_on_match: no
+    accept_all: yes
+    list_add:
       - trakt_list:
           account: '{? trakt.acc ?}'
           list: watchlist
           type: movies
-
-  ######################################## offline check/delay - add back to watchlist, if the movie is not trakt-collected within 2 weeks
+     ######################################## offline check/delay - add back to watchlist, if the movie is not trakt-collected within 2 weeks
   Offline_Check:
     interval: 24 hours
-    delay: 2 weeks
-    template: no_global
+    delay: 4 weeks
+    template: 
+      - no_global
+      - no_seen
     priority: 2
+    trakt_list:
+      account: '{? trakt.acc ?}'
+      list: collection
+      type: movies
     list_match:
       from:
         - movie_list: offline_check
       remove_on_match: yes
     accept_all: yes
     seen: local
-    crossmatch:
-      from:
-        - trakt_list:
-            account: '{? trakt.acc ?}'
-            list: collection
-            type: movies
-      fields:
-        - imdb_id
-      action: reject
     list_add:
       - movie_list: Default
       - trakt_list:
@@ -605,22 +891,6 @@ tasks:
     accept_all: yes
     set_series_begin: yes   
 
-   ######################################## Fill Favorites
-  Update_Movie_Favorites:
-    priority: 1
-    template:
-      - no_seen
-      - no_global
-    trakt_lookup:
-      account: '{? trakt.acc ?}'   
-    trakt_list:
-      account: '{? trakt.acc ?}'
-      list: collection
-      type: movies
-    if:
-      - trakt_movie_user_rating > 9: accept ## 9-10 is ideal for usage with Plex (4 Plex Stars = 8 trakt/imdb Stars ---- 5 Plex Stars = 10 trakt/imdb Stars)
-    list_add:
-      - movie_list: favorites
   ############################################################## Removings
   #
   ######################################## Remove canceled Series (Nobody wants to start watching canceled Series, or ?!)
@@ -654,9 +924,9 @@ tasks:
   Remove_CollectedSeriesFromWatchlist:
     priority: 1
     interval: 24 hours
-    seen: local
     template:
       - no_global
+      - no_seen
     trakt_list:
       account: '{? trakt.acc ?}'
       list: watchlist
@@ -738,17 +1008,19 @@ tasks:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
+      - '{? disable_enable_tasks.Movie_Size_Main ?}-Movie_Size_Main'
       - movies_lookup
       - German
+      - Movie_Global
+      - enable-3D
     quality: '{? quality.main ?}'
-#    content_size:
-#      min: '{? Minimum_Movie_Size_Main ?}'
-#      max: '{? Maximum_Movie_Size_Main ?}'
     discover:
       what:
-        - movie_list:
-            list_name: Default
-            strip_year: yes
+        - trakt_list:
+            account: '{? trakt.acc ?}'
+            list: watchlist
+            type: movies
+            language: de
       from:
 #        - search_rss: https://scenefiles.to/RSS-Movies-German-1080p?results=filecrypt&filter=1k&search={{search_term}} ##Offline
         - searchHdarea:
@@ -762,10 +1034,7 @@ tasks:
         - movie_list: Default
       single_match: yes
       remove_on_match: yes
-    regexp:
-      reject:
-        - \b3D\b
-    include: Movie_Size_Main.yml
+#    include: Movie_Size_Main.yml
     list_add:
       - movie_list: offline_check
 
@@ -778,17 +1047,17 @@ tasks:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
+      - '{? disable_enable_tasks.Movie_Size_Low ?}-Movie_Size_Low'
       - movies_lookup
       - German
     quality: '{? quality.low ?}'
-#    content_size:
-#      min: "'{? Minimum_Movie_Size_Low ?}'"
-#      max: "'{? Maximum_Movie_Size_Low ?}'"
     discover:
       what:
-        - movie_list:
-            list_name: Default
-            strip_year: yes
+        - trakt_list:
+            account: '{? trakt.acc ?}'
+            list: watchlist
+            type: movies
+            language: de
       from:
 #        - search_rss: https://scenefiles.to/RSS-Movies-German-720p?results=filecrypt&filter=1k&search={{search_term}} ## OFFLINE
         - searchHdarea:
@@ -805,7 +1074,7 @@ tasks:
     regexp:
       reject:
         - \b3D\b
-    include: Movie_Size_Low.yml
+#    include: Movie_Size_Low.yml
     list_add:
       - movie_list: offline_check
 
@@ -817,32 +1086,25 @@ tasks:
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
       - '{? disable_enable_tasks.Upgrade_Movies ?}-Upgrade-Movies'
-      - '{? disable_enable_tasks.IMDb_Persons ?}-IMDb_Persons'
+      - '{? disable_enable_tasks.IMDb_Actress ?}-IMDb_Actress'
+      - '{? disable_enable_tasks.IMDb_Actors ?}-IMDb_Actors'
+      - '{? disable_enable_tasks.Download_Best_on_IMDb ?}-Download_Best_on_IMDb'
+      - '{? disable_enable_tasks.Movie_Size_Main ?}-Movie_Size_Main'
       - movies_lookup
       - German
       - Movie_Streams
+      - Movie_Global
+      - enable-3D
     quality: '{? quality.main ?}'
-#    content_size:
-#      min: '{? Minimum_Movie_Size_Main ?}'
-#      max: '{? Maximum_Movie_Size_Main ?}'
     list_match:
       from:
-        - movie_list: Default
         - trakt_list:
             account: '{? trakt.acc ?}'
-            list: '{? trakt.favorites ?}'
+            list: watchlist
             type: movies
       single_match: yes
       remove_on_match: yes
-    list_remove:
-      - trakt_list:
-          account: '{? trakt.acc ?}'
-          list: watchlist
-          type: movies
-    regexp:
-      reject:
-        - \b3D\b
-    include: Movie_Size_Main.yml
+#    include: Movie_Size_Main.yml
 
   ######################################## Search based on Stream
   Movies_Watchlist_Stream_DE_Low:
@@ -852,62 +1114,58 @@ tasks:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
-      - '{? disable_enable_tasks.IMDb_Persons ?}-IMDb_Persons'
+      - '{? disable_enable_tasks.IMDb_Actress ?}-IMDb_Actress'
+      - '{? disable_enable_tasks.IMDb_Actors ?}-IMDb_Actors'
+      - '{? disable_enable_tasks.Movie_Size_Low ?}-Movie_Size_Low'
+      - '{? disable_enable_tasks.Download_Best_on_IMDb ?}-Download_Best_on_IMDb'
       - movies_lookup
       - German
       - Movie_Streams
     quality: '{? quality.low ?}'
-#    content_size:
-#      min: '{? Minimum_Movie_Size_Low ?}'
-#      max: '{? Maximum_Movie_Size_Low ?}'
     if:
       - trakt_collected: reject
     list_match:
       from:
-        - movie_list: Default
-      single_match: yes
-      remove_on_match: yes
-    crossmatch:
-      from:
         - trakt_list:
             account: '{? trakt.acc ?}'
-            list: '{? trakt.Favorite_List ?}'
-            type: movies      
-      fields:
-        - imdb_id
-      action: reject
+            list: watchlist
+            type: movies
+      single_match: yes
+      remove_on_match: yes
     regexp:
       reject:
         - \b3D\b
-    include: Movie_Size_Low.yml
+#    include: Movie_Size_Low.yml
             
   ######################################## 3D
-  Movies_3D_Stream:
-    proper_movies: yes  #accept Quality-fixes (Proper means there was a bug in the release before)
-    priority: 3
-    template:
-      - '{? disable_enable_tasks.Download_3D ?}-Download_3D'    
-      - '{? DownloadManager ?}-Defaults'
-      - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
-      - '{? DownloadManager ?}-3D'
-      - movies_lookup
-      - German
-      - Movie_Streams
-    quality: '{? quality.main ?}'
-    list_match:
-      from:
-        - movie_list: Default
-        - trakt_list:
-            account: '{? trakt.acc ?}'
-            list: collection
-            type: movies  
-      remove_on_match: no
-      single_match: yes
-    regexp:
-      reject_excluding:
-        - \b3D\b
-    seen: local
-    include: Movie_Size_3D.yml
+#   Movies_3D_Stream:
+#     proper_movies: yes  #accept Quality-fixes (Proper means there was a bug in the release before)
+#     priority: 3
+#     template:
+#       - '{? DownloadManager ?}-Defaults'
+#       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
+#       - '{? DownloadManager ?}-3D'
+#       - movies_lookup
+#       - German
+#       - Movie_Streams
+#     quality: '{? quality.main ?}'
+#     list_match:
+#       from:
+#         - trakt_list:
+#             account: '{? trakt.acc ?}'
+#             list: watchlist
+#             type: movies
+#         - trakt_list:
+#             account: '{? trakt.acc ?}'
+#             list: collection
+#             type: movies
+#       remove_on_match: no
+#       single_match: yes
+#     regexp:
+#       reject_excluding:
+#         - \b3D\b
+#     seen: local
+#     include: Movie_Size_3D.yml
 
   ######################################## Search based on Stream
 #   Movies_Watchlist_Stream_EN_Sceper:
@@ -923,7 +1181,11 @@ tasks:
 #     quality: '{? quality.main ?}'
 #     list_match:
 #       from:
-#         - movie_list: Default
+#         - trakt_list:
+#             account: '{? trakt.acc ?}'
+#             list: watchlist
+#             type: movies
+#             language: de
 #       remove_on_match: no
 #     sceper: 'http://sceper.ws/category/movies'
 #     disable: [urlrewrite_redirect]
@@ -936,34 +1198,38 @@ tasks:
 #       - not imdb_languages or not 'english' in imdb_languages: reject
 #       - 'german' in imdb_languages: reject
 #   ######################################## 10 Star Rating = high quality
- 
-  Movies_10Star_HighQuality_Search:
-    priority: 6
-    seen: local
-    template:
-      - '{? DownloadManager ?}-Defaults'
-      - '{? DownloadManager ?}-Archive-Movies'
-      - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
-      - '{? disable_enable_tasks.Upgrade_Movies ?}-Upgrade-Movies'
-      - movies_lookup
-      - German
-    discover:
-      what:
-        - movie_list: favorites
-      from:
-        - searchHdarea:
-            hoster: '{? Settings.Hoster ?}'
-        - searchHdworld:
-            hoster: '{? Settings.Hoster ?}'
-        - searchMovieBlog:
-            hoster: '{? Settings.Hoster ?}'
-    quality: '{? quality.high ?}'
-    list_match:
-      from:
-        - movie_list: favorites
-      single_match: yes
-      remove_on_match: yes
-    include: Movie_Size_High.yml
+#  
+#   Movies_10Star_HighQuality_Search:
+#     priority: 6
+#     seen: local
+#     template:
+#       - '{? DownloadManager ?}-Defaults'
+#       - '{? DownloadManager ?}-Archive-Movies'
+#       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
+#       - '{? disable_enable_tasks.Upgrade_Movies ?}-Upgrade-Movies'
+#       - movies_lookup
+#       - German
+#     discover:
+#       what:
+#         - trakt_list:
+#             account: '{? trakt.acc ?}'
+#             list: '{? trakt.Favorites ?}'
+#             type: movies
+#             language: de
+#       from:
+#         - searchHdarea:
+#             hoster: '{? Settings.Hoster ?}'
+#         - searchHdworld:
+#             hoster: '{? Settings.Hoster ?}'
+#         - searchMovieBlog:
+#             hoster: '{? Settings.Hoster ?}'
+#     quality: '{? quality.high ?}'
+#     list_match:
+#       from:
+#         - movie_list: favorites
+#       single_match: yes
+#       remove_on_match: yes
+#     include: Movie_Size_High.yml
 
 ############################################################################################################ Series ############################################################################################################
 
@@ -999,7 +1265,6 @@ tasks:
             account: '{? trakt.acc ?}'
             list: collection
             type: shows
-
   ######################################## Stream and Search for Serienunkies
 
   Series_Collection_DE_Stream:
@@ -1025,44 +1290,43 @@ tasks:
       action: reject
     if:     
       - trakt_series_status == 'canceled': reject
-  ######################################## Based on Series-Collection "English"
-
-  Series_Collection_EN:
-    priority: 8
-    delay: 48 hours
-    template:
-      - '{? DownloadManager ?}-Archive-Series'
-      - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
-#      - 'Discover-{? series.backfill ?}-Backfill'
-#      - '{? series.backfill ?}-Upgrade-Series'
-      - series_lookup
-      - English
-#      - Series_Streams_English
-    quality: '{? quality.main ?}'
-    seen: local
-    discover:
-      what:
-        - next_trakt_episodes:
-            account: '{? trakt.acc ?}'
-            context: collected
-            list: collection
-            position: next
-            strip_dates: yes
-      from:
-        - searchHdarea:
-            hoster: '{? Settings.Hoster ?}'
-        - searchHdworld:
-            hoster: '{? Settings.Hoster ?}'
-        - searchMovieBlog:
-            hoster: '{? Settings.Hoster ?}'
-    list_add:
-      - trakt_list:
-          account: '{? trakt.acc ?}'
-          list: '{? trakt.English.Series ?}'
-          type: episodes    
-#    if:
-#      - trakt_languages == ['german']: reject
-#      - imdb_languages == ['german']: reject
+#   ######################################## Based on Series-Collection "English"
+# 
+#   Series_Collection_EN:
+#     priority: 8
+#     delay: 48 hours
+#     template:
+#       - '{? DownloadManager ?}-Archive-Series'
+#       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
+# #      - 'Discover-{? series.backfill ?}-Backfill'
+# #      - '{? series.backfill ?}-Upgrade-Series'
+#       - series_lookup
+#       - English
+# #      - Series_Streams_English
+#     quality: '{? quality.main ?}'
+#     seen: local
+#     discover:
+#       what:
+#         - next_trakt_episodes:
+#             account: '{? trakt.acc ?}'
+#             context: collected
+#             list: collection
+#             position: next
+#       from:
+#         - searchHdarea:
+#             hoster: '{? Settings.Hoster ?}'
+#         - searchHdworld:
+#             hoster: '{? Settings.Hoster ?}'
+#         - searchMovieBlog:
+#             hoster: '{? Settings.Hoster ?}'
+#     list_add:
+#       - trakt_list:
+#           account: '{? trakt.acc ?}'
+#           list: '{? trakt.English.Series ?}'
+#           type: episodes    
+# #    if:
+# #      - trakt_languages == ['german']: reject
+# #      - imdb_languages == ['german']: reject
   ######################################## Watchlist-Premieres | Needs work for: Prefer DE, otherwise EN
   ################################## What it does: Download Episode 1-3 and add to custom trakt-OnHold-List 
   Series_Watchlist:
@@ -1077,6 +1341,7 @@ tasks:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Series'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
+      - '{? disable_enable_tasks.Download_Popular_Series ?}-Download_Popular_Series'
       - 'Discover-{? series.backfill ?}-Backfill'
       - series_lookup
       - German
@@ -1110,7 +1375,6 @@ tasks:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-YouTube'
       - no_global
-    seen: local
 ###############################################################################################################################################
 ## SPECIALS ############################################################################################config#by#snickers2k###################
 ###############################################################################################################################################
@@ -1135,7 +1399,7 @@ tasks:
         title: 1
         quality: 2
         url: 3
-#   ######################################## Search based on Stream (THIS PLUGIN IS BASED ON https://flexget.com/Plugins/from_imdb AND NEEDS "pip install imdbpy")
+  ######################################## Search based on Stream (THIS PLUGIN IS BASED ON https://flexget.com/Plugins/from_imdb AND NEEDS "pip install imdbpy")
 #   Studio_Downloads:
 #     priority: 1
 #     seen: local
@@ -1153,77 +1417,88 @@ tasks:
 #         - co0072491 ## Industrial Light & Magic (e.g. Indiana Jones)
 #         - co0103818 ## Framestore (e.g. JungleBook)
 #       max_entries: 99999
-#     crossmatch:
-#       from:
-#         - trakt_list:
-#             account: '{? trakt.acc ?}'
-#             list: collection
-#             type: movies
-#       fields:
-#         - imdb_id
-#       action: reject
 #     list_add:
 #       - trakt_list:
 #           account: '{? trakt.acc ?}'
-#           list: collection
+#           list: watchlist
 #           type: movies
 #     if:
 #       - trakt_collected: reject
 
-  ######################################## Download IMDb's Best-Rated
-  Movies_Best_on_IMDb:
-    priority: 8
-    manual: yes ##testing
-    template:
-      - '{? DownloadManager ?}-Defaults'
-      - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
-      - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
-#      - '{? disable_enable_tasks.Download_Best_on_IMDb ?}-Download_Best_on_IMDb'
-      - movies_lookup
-      - German 
-      - Movie_Streams
-    quality: '{? quality.main ?}'
-    imdb:
-      min_year: 1980
-    if:
-      - trakt_collected: reject
-      - "'musical' in (imdb_genres or [])": reject
-      - "'documentary' in (imdb_genres or [])": reject
-      - imdb_year > now.year - 2:
-          imdb:
-            min_score: 8.0
-            min_votes: 100000
-      - imdb_year > now.year - 5:
-          imdb:
-            min_score: 7.7
-            min_votes: 200000
-      - imdb_year > now.year - 10:
-          imdb:
-            min_score: 7.4
-            min_votes: 350000
-      - imdb_year < now.year - 60:
-          imdb:
-            min_score: 7.2
-            min_votes: 500000
-            min_year: 1980
-    require_field:
-      - imdb_id
+#   ######################################## Download IMDb's Best-Rated
+#   Movies_Best_on_IMDb:
+#     priority: 8
+#     manual: yes ##testing
+#     template:
+#       - '{? DownloadManager ?}-Defaults'
+#       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
+#       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
+#       - '{? disable_enable_tasks.Download_Best_on_IMDb ?}-Download_Best_on_IMDb'
+#       - movies_lookup
+#       - German 
+#       - Movie_Streams
+#     quality: '{? quality.main ?}'
+#     imdb:
+#       min_year: 1960
+#     if:
+#       - trakt_collected: reject
+#       - "'musical' in (imdb_genres or [])": reject
+#       - "'documentary' in (imdb_genres or [])": reject
+#       - imdb_year < now.year - 2:
+#           imdb:
+#             min_score: 5.0
+#             min_votes: 100000
+#       - imdb_year < now.year - 5:
+#           imdb:
+#             min_score: 5.5
+#             min_votes: 200000
+#       - imdb_year < now.year - 15:
+#           imdb:
+#             min_score: 5.7
+#             min_votes: 350000
+#       - imdb_year < now.year - 100:
+#           imdb:
+#             min_score: 6.0
+#             min_votes: 500000
+#       - "set(['animation', 'family']).issubset(set(imdb_genres or []))":
+#           imdb:
+#             min_score: 6
+#             min_votes: 20000
+#     require_field:
+#       - imdb_id
 
-  Specials: #(Second IMDB-User Task - not supported)
+  Specials: #custom-task
     template:
-      - no_global
-      - no_seen
       - '{? disable_enable_tasks.Download_Specials ?}-Download_Specials'
     priority: 10
 
 
-  Specials2: #(Third IMDB-User Task - not supported)
+  Specials2:  #custom-task
     template:
       - no_global
       - no_seen     
       - '{? disable_enable_tasks.Download_Specials2 ?}-Download_Specials2'
     priority: 10
- #   include: Specials2.yml
+
+  ######################################## Remove Collected trakt-Watchlist
+  Add_Favorite_Actress_Movies_to_List:
+    priority: 8
+    interval: 70 hours
+    template:
+      - no_global
+      - no_seen
+      - '{? disable_enable_tasks.IMDb_Actress ?}-IMDb_Actress'
+    list_match:
+      from:
+        - trakt_list:
+            account: '{? trakt.acc ?}'
+            list: collection
+            type: movies
+    list_add:
+      - trakt_list:
+          account: '{? trakt.acc ?}'
+          list: FavActress
+          type: movies      
 
 
   ######################################## eBooks
@@ -1240,25 +1515,7 @@ tasks:
 #     seen: local
 # 
 # 
-# 
-#   Sync_Christmas_Movies:
-#     interval: 9 weeks
-#     template: 
-#       - no_global
-#       - no_seen
-#     priority: 8
-#     accept_all: yes
-#     imdb_watchlist:
-#       user_id: ur9197672
-#       list: ls000096828
-#       force_language: de-de
-#     accept_all: yes
-#     list_add:
-#       - trakt_list:
-#           account: '{? trakt.acc ?}'
-#           list: Christmas
-#           type: movies
-#       
+#   
 
 ###############################################################################################################################################
 ## MISC ################################################################################################config#by#snickers2k###################
@@ -1271,4 +1528,10 @@ schedules:
     schedule:
       hour: '{? flexget.scheduler ?}'
 ###############
-web_server: yes
+web_server:
+#  bind: 0.0.0.0
+  port: 3539
+#  ssl_certificate: '/etc/ssl/private/myCert.pem'
+#  ssl_private_key: '/etc/ssl/private/myKey.key'
+  web_ui: yes
+  base_url: /foo
