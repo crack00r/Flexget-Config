@@ -313,6 +313,34 @@ templates:
   disable-Download_eBooks:
     manual: yes
 
+  enable-OnHold: 
+    exec:
+      - echo "OnHold Series activated"
+    crossmatch:
+      from:
+        - trakt_list:
+            account: '{? trakt.acc ?}'
+            list: '{? trakt.OnHold ?}'
+            type: shows
+      fields:
+        - imdb_id
+      action: reject
+
+  disable-OnHold:
+    exec:
+      - echo "Not use OnHold"
+
+  enable-Canceled: 
+    exec:
+      - echo "Stop Downloading canceled Series"
+    if:     
+      - trakt_series_status == 'canceled': reject
+
+  disable-Canceled:
+    exec:
+      - echo "Download canceled Series"
+
+
   enable-Download_Trending_Movies: 
     exec:
       - echo "Crawling Trending Movies"
@@ -1244,21 +1272,11 @@ tasks:
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
       - 'Discover-{? series.backfill ?}-Backfill'
       - '{? series.backfill ?}-Upgrade-Series'
+      - '{? disable_enable_tasks.OnHold ?}-OnHold'      
+      - '{? disable_enable_tasks.Canceled ?}-Canceled'   
       - German
-      - series_lookup
+      - series_lookup   
     quality: '{? quality.main ?}'
-    # Crossmatch for Series on HOLD
-    crossmatch:
-      from:
-        - trakt_list:
-            account: '{? trakt.acc ?}'
-            list: '{? trakt.OnHold ?}'
-            type: shows
-      fields:
-        - imdb_id
-      action: reject
-    if:     
-      - trakt_series_status == 'canceled': reject
     list_match:
       from:
         - trakt_list:
@@ -1274,22 +1292,19 @@ tasks:
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Series'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
       - '{? series.backfill ?}-Upgrade-Series'
+      - '{? disable_enable_tasks.OnHold ?}-OnHold'      
+      - '{? disable_enable_tasks.Canceled ?}-Canceled'     
       - German
       - series_lookup
       - Series_Streams
     quality: '{? quality.main ?}'
-    # Crossmatch for Series on HOLD
-    crossmatch:
+    list_match:
       from:
         - trakt_list:
             account: '{? trakt.acc ?}'
-            list: '{? trakt.OnHold ?}'
+            list: collection
             type: shows
-      fields:
-        - imdb_id
-      action: reject
-    if:     
-      - trakt_series_status == 'canceled': reject
+
 #   ######################################## Based on Series-Collection "English"
 # 
 #   Series_Collection_EN:
@@ -1342,6 +1357,7 @@ tasks:
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Series'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
       - '{? disable_enable_tasks.Download_Popular_Series ?}-Download_Popular_Series'
+      - '{? disable_enable_tasks.Canceled ?}-Canceled'   
       - 'Discover-{? series.backfill ?}-Backfill'
       - series_lookup
       - German
@@ -1361,8 +1377,6 @@ tasks:
     regexp:
       reject_excluding:
         - \bS01(.E0|E0)('{? series.Stop_watchlist_counter ?}')\b  # counter has to be set in options.yml
-    if:     
-      - trakt_series_status == 'canceled': reject
 ############################################################################################################ YouTube ############################################################################################################
   YouTube-Personal-Playlist:
     priority: 10
