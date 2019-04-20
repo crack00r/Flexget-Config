@@ -129,7 +129,10 @@ disable_enable_tasks: # "enable" and "disable" are possible values
 
   IMDb_Actress: enable #  This refers to Actress.yml 
   IMDb_Actors: enable #  This refers to Actors.yml 
-  
+
+  OnHold: disable # Enable/disable OnHold Watchlist Series feature
+  Canceled: disable # enable/disable downloading canceled Series (ENABLE stops downloading canceled Series)
+
 ##########################################################################################################################################################################
 ##########################################################################################################################################################################
 ##########################################################################################################################################################################
