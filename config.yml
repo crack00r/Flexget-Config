@@ -856,6 +856,7 @@ tasks:
 #           type: movies
   ######################################## Sync Movist-Popular to own Playlist (FOR PLEX VISUAL ONLY) - Populars has other input task
   Add_Popular_Movies_To_Trakt_List:
+    manual: yes
     template: 
       - no_global
       - no_seen
@@ -873,7 +874,6 @@ tasks:
             type: movies
       action: reject 
       remove_on_match: no
-    accept_all: yes
     list_add:
       - trakt_list:
           account: '{? trakt.acc ?}'
