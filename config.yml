@@ -396,10 +396,12 @@ templates:
   enable-Download_Trending_Movies: 
     exec:
       - echo "Crawling Trending Movies"
-    trakt_list:
-      list: trending
-      type: movies
-      limit: 200
+    limit:
+      amount: 200
+      from: 
+        trakt_list:
+          list: trending
+          type: movies
   disable-Download_Trending_Movies:
     exec:
       - echo "no Trending Movies to consider"
@@ -407,10 +409,12 @@ templates:
   enable-Download_Popular_Movies: 
     exec:
       - echo "Crawling Popular Movies"
-    trakt_list:
-      list: popular
-      type: movies
-      limit: 1000
+    limit:
+      amount: 1000
+      from: 
+        trakt_list:
+          list: popular
+          type: movies
   disable-Download_Popular_Movies:
     exec:
       - echo "no Popular Movies to consider"
@@ -418,10 +422,12 @@ templates:
   enable-Download_Popular_Shows: 
     exec:
       - echo "Crawling Popular Shows"
-    trakt_list:
-      list: popular
-      type: shows
-      limit: 100
+    limit:
+      amount: 100
+      from: 
+        trakt_list:
+          list: popular
+          type: shows
   disable-Download_Popular_Shows:
     exec:
       - echo "no Popular Shows to consider"
@@ -429,10 +435,12 @@ templates:
   enable-Download_Trending_Shows: 
     exec:
       - echo "Crawling Trending Shows"
-    trakt_list:
-      list: trending
-      type: shows
-      limit: 15
+    limit:
+      amount: 15
+      from: 
+        trakt_list:
+          list: trending
+          type: shows
   disable-Download_Trending_Shows:
     exec:
       - echo "no Trending Shows to consider"
