@@ -74,6 +74,7 @@ templates:
           replace:
             regexp: 'é'
             format: 'e'
+
     ######################################## Global Exclude  (For testing: https://regex101.com)
     regexp:
       reject:
@@ -100,6 +101,38 @@ templates:
         - \bflac\b   # flac
         - \b(ac3(.|))md|(mic(.|))dubbed\b # LD/Line-Dubbed (we want original Dubbed-Line (DL)
         - \b(ac3(.|))ld|(line(.|))dubbed\b # LD/Line-Dubbed (we want original Dubbed-Line (DL)
+
+    ######################################## Global Log-Filter - what and how should be logged (flexget.log in the config directory)
+#     log_filter:
+#       task:
+#         - marked seen
+#         - because quality already downloaded
+#         - because episode has already been downloaded
+#         - Task does not have any
+#       move:
+#         - left because it exceeds safety value
+#         - does not exists (anymore)
+#       urlrewriter:
+#         - URL rewritten to
+#       enzyme.mkv:
+#         - Reading
+#         - Processing
+#       enzyme.parsers.ebml.core:
+#         - ignored
+#         - Maximum level
+#       subliminal.video:
+#         - Scanning video
+#       parser_internal:
+#         - appears to be an episode pack
+#       content_size:
+#         - rejecting
+#       search_rss:
+#         - Error
+#       assume_quality:
+#         - ""
+#       utils.requests:
+#         - Waiting
+
 ###############################################################################################################################################
 ### Templates #################################################################################################################################
 ###############################################################################################################################################
@@ -273,7 +306,7 @@ templates:
       max: 30000 #"'{? Maximum_Movie_Size_Main ?}'"
   disable-Movie_Size_Main:
     exec:
-      - echo "no Movie-Size" 
+      - echo "no Movie-Size to consider" 
 
   enable-Movie_Size_Low:
     content_size:
@@ -281,12 +314,34 @@ templates:
       max: 10000 #"'{? Maximum_Movie_Size_Low ?}'"
   disable-Movie_Size_Low:
     exec:
-      - echo "no Movie-Size" 
+      - echo "no Movie-Size to consider" 
 
   enable-Download_Best_on_IMDb:
-    manual: no
+    if:
+      - imdb_year < now.year - 2:
+          imdb:
+            min_score: 5.0
+            min_votes: 100000
+      - imdb_year < now.year - 5:
+          imdb:
+            min_score: 5.5
+            min_votes: 200000
+      - imdb_year < now.year - 15:
+          imdb:
+            min_score: 5.7
+            min_votes: 300000
+      - imdb_year < now.year - 100:
+          imdb:
+            min_score: 6.0
+            min_votes: 400000
+      - "set(['animation']).issubset(set(imdb_genres or []))":
+          imdb:
+            min_score: 6.0
+            min_votes: 50000
+
   disable-Download_Best_on_IMDb:
-    manual: yes 
+    exec:
+      - echo "Not loading Best on IMDb" 
 
   enable-YouTube_Downloads: 
     manual: no
@@ -325,7 +380,6 @@ templates:
       fields:
         - imdb_id
       action: reject
-
   disable-OnHold:
     exec:
       - echo "Not use OnHold"
@@ -335,22 +389,17 @@ templates:
       - echo "Stop Downloading canceled Series"
     if:     
       - trakt_series_status == 'canceled': reject
-
   disable-Canceled:
     exec:
       - echo "Download canceled Series"
-
 
   enable-Download_Trending_Movies: 
     exec:
       - echo "Crawling Trending Movies"
     trakt_list:
-      list: popular
-      type: movies
-    trakt_list:
       list: trending
       type: movies
-
+      limit: 200
   disable-Download_Trending_Movies:
     exec:
       - echo "no Trending Movies to consider"
@@ -361,10 +410,7 @@ templates:
     trakt_list:
       list: popular
       type: movies
-    trakt_list:
-      list: popular
-      type: movies
-
+      limit: 1000
   disable-Download_Popular_Movies:
     exec:
       - echo "no Popular Movies to consider"
@@ -375,10 +421,7 @@ templates:
     trakt_list:
       list: popular
       type: shows
-    trakt_list:
-      list: popular
-      type: shows
-
+      limit: 100
   disable-Download_Popular_Shows:
     exec:
       - echo "no Popular Shows to consider"
@@ -389,15 +432,10 @@ templates:
     trakt_list:
       list: trending
       type: shows
-    trakt_list:
-      list: trending
-      type: shows
-
+      limit: 15
   disable-Download_Trending_Shows:
     exec:
       - echo "no Trending Shows to consider"
-
-
 
   enable-IMDb_Actress: 
     include: Actress.yml
@@ -414,7 +452,9 @@ templates:
   enable-3D: 
     if:
       - "'3D' in title":
-          exec: echo "packageName={{title}}-({{imdb_name}})-({{imdb_year}})-{{imdb_id}}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+          exec: 
+            - echo "packageName={{title}}-({{imdb_name}})-({{imdb_year}})-{{imdb_id}}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+            - echo "downloadFolder={? DLFolder ?}/{? DLFolder3D ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
           disable: seen
           list_add:
             - movie_list: 3D
@@ -430,7 +470,6 @@ templates:
     if:
       - trakt_movie_user_rating > 9: ## 9-10 is ideal for usage with Plex (4 Plex Stars = 8 trakt/imdb Stars ---- 5 Plex Stars = 10 trakt/imdb Stars)
           quality: '{? quality.high ?}'
-
 
   enable-Download_Best_on_IMDb:
     if:
@@ -744,37 +783,17 @@ tasks:
   ## CSV workaround:
   Sync_Movies:
     interval: 24 hours
-    only_new: yes
     template: 
       - no_global
+      - no_seen
       - '{? disable_enable_tasks.Download_Popular_Movies ?}-Download_Popular_Movies'
       - '{? disable_enable_tasks.Download_Trending_Movies ?}-Download_Trending_Movies'
       - movies_lookup
     priority: 1
-#     csv:
-#       url: http://localhost/{? imdb.listID1 ?}/WATCHLIST.csv
-#       values:
-#         title: 6
-#         imdb_id: 2
-#         imdb_url: 7
-#         url: 0
-    accept_all: yes
     trakt_list:
       account: '{? trakt.acc ?}'
       list: watchlist
       type: movies
-    seen: local
-#     crossmatch:
-#       from:
-#         - trakt_list:
-#             account: '{? trakt.acc ?}'
-#             list: collection
-#             type: movies
-#       fields:
-#         - imdb_id
-#       action: reject
-#     if:
-#       - trakt_collected: reject
     list_match:
       from:
         - trakt_list:
@@ -789,7 +808,19 @@ tasks:
           list: watchlist
           type: movies        
       - movie_list: Default
-
+    if:
+      - trakt_votes < 20: reject
+      - trakt_score < 4.0: reject
+      - trakt_collected: reject
+#      - trakt_movie_user_rating < 2: reject
+      - imdb_votes < 400: reject
+    imdb:
+      min_score: 4.0
+      min_votes: 400
+      reject_genres:
+        - musical
+        - documentary
+     
 #   ######################################## Sync Trakt/IMDb Movie-Watchlist to Flexget-Queue
 #   ## imdb API (used by imdb_list-plugin) is now restricted to 250 entries - everything above results in error
 #   ## CSV workaround:
@@ -854,31 +885,6 @@ tasks:
 #           account: '{? trakt.acc ?}'
 #           list: Sync
 #           type: movies
-  ######################################## Sync Movist-Popular to own Playlist (FOR PLEX VISUAL ONLY) - Populars has other input task
-  Add_Popular_Movies_To_Trakt_List:
-    manual: yes
-    template: 
-      - no_global
-      - no_seen
-    trakt_list:
-      list: trending
-      type: movies
-    trakt_list:
-      list: popular
-      type: movies
-    list_match:
-      from:
-        - trakt_list:
-            account: '{? trakt.acc ?}'
-            list: collection
-            type: movies
-      action: reject 
-      remove_on_match: no
-    list_add:
-      - trakt_list:
-          account: '{? trakt.acc ?}'
-          list: watchlist
-          type: movies
      ######################################## offline check/delay - add back to watchlist, if the movie is not trakt-collected within 2 weeks
   Offline_Check:
     interval: 24 hours
@@ -1037,10 +1043,10 @@ tasks:
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
       - '{? disable_enable_tasks.Movie_Size_Main ?}-Movie_Size_Main'
+      - '{? disable_enable_tasks.3D ?}-3D'
       - movies_lookup
       - German
       - Movie_Global
-      - enable-3D
     quality: '{? quality.main ?}'
     discover:
       what:
@@ -1126,10 +1132,7 @@ tasks:
     quality: '{? quality.main ?}'
     list_match:
       from:
-        - trakt_list:
-            account: '{? trakt.acc ?}'
-            list: watchlist
-            type: movies
+        - movie_list: Default
       single_match: yes
       remove_on_match: yes
 #    include: Movie_Size_Main.yml
@@ -1154,10 +1157,7 @@ tasks:
       - trakt_collected: reject
     list_match:
       from:
-        - trakt_list:
-            account: '{? trakt.acc ?}'
-            list: watchlist
-            type: movies
+        - movie_list: Default
       single_match: yes
       remove_on_match: yes
     regexp:
@@ -1439,47 +1439,6 @@ tasks:
 #     if:
 #       - trakt_collected: reject
 
-#   ######################################## Download IMDb's Best-Rated
-#   Movies_Best_on_IMDb:
-#     priority: 8
-#     manual: yes ##testing
-#     template:
-#       - '{? DownloadManager ?}-Defaults'
-#       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
-#       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
-#       - '{? disable_enable_tasks.Download_Best_on_IMDb ?}-Download_Best_on_IMDb'
-#       - movies_lookup
-#       - German 
-#       - Movie_Streams
-#     quality: '{? quality.main ?}'
-#     imdb:
-#       min_year: 1960
-#     if:
-#       - trakt_collected: reject
-#       - "'musical' in (imdb_genres or [])": reject
-#       - "'documentary' in (imdb_genres or [])": reject
-#       - imdb_year < now.year - 2:
-#           imdb:
-#             min_score: 5.0
-#             min_votes: 100000
-#       - imdb_year < now.year - 5:
-#           imdb:
-#             min_score: 5.5
-#             min_votes: 200000
-#       - imdb_year < now.year - 15:
-#           imdb:
-#             min_score: 5.7
-#             min_votes: 350000
-#       - imdb_year < now.year - 100:
-#           imdb:
-#             min_score: 6.0
-#             min_votes: 500000
-#       - "set(['animation', 'family']).issubset(set(imdb_genres or []))":
-#           imdb:
-#             min_score: 6
-#             min_votes: 20000
-#     require_field:
-#       - imdb_id
 
   Specials: #custom-task
     template:
@@ -1514,7 +1473,6 @@ tasks:
           list: FavActress
           type: movies      
 
-
   ######################################## eBooks
 # 
 #   eBooks:
@@ -1531,6 +1489,59 @@ tasks:
 # 
 #   
 
+###############################################################################################################################################
+## MOVE ################################################################################################config#by#snickers2k###################
+###############################################################################################################################################
+
+  move-Movies:
+    manual: yes
+    template:
+      - no_global
+      - no_seen
+      - movies_lookup
+    accept_all: yes 
+    filesystem:
+      path: '{? DLFolder ?}/{? DLFolderArchive ?}/Series/'
+      recursive: yes 
+      regexp: '.*\.(avi|mkv|mp4|m4v)$'
+    move:
+      to: "{? filesystem.mountpoint.movies ?}{{trakt_movie_name|default(movie_name)|pathscrub}} ({{trakt_movie_year|default(movie_year)}})"
+      rename: "{{trakt_movie_name|default(movie_name)|pathscrub}} ({{trakt_movie_year|default(movie_year)}}){% if quality|default(False) %} - [{{quality}}]{% endif %}"
+      along:
+        extensions:
+          - sub
+          - srt
+          - nfo
+      clean_source: 200  #remove samples and trash
+    exec:
+      on_exit:
+        phase: find "{? DLFolder ?}/{? DLFolderArchive ?}/Series/"* -type d -empty -delete
+
+
+  move-Episodes:
+    manual: yes
+    template:
+      - no_global
+      - no_seen
+      - series_lookup
+    accept_all: yes 
+    filesystem:
+      path: '{? DLFolder ?}/{? DLFolderArchive ?}/Series/'
+      recursive: yes 
+      regexp: '.*\.(avi|mkv|mp4|m4v)$'
+    move:
+      to: "{? filesystem.mountpoint.series ?}/{{tvdb_series_name|default(series_name)|pathscrub}}/S{{tvdb_season|pad(2)|default(series_season|pad(2))}}/"
+      rename: "{{tvdb_series_name|default(series_name)|pathscrub}} - {{tvdb_ep_id|default(series_id)}}{% if tvdb_ep_name|default(False) %} - {{tvdb_ep_name|pathscrub}}{% endif %}{% if quality|default(False) %} - [{{quality}}]{% endif %}"
+      along:
+        extensions:
+          - sub
+          - srt
+          - nfo
+      clean_source: 100 #remove samples and trash
+    exec:
+      on_exit:
+        phase: find "{? DLFolder ?}/{? DLFolderArchive ?}/Series/"* -type d -empty -delete
+        
 ###############################################################################################################################################
 ## MISC ################################################################################################config#by#snickers2k###################
 ###############################################################################################################################################
