@@ -7,6 +7,7 @@ from flexget.utils.tools import parse_filesize
 from .BaseSearchPlugin import BaseSearchPlugin, SearchResultEntry
 from flexget.components.sites.utils import normalize_unicode
 
+# This Plugin searches HD-Area, HDWorld and MovieBlog together
 
 #CATEGORIES = {
 #    # Hoster
