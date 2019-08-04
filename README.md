@@ -16,7 +16,6 @@ You only need to fill in your credentials. <br>
 - merge any external trakt list to own watchlist <br>
 - perform search on multiple sites <br>
 - perform daily crawl on multiple sites <br>
-<br>
 - Filebot-like file-moving and sorting of Library (coming soon) <br>
 <br>
 - Supported-Downloaders: JDownloader and pyLoad <br>
