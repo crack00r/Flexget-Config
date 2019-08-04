@@ -3,9 +3,23 @@
 Flexget-Config by snickers<br>
 thanks to [topy](https://github.com/topy) for Plugins <br>
 
+Mainly for German Users, but help with other languages is appreciated <br>
 
-Easy to use Flexget config with support of secrets file. You only need to fill in your credentials. <br>
-Mainly for German Users <br>
+### Features<br>
+
+- Easy to use Flexget config with support of secrets file. <br> 
+You only need to fill in your credentials. <br>
+
+- Manual adding via trakt.tv Watchlist
+- Automatic adding via trakt_popular, trakt_trending and Ombi
+
+- merge_custom trakt list to watchlist
+- perform search on multiple sites
+- perform daily crawl on multiple sites
+
+- Filebot-like file-moving and sorting of Library (coming soon)
+
+- Supported-Downloaders: JDownloader and pyLoad
 
 
 ### support-Forum<br>
