@@ -9,18 +9,18 @@ Mainly for German Users, but help with other languages is appreciated <br>
 
 - Easy to use Flexget config with support of secrets file. <br> 
 You only need to fill in your credentials. <br>
-
-- Manual adding via trakt.tv Watchlist
-- Automatic adding via trakt_popular, trakt_trending and Ombi
-
-- merge_custom trakt list to watchlist
-- perform search on multiple sites
-- perform daily crawl on multiple sites
-
-- Filebot-like file-moving and sorting of Library (coming soon)
-
-- Supported-Downloaders: JDownloader and pyLoad
-
+<br>
+- Manual adding via trakt.tv Watchlist <br>
+- Automatic adding via trakt_popular, trakt_trending and Ombi <br>
+<br>
+- merge_custom trakt list to watchlist <br>
+- perform search on multiple sites <br>
+- perform daily crawl on multiple sites <br>
+<br>
+- Filebot-like file-moving and sorting of Library (coming soon) <br>
+<br>
+- Supported-Downloaders: JDownloader and pyLoad <br>
+<br>
 
 ### support-Forum<br>
 https://board.jdownloader.org/showthread.php?t=67579  <br>
