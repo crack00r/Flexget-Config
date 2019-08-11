@@ -1,7 +1,8 @@
 import sys, feedparser, codecs, re
 from datetime import datetime
+from flexget.components.sites.utils import normalize_unicode
 
-### setup , please:    
+### setup , please:
 # output_folder for rss_feed_1-10.xml with "/" on the end
 OutputFolder= "./"
 #max. 200 entries per file
@@ -28,7 +29,7 @@ while j<(files+1):
   outputFile.write("\t\t<language>de</language>\n")
   outputFile.write("\t\t<lastBuildDate>"+datetime.now().strftime('%a, %d %b %Y %H:%M:%S +0200')+"</lastBuildDate>\n")
   outputFile.write("\t\t<copyright>serienjunkies.org</copyright>\n")
-  
+
   #create every item
   while i<(200*j):
     if i==len(feed.entries): break

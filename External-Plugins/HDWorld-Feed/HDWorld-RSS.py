@@ -1,8 +1,8 @@
 import feedparser, re, urllib2, requests
-from bs4 import BeautifulSoup 
+from bs4 import BeautifulSoup
+from flexget.components.sites.utils import normalize_unicode
 
-quality = "720"
-hoster = "uploaded"             # uploaded;uplaoded;oboom;cloudzer;filemonkey
+hoster = ["share online", "share-online", "share-online.biz", "uploaded","filer", "rapidgator"]
 outputFilename = "HDWorld.xml"   # wo soll die rss-datei gespeichert werden ?
 
 ## Schreibe RSS
@@ -46,21 +46,35 @@ def replaceUmlauts(title):
 for site in ('1','2','3','4','5','6','7','8','9'):
     opener = urllib2.build_opener()
     opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-    url = ('http://hd-world.org/category/serien/page/' + site)
+    url = ('http://hd-world.org/category/1080p/page/' + site)
     response = opener.open(url)
     page = response.read()
-    soup = BeautifulSoup(page)
+    soup = BeautifulSoup("page", "lxml")
     for post in soup.findAll("div", {"class" : "post"}):
         for all in post.findAll("h1", {"id" : re.compile('post.*')}):
             for title in all.findAll('a'):
                 title = title.getText()
                 title = replaceUmlauts(title)
-                # season = re.compile('.*S\d{2}E\d{2}.*')
-                # if season.match(title):
-                    # print title
         for links in post.findAll('a', href=True):
-            season = re.compile('.*S\d{2}E\d{2}.*')
-            if season.match(title) and (quality in title) and hoster.lower() in links.text.lower():
+#            if hoster.lower() in links.text.lower():
+                print title
+                lnk = links["href"]
+                print lnk
+                make_rss(title, lnk)
+for site in ('1','2','3','4','5','6','7','8','9'):
+    opener = urllib2.build_opener()
+    opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+    url = ('http://hd-world.org/category/720p/page/' + site)
+    response = opener.open(url)
+    page = response.read()
+    soup = BeautifulSoup(page, "lxml")
+    for post in soup.findAll("div", {"class" : "post"}):
+        for all in post.findAll("h1", {"id" : re.compile('post.*')}):
+            for title in all.findAll('a'):
+                title = title.getText()
+                title = replaceUmlauts(title)
+        for links in post.findAll('a', href=True):
+#            if hoster.lower() in links.text.lower():
                 print title
                 lnk = links["href"]
                 print lnk
