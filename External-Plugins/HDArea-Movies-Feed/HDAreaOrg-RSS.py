@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 import feedparser, re, urllib, urllib2, requests, threading
-#from urllib import urlopen
+from urllib import urlopen
 from bs4 import BeautifulSoup
-#from flexget.components.sites.utils import normalize_unicode
+from flexget.components.sites.utils import normalize_unicode
 
 
 # Einstellungen:
-#quality = ["720p", "1080p", "2160p", "4k"]
-sites = ["neues", "top-rls", "movies", "Old_Stuff", "Cinedubs"]
+quality = ["720p", "1080p", "2160p", "4k"]
+sites = ["neues", "top-rls", "movies", "Old_Stuff"]
 hoster = ["share online", "share-online", "share-online.biz", "uploaded","filer", "rapidgator"]
 rssname = "HDArea.xml"
 
