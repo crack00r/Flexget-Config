@@ -17,44 +17,52 @@ DownloadManager: jdownloader # "jdownloader" or "pyload" are possible values. US
 DownloadManagerQueue: 'enable' # disable = collector -- "enable" = Queue
 
 
-DLFolder: '~/Downloads' #Do not put an "/" at the end
-DLFolderArchive: '---Archiv'       #Name of your Archive Folder inside your Downloads Folder
-DLFolderWatchlist: '---Watchlist'  #Name of your Watchlist Folder inside your Downloads Folder
-DLFolderYouTube: '--YouTube'       #Name of your YouTube Folder inside your Downloads Folder
-DLFoldereBooks: '-eBooks'          #Name of your eBooks Folder inside your Downloads Folder
-DLFolderSports: '--Sports'         #Name of your YouTube Folder inside your Downloads Folder
-DLFolder3D: '--3D'                 #Name of your YouTube Folder inside your Downloads Folder
+########### Filesystem
+filesystem: 
+  Library: 
+    series: /mnt/media/Series #---->>> Do not put an "/" at the end !! (ABSOLUTE PATH)
+    movies: /mnt/media/Movies #---->>> Do not put an "/" at the end !! (ABSOLUTE PATH)
+  
+  Downloads:
+    Main: '/home/USERNAME/Downloads' # "root"-Download-Folder - Do not put an "/" at the end
+    Archive: '---Archiv'       #Name of your Archive Folder inside your Downloads Folder
+    Watchlist: '---Watchlist'  #Name of your Watchlist Folder inside your Downloads Folder
+    YouTube: '--YouTube'       #Name of your YouTube Folder inside your Downloads Folder
+    eBooks: '-eBooks'          #Name of your eBooks Folder inside your Downloads Folder
+    Sports: '--Sports'         #Name of your YouTube Folder inside your Downloads Folder
+    3D: '--3D'                 #Name of your YouTube Folder inside your Downloads Folder
+
+  Move2Library: /home/snikay/Move2Drive # Everything unpacked is placed here in a nice clean folder-structure (Filebot-like). This is used for rclone, to upload from this Folder
+
+
+  htmlpath: /var/www/html ## Path to your html folder, needed for imdb_watchlist (if you do not use imdb_watchlist, leave it blank) #---->>> Do not put an "/" at the end !! (ABSOLUTE PATH)
 
 #-------------------
 JDownloader: #JDownloaders Path
-  path: '~/jd2' #Do not put an "/" at the end (ABSOLUTE PATH)
+  path: '/home/USERNAME/jd2' #Do not put an "/" at the end (ABSOLUTE PATH)
   
 #------------------- ## NOT SUPPORTED - I'M NOT A PYLOAD USER ANYMORE!
 pyload: #pyload.org
-  usr: 'snikay'
-  pwd: 'PKoeniG00'
+  usr: 'USERNAME'
+  pwd: 'PASSWORD'
   ip: 'localhost' # localhost (when running flexget on the same machine), Hostname , URL and IP-Adresses are possible values # ALWAYS WITHOUT "HTTP(S)://"
   protocol: 'http' # "http" and "https" are possible values
   port: '8000' #Webinterface port
   
 ########## flexget
 flexget: 
-  path: '~/.flexget' # Windows "C:/path/to/flexget" , Linux "/home/username/.flexget" ---->>> Do not put an "/" at the end !! (ABSOLUTE PATH)
+  path: '/home/USERNAME/.flexget' # Windows "C:/path/to/flexget" , Linux "/home/username/.flexget" ---->>> Do not put an "/" at the end !! (ABSOLUTE PATH)
   scheduler: 5-17/2 # ONLY HOURS ARE POSSIBLE VALUES ! Example: Run every 2 hours between 5am and 5pm (http://flexget.com/wiki/Plugins/Daemon/scheduler)
 
-filesystem: 
-  mountpoint: 
-    series: /path/to/Series #---->>> Do not put an "/" at the end !! (ABSOLUTE PATH)
-    movies: /path/to/Movies #---->>> Do not put an "/" at the end !! (ABSOLUTE PATH)
-    
+
 ########## Settings
 Settings:
-  Hoster: zippyshare;shareonline;uploaded;rapidgator # Supported hosters - shareonline uploaded rapidgator filer oboom zippyshare - also combined "uploaded;shareonline;rapidgator"
+  Hoster: zippyshare;uploaded;shareonline;rapidgator # Supported hosters - shareonline uploaded rapidgator filer oboom zippyshare - also combined "uploaded;shareonline;rapidgator"
   Language: german # "german" , "english" are possible values
 
 Parser:
-  Series: guessit # guessit and internal are possible values
-  Movies: guessit # guessit and internal are possible values
+  Series: guessit # "guessit" and "internal" are possible values
+  Movies: guessit # "guessit" and "internal" are possible values
 
 
 Size: #look enable/disable tasks
@@ -64,22 +72,31 @@ Size: #look enable/disable tasks
   Minimum_Movie_Size_Low: '15000'
   Maximum_Movie_Size_Low: '200000'     
 ########## LOGINS
-imdb: #imdb.com #### NOT WORKING !!!!
-  listID1: 'ls000000000' ## NOT SUPPORTED
-  listID2: 'ls000000000' ## NOT SUPPORTED
-  listID3: ## NOT SUPPORTED
+imdb: #imdb.com
+  listID1: 'ls050713726' ## NOT SUPPORTED ANYMORE #IMDB API SUCKS
   
 trakt: #trakt.tv
-  acc: 'user'
-  pwd: 'password'
+  acc: 'USERNAME'
+  pwd: 'PASSWORD'
 
-  OnHold: OnHold #Type in the Name of your OnHold-List. Everything on this List stops downloading entries after the given "Stop_Watchlist_Counter".
+  OnHold: OnHold #Type in the Name of your OnHold-List. Everything on this List stops downloading entries after the given "Stop_Watchlist_Counter" further below. THIS IS DISABLED BY DEFAULT
 
   English: ## This Feature adds Movies/Series to a special List, to load them again if your prefered language is online
     Series: Foreign_Series #THIS LIST MUST ALREADY EXIST ON TRAKT ! FLEXGET CAN'T CREATE IT -- CREATE IT ON TRAKT WEBSITE
     Movies: Foreign_Movies #THIS LIST MUST ALREADY EXIST ON TRAKT! FLEXGET CAN'T CREATE IT -- CREATE IT ON TRAKT WEBSITE
 
   Favorites: Favorites ## Optional ## Name of your trakt-favorites list. Works without as well, just a visual thing inside trakt
+
+  ##///////////////////////// TRAKT MERGE EXTERNAL LIST TO WATCHLIST (only working with public lists) ////////////////////
+  merge_list:
+    username: USERNAME #username of list owner
+    listname: LISTNAME #listname
+       
+    
+ombi:
+  url: localhost
+  usr: XXXXXX
+  pwd: XXXXXX
     
 ############ QUALITY:         ### For possible values look: http://flexget.com/wiki/Plugins/quality
 quality: ## This will target your "main" quality, but falls back to "low" quality, if main quality is not available. "High" is for your Trakt Favorite_List
@@ -101,14 +118,14 @@ series:
   
   ## The Watchlist_Counter stops at given "Stop"-Number and Starts again, only when the given "Start"-Number is marked WATCHED in trakt. 
   ## So it downloads for example 7 Episodes, and after you watch 4 of it, there is a high chance you want to watch more. So it downloads anything else.
-  Stop_watchlist_counter: 1|2|3|4|5|6|7 # Must be this exact format. 7 is relatively ideal. but choose what you want. 0 to disable the watchlist completely and load everything straight away.
-  Start_Collection_counter: 04 # 04 is relatively ideal. but choose what you want. 0 to disable the watchlist completely and load everything straight away.
-  season_packs: always # READ THIS https://flexget.com/Plugins/series/season_packs to fill in your values. Default is disabled - but can be enabled by your preferences.
-  Staffelpack: True # True/False (enables/disables Serienjunkies Season_Packs)
+  ## This prevents endless downloading of Series you don't like maybe
+  Stop_watchlist_counter: 0 #1|2|3|4|5|6|7 # Must be this exact format. 7 is relatively ideal. 0 to disable the watchlist completely and load everything straight away. THIS IS DISABLED BY DEFAULT
+  Start_Collection_counter: 04 # 04 is relatively ideal. 0 to disable the watchlist completely and load everything straight away.
+  season_packs: yes # To Fix ugly behavior, this is only working if a Season is completed - and is named completed in the title.
   
 ########### YouTube-Playlist: 
 YouTube:
-  Playlist: 'XXXXXXXXXX'
+  Playlist: 'PLRXXXXXXXXXXXXXXXXXXXDfZ2Hhaac'
 
 
 ############ ENGLISH:
@@ -116,7 +133,6 @@ English: 'enable' # "enable" and "disable" are possible values
 
 ############ Enable / Disable certain tasks:
 disable_enable_tasks: # "enable" and "disable" are possible values
-  Download_3D: disable 
   Upgrade_Movies: enable
   #Trending 
   Download_Trending_Movies: enable
@@ -125,22 +141,24 @@ disable_enable_tasks: # "enable" and "disable" are possible values
   Download_Popular_Movies: enable
   Download_Popular_Series: enable
   #Best of
-  Download_Best_on_IMDb: disable ## Based on Score
+  Download_Best_on_IMDb: enable ## Based on Score
+
+  Download_Seasons: enable
 
   IMDb_Actress: enable #  This refers to Actress.yml 
   IMDb_Actors: enable #  This refers to Actors.yml 
 
   OnHold: disable # Enable/disable OnHold Watchlist Series feature
   Canceled: disable # enable/disable downloading canceled Series (ENABLE stops downloading canceled Series)
-
+  
 ##########################################################################################################################################################################
 ##########################################################################################################################################################################
 ##########################################################################################################################################################################
 
-  #from here on keep it disabled! NO Support for these tasks!
-  #from here on keep it disabled! NO Support for these tasks!
-  #from here on keep it disabled! NO Support for these tasks!  
-  #from here on keep it disabled! NO Support for these tasks!
+  #from here on KEEP it DISABLED! NO Support for these tasks!
+  #from here on KEEP it DISABLED! NO Support for these tasks!
+  #from here on KEEP it DISABLED! NO Support for these tasks!  
+  #from here on KEEP it DISABLED! NO Support for these tasks!
   Download_Second_IMDb_Movies: enable 
   Sync_Main_IMDb_to_Second: enable
   Studio_Downloads: enable
@@ -151,3 +169,9 @@ disable_enable_tasks: # "enable" and "disable" are possible values
   Download_eBooks: enable
   Movie_Size_Main: disable
   Movie_Size_Low: disable
+  Sorting: enable
+  3D: disable
+
+
+Specials1: Specials #Name of File1 - without .yml
+Specials2: Potter #Name of File4 - without .yml  
