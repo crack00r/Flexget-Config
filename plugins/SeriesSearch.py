@@ -147,3 +147,96 @@ class SearchDokujunkies(SearchSerienjunkies):
 @event('plugin.register')
 def register_plugin():
     plugin.register(SearchDokujunkies, 'searchDokujunkies', interfaces=['search'], api_ver=2)
+    
+class SearchHdworldSeries(BaseSearchPlugin):
+    """
+        HD-World search plugin.
+    """
+    name = "searchHDWorldSeries"
+    query_url = 'http://hd-world.org/index.php?'
+    query_static = {"cat":0}
+    query_param_name = "s"
+    
+    html_entry_class = "post"
+    html_entry_title_element = "h2"
+        
+    def parse_results_page(self, results_page):
+        archiv = results_page.find("div",id="archiv")
+        
+        result_entries = []
+        for a in archiv.select("h1 > a"):
+            # ignoring the fact that it could block the triple X movies with Vin Diesel, but I dont want pr0n in my library
+            if not '^.*S\d\dE\d\d' in a.text:
+                break
+            
+            result_entries.append({"title": a.text, "url": a['href']})
+            
+        ## check for more result pages
+        next_link = archiv.find("a", {"class":"nextpostslink", "text":"»"})
+        if len(result_entries) > 0 and next_link:
+            next_page = self.get_url_content(next_link['href'])
+            result_entries.extend(self.parse_results_page(next_page))
+    
+        return result_entries
+        
+    def parse_result_entry(self, entry_page):
+    
+        try:
+            beitrag = entry_page.find("div", {"id":"content"})
+            title = entry_page.find("div", {"class":self.html_entry_class}).find(self.html_entry_title_element).a.text
+        
+            size = 0
+            sizetag = beitrag.find("strong", text="Größe: ")
+            if sizetag:
+                size = parse_filesize(sizetag.next_sibling.replace("|", "").strip())
+                   
+            links = entry_page.findAll("a")
+            dl_links = []
+            imdb_url = ""
+            for link in links:
+                if "imdb" in link.text.lower():
+                    imdb_url = link["href"]
+                if self.contains_hoster_variant(link.text):
+                    dl_links.append(link["href"])
+        
+            return [SearchResultEntry(title, size, dl_links, imdb_url)]
+        except Exception:
+            log.error("Got unexpected result page - maybe no valid search results on that page?")
+            #self.log_soup_to_file(entry_page)
+        finally:
+            return []
+        
+@event('plugin.register')
+def register_plugin():
+    plugin.register(SearchHdworldSeries, 'searchHdworldSeries', interfaces=['search'], api_ver=2)
+    
+class SearchMovieBlogSeries(SearchHdworldSeries):
+    """
+        MovieBlogSeries search plugin.
+        
+        
+        Bug:
+        
+        This Plugins raises a known Flexget issue:
+        
+        ## https://github.com/Flexget/Flexget/issues/847
+        ## Solution:
+        ## In flexget\plugins\input\discover.py's entry_complete method, insert:
+        if entry not in search_results:
+            # Rebuild search_results in place to recompute all its hashes
+            search_results_copy = list(search_results)
+            search_results.intersection_update([])      # empty search_results set in place
+            search_results.update(search_results_copy)  # repopulate search_results set in place
+            
+        ##before the line:
+        search_results.remove(entry)  
+    """
+    name = "searchMovieBlogSeries"
+    query_url = 'http://www.movie-blog.org/index.php?'
+
+    html_entry_class = "beitrag"
+    html_entry_title_element = "h1"
+
+@event('plugin.register')
+def register_plugin():
+    plugin.register(SearchMovieBlogSeries, 'searchMovieBlogSeries', interfaces=['search'], api_ver=2)

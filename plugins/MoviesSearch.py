@@ -7,7 +7,6 @@ from flexget.utils.tools import parse_filesize
 from .BaseSearchPlugin import BaseSearchPlugin, SearchResultEntry
 from flexget.components.sites.utils import normalize_unicode
 
-# This Plugin searches HD-Area, HDWorld and MovieBlog together
 
 #CATEGORIES = {
 #    # Hoster
@@ -35,8 +34,8 @@ from flexget.components.sites.utils import normalize_unicode
 #}
 
 log = logging.getLogger("MovieSearchPlugin")
-#HOSTER = ['uploaded', 'shareonline']
-#DEFAULT_HOST = 'shareonline'     
+#DEFAULT_LANG = 'german'
+#DEFAULT_HOST = 'shareonline'
 
 class SearchHdarea(BaseSearchPlugin):
     """
@@ -51,6 +50,7 @@ class SearchHdarea(BaseSearchPlugin):
         
         #return self.get_url_content('http://www.hd-area.org/?', {'s':'search','q':search_string})
     #    return self.get_url_content(self.query_url, self.query_static.update({self.query_param_name:search_string}))
+
         
     def parse_results_page(self, results_page):
         results_page = results_page.find("div",id="content").find("div", {"class":"whitecontent"})

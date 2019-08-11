@@ -12,7 +12,7 @@ from flexget.utils import requests
 #from flexget.utils.tools import parse_filesize
 
 log = logging.getLogger("BaseSearchPlugin")
-ENUM_HOSTER = ['uploaded', 'shareonline']
+#ENUM_HOSTER = ['uploaded', 'shareonline']
 DEFAULT_HOST = 'shareonline'
 
 HOSTERVARIANTS = {
