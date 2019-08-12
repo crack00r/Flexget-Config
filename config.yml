@@ -541,8 +541,7 @@ templates:
     regexp:
       reject:
         - \bcomplete\b #In Movie-Titles, this usually means Complete-Bluray (iso)
-        - \b\S[0-9][0-9](|e[0-9][0-9])\b #usually Complete-Bluray (iso)
-
+        - \b\S[0-9][0-9](|e[0-9][0-9])\b
     if:
       - trakt_movie_user_rating > 9: ## 9-10 is ideal for usage with Plex (4 Plex Stars = 8 trakt/imdb Stars ---- 5 Plex Stars = 10 trakt/imdb Stars)
           quality: '{? quality.high ?}'
@@ -1154,7 +1153,7 @@ tasks:
     discover:
       what:
         - movie_list: Default
-        - regexp_list: Default ## Search with regexp_list is the best way - but not working right now with discover - needs fix flexget-wise
+#        - regexp_list: Default ## Search with regexp_list is the best way - but not working right now with discover - needs fix flexget-wise
       from:
         - searchHdarea:
             hoster: '{? Settings.Hoster ?}'
@@ -1164,11 +1163,9 @@ tasks:
             hoster: '{? Settings.Hoster ?}'
     list_match:
       from:
-#        - regexp_list: Default
         - movie_list: Default
       single_match: yes
       remove_on_match: yes
-#    include: Movie_Size_Main.yml
     list_add:
       - movie_list: offline_check
 
@@ -1188,7 +1185,7 @@ tasks:
     quality: '{? quality.low ?}'
     discover:
       what:
-        - regexp_list: Default ## Search with regexp_list is the best way - but not working right now with discover - needs fix flexget-wise
+#        - regexp_list: Default ## Search with regexp_list is the best way - but not working right now with discover - needs fix flexget-wise
         - movie_list: Default
       from:
         - searchHdarea:
@@ -1205,7 +1202,6 @@ tasks:
     regexp:
       reject:
         - \b3D\b
-#    include: Movie_Size_Low.yml
     list_add:
       - movie_list: offline_check
 
@@ -1255,13 +1251,12 @@ tasks:
       - Movie_Streams
       - Movies_Global
     quality: '{? quality.low ?}'
+    seen: local #still upgradable by Main
     list_match:
       from:
         - movie_list: Default
       single_match: yes
       remove_on_match: no
-    if:
-      - trakt_collected: reject
     regexp:
       reject:
         - \b3D\b
@@ -1294,6 +1289,10 @@ tasks:
             account: '{? trakt.acc ?}'
             list: collection
             type: shows
+    regexp:
+      reject:
+        - \bs[0-9][0-9]\b
+        
   ######################################## Stream and Search for Serienunkies
 
   Series_Collection_DE_Stream:
@@ -1316,6 +1315,9 @@ tasks:
             account: '{? trakt.acc ?}'
             list: collection
             type: shows
+    regexp:
+      reject:
+        - \bs[0-9][0-9]\b
 
   ######################################## Stream and Search for Serienunkies
 
@@ -1341,12 +1343,9 @@ tasks:
             list: collection
             type: shows
     regexp:
-      reject:
-        - \bcomplete\b # For Series this stands for Season-completed of course
-    configure_series: 
-      settings:
-        season_packs: '{? series.season_packs ?}' 
-    season_pack_lookup: True
+      reject_excluding:
+        - \bcomplete\b #In Series-Titles, this usually means complete Seasons
+        - \bs[0-9][0-9]\b #only accept Seasons
         
   ######################################## Watchlist-Premieres | Needs work for: Prefer DE, otherwise EN
   ################################## What it does: Download Episode 1-3 and add to custom trakt-OnHold-List 
@@ -1384,6 +1383,8 @@ tasks:
     regexp:
       reject_excluding:
         - \bS01(.E0|E0)('{? series.Stop_watchlist_counter ?}')\b  # counter has to be set in options.yml
+      reject:
+        - \bs[0-9][0-9]\b
 
 ############################################################################################################ YouTube ############################################################################################################
   YouTube-Personal-Playlist:
