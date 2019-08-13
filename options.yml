@@ -160,19 +160,19 @@ disable_enable_tasks: # "enable" and "disable" are possible values
   #from here on KEEP it DISABLED! NO Support for these tasks!
   #from here on KEEP it DISABLED! NO Support for these tasks!  
   #from here on KEEP it DISABLED! NO Support for these tasks!
-  Download_Second_IMDb_Movies: enable 
-  Sync_Main_IMDb_to_Second: enable
-  Studio_Downloads: enable
-  YouTube_Downloads: enable   
-  Download_Specials: enable
-  Download_Specials2: enable
-  Download_Sports: enable
-  Download_eBooks: enable
+  Download_Second_IMDb_Movies: disable 
+  Sync_Main_IMDb_to_Second: disable
+  Studio_Downloads: disable
+  YouTube_Downloads: disable   
+  Download_Specials: disable
+  Download_Specials2: disable
+  Download_Sports: disable
+  Download_eBooks: disable
   Movie_Size_Main: disable
   Movie_Size_Low: disable
-  Sorting: enable
+  Sorting: disable
   3D: disable
 
 
-Specials1: Specials #Name of File1 - without .yml
-Specials2: Potter #Name of File4 - without .yml  
+Specials1: XXXXX #Name of File1 - without .yml
+Specials2: XXXXX #Name of File4 - without .yml  
