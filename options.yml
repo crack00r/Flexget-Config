@@ -60,6 +60,9 @@ Settings:
   Hoster: zippyshare;uploaded;shareonline;rapidgator # Supported hosters - shareonline uploaded rapidgator filer oboom zippyshare - also combined "uploaded;shareonline;rapidgator"
   Language: german # "german" , "english" are possible values
 
+  HosterSJ: so #['ul', 'cz', 'so', 'all']
+  LanguageSJ: dual #['german', 'foreign', 'subtitle', 'dual']
+  
 Parser:
   Series: guessit # "guessit" and "internal" are possible values
   Movies: guessit # "guessit" and "internal" are possible values
