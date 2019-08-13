@@ -368,16 +368,16 @@ templates:
 
   enable-Movie_Size_Main:
     content_size:
-      min:  "'{? Size.Main.Minimum ?}'"
-      max:  "'{? Size.Main.Maximum ?}'"
+      min:  '{? Size.Main.Minimum ?}'
+      max:  '{? Size.Main.Maximum ?}'
   disable-Movie_Size_Main:
     exec:
       - echo "no Movie-Size to consider" 
 
   enable-Movie_Size_Low:
     content_size:
-      min: "'{? Size.Low.Minimum ?}'"
-      max: "'{? Size.Low.Minimum ?}'"
+      min: '{? Size.Low.Minimum ?}'
+      max: '{? Size.Low.Minimum ?}'
   disable-Movie_Size_Low:
     exec:
       - echo "no Movie-Size to consider" 
