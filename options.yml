@@ -145,6 +145,7 @@ disable_enable_tasks: # "enable" and "disable" are possible values
   Download_Best_on_IMDb: enable ## Based on Score
 
   Download_Seasons: enable
+  Series_Collection_DE_Stream: enable
 
   IMDb_Actress: enable #  This refers to Actress.yml 
   IMDb_Actors: enable #  This refers to Actors.yml 
