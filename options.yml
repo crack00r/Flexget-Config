@@ -66,11 +66,12 @@ Parser:
 
 
 Size: #look enable/disable tasks
-  Minimum_Movie_Size_Main: '20000'
-  Maximum_Movie_Size_Main: '300000'
-#--
-  Minimum_Movie_Size_Low: '15000'
-  Maximum_Movie_Size_Low: '200000'     
+  Main:
+    Minimum: '20000'
+    Maximum: '300000'
+  Low:
+    Minimum: '1500'
+    Maximum: '20000'   
 ########## LOGINS
 imdb: #imdb.com
   listID1: 'ls050713726' ## NOT SUPPORTED ANYMORE #IMDB API SUCKS
