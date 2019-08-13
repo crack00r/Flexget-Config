@@ -8,8 +8,6 @@ templates:
   global:
     ######################################## Misc
     redirect_url: yes
-    plugin_priority:
-      regexp: 250
     parsing:
       movie: '{? Parser.Movies ?}'
       series: '{? Parser.Series ?}'
@@ -25,6 +23,7 @@ templates:
     pathscrub: windows  # Use Windows conform filenames (since Windows is the worst of all OS, what's working on Windows, should always work on Linux/Mac)
     plugin_priority:
       manipulate: 255       # manipulate must fix the titles before lookups
+      regexp: 200
     manipulate:
     # fix nonsense
       - title:
@@ -152,7 +151,7 @@ templates:
         - \br(5|6)\b   # R5/6 (Region Release: Asia & East-Europe - usually bad Quality)
         - \b(un|)sub(|s|bed)\b # Subtitles (Sub / Subs / Subbed / Unsubbed)
         - \b(hc|hardcoded)\b # Subtitles (HC / Hardcoded)
-        - \b(web|)blur(\b|rt|red)\b # Blurred-Subtitles
+        - \bblur(\b|rt|red)\b # Blurred-Subtitles
         - \biso\b # ISO-Files
       # Audio
         - \bflac\b   # flac
@@ -340,7 +339,7 @@ templates:
   enable-Upgrade-Movies:
     exists_movie:
       path: 
-       - "{? filesystem.Library.movies ?}/"
+        - "{? filesystem.Library.movies ?}/"
       allow_different_qualities: '{? movies.different_qualities ?}'
       lookup: imdb
 
@@ -365,22 +364,6 @@ templates:
     manual: no
   disable-Studio_Downloads:
     manual: yes 
-
-  enable-Movie_Size_Main:
-    content_size:
-      min:  '{? Size.Main.Minimum ?}'
-      max:  '{? Size.Main.Maximum ?}'
-  disable-Movie_Size_Main:
-    exec:
-      - echo "no Movie-Size to consider" 
-
-  enable-Movie_Size_Low:
-    content_size:
-      min: '{? Size.Low.Minimum ?}'
-      max: '{? Size.Low.Minimum ?}'
-  disable-Movie_Size_Low:
-    exec:
-      - echo "no Movie-Size to consider" 
 
   enable-Download_Best_on_IMDb:
     if:
@@ -434,6 +417,11 @@ templates:
   enable-Download_Seasons: 
     manual: no
   disable-Download_Seasons: 
+    manual: yes
+
+  enable-Series_Collection_DE_Stream: 
+    manual: no
+  disable-Series_Collection_DE_Stream: 
     manual: yes
 
   enable-Sorting: 
@@ -549,6 +537,12 @@ templates:
     if:
       - trakt_movie_user_rating > 9: ## 9-10 is ideal for usage with Plex (4 Plex Stars = 8 trakt/imdb Stars ---- 5 Plex Stars = 10 trakt/imdb Stars)
           quality: '{? quality.high ?}'
+    crossmatch:
+      from:
+        - movie_list: offline_check
+      fields:
+        - imdb_id
+      action: reject
 
   Series_Global:
     sort_by:
@@ -824,7 +818,7 @@ tasks:
     template: 
       - no_global
       - no_seen
-      - '{? disable_enable_tasks.Download_Trending_Movies ?}-Download_Trending_Movies'
+      - '{? enable_disable.Download_Trending_Movies ?}-Download_Trending_Movies'
       - movies_lookup
     priority: 1
     list_add:
@@ -841,7 +835,7 @@ tasks:
     template: 
       - no_global
       - no_seen
-      - '{? disable_enable_tasks.Download_Popular_Movies ?}-Download_Popular_Movies'
+      - '{? enable_disable.Download_Popular_Movies ?}-Download_Popular_Movies'
       - movies_lookup
     priority: 1
     list_match:
@@ -870,6 +864,7 @@ tasks:
     template: 
       - no_seen
       - movies_lookup
+      - Movies_Global #crossmatch offline_check
     only_new: yes
     trakt_list:
       account: '{? trakt.acc ?}'
@@ -1145,8 +1140,8 @@ tasks:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
-      - '{? disable_enable_tasks.Movie_Size_Main ?}-Movie_Size_Main'
-#      - '{? disable_enable_tasks.3D ?}-3D'
+      - '{? enable_disable.Movie_Size_Main ?}-Movie_Size_Main'
+#      - '{? enable_disable.3D ?}-3D'
       - movies_lookup
       - German
       - Movies_Global
@@ -1183,7 +1178,7 @@ tasks:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
-      - '{? disable_enable_tasks.Movie_Size_Low ?}-Movie_Size_Low'
+      - '{? enable_disable.Movie_Size_Low ?}-Movie_Size_Low'
       - movies_lookup
       - German
     quality: '{? quality.low ?}'
@@ -1217,16 +1212,16 @@ tasks:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
-      - '{? disable_enable_tasks.Upgrade_Movies ?}-Upgrade-Movies'
-      - '{? disable_enable_tasks.IMDb_Actress ?}-IMDb_Actress'
-      - '{? disable_enable_tasks.IMDb_Actors ?}-IMDb_Actors'
-      - '{? disable_enable_tasks.Download_Best_on_IMDb ?}-Download_Best_on_IMDb'
-      - '{? disable_enable_tasks.Movie_Size_Main ?}-Movie_Size_Main'
+      - '{? enable_disable.Upgrade_Movies ?}-Upgrade-Movies'
+      - '{? enable_disable.IMDb_Actress ?}-IMDb_Actress'
+      - '{? enable_disable.IMDb_Actors ?}-IMDb_Actors'
+      - '{? enable_disable.Download_Best_on_IMDb ?}-Download_Best_on_IMDb'
+      - '{? enable_disable.Movie_Size_Main ?}-Movie_Size_Main'
       - movies_lookup
       - German
       - Movie_Streams
       - Movies_Global
-#      - '{? disable_enable_tasks.3D ?}-3D'
+#      - '{? enable_disable.3D ?}-3D'
     quality: '{? quality.main ?}'
     list_match:
       from:
@@ -1245,11 +1240,11 @@ tasks:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
-      - '{? disable_enable_tasks.Upgrade_Movies ?}-Upgrade-Movies'
-      - '{? disable_enable_tasks.IMDb_Actress ?}-IMDb_Actress'
-      - '{? disable_enable_tasks.IMDb_Actors ?}-IMDb_Actors'
-      - '{? disable_enable_tasks.Download_Best_on_IMDb ?}-Download_Best_on_IMDb'
-      - '{? disable_enable_tasks.Movie_Size_Main ?}-Movie_Size_Low'
+      - '{? enable_disable.Upgrade_Movies ?}-Upgrade-Movies'
+      - '{? enable_disable.IMDb_Actress ?}-IMDb_Actress'
+      - '{? enable_disable.IMDb_Actors ?}-IMDb_Actors'
+      - '{? enable_disable.Download_Best_on_IMDb ?}-Download_Best_on_IMDb'
+      - '{? enable_disable.Movie_Size_Main ?}-Movie_Size_Low'
       - movies_lookup
       - German
       - Movie_Streams
@@ -1281,8 +1276,8 @@ tasks:
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
       - 'Discover-{? series.backfill ?}-Backfill'
       - '{? series.backfill ?}-Upgrade-Series'
-      - '{? disable_enable_tasks.OnHold ?}-OnHold'      
-      - '{? disable_enable_tasks.Canceled ?}-Canceled'   
+      - '{? enable_disable.OnHold ?}-OnHold'      
+      - '{? enable_disable.Canceled ?}-Canceled'   
       - German
       - Series_Lookup   
       - Series_Global
@@ -1306,8 +1301,9 @@ tasks:
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Series'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
       - '{? series.backfill ?}-Upgrade-Series'
-      - '{? disable_enable_tasks.OnHold ?}-OnHold'      
-      - '{? disable_enable_tasks.Canceled ?}-Canceled'     
+      - '{? enable_disable.OnHold ?}-OnHold'      
+      - '{? enable_disable.Canceled ?}-Canceled'  
+      - '{? enable_disable.Series_Collection_DE_Stream ?}-Series_Collection_DE_Stream'   
       - German
       - Series_Lookup
       - Series_Global
@@ -1324,8 +1320,8 @@ tasks:
         - \bs[0-9][0-9]\b
     redirect_url: yes
     serienjunkies:
-      language: dual
-      hoster: so
+      language: '{? Settings.LanguageSJ ?}'
+      hoster: '{? Settings.HosterSJ ?}'
   ######################################## Stream and Search for Serienunkies
 
   Series_Collection_DE_Seasons:
@@ -1335,9 +1331,9 @@ tasks:
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Series'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
       - '{? series.backfill ?}-Upgrade-Series'
-      - '{? disable_enable_tasks.OnHold ?}-OnHold'      
-      - '{? disable_enable_tasks.Seasons ?}-Seasons'      
-      - '{? disable_enable_tasks.Canceled ?}-Canceled'     
+      - '{? enable_disable.OnHold ?}-OnHold'      
+      - '{? enable_disable.Seasons ?}-Seasons'      
+      - '{? enable_disable.Canceled ?}-Canceled'     
       - German
       - Series_Lookup
       - Series_Global
@@ -1368,9 +1364,9 @@ tasks:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Series'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
-      - '{? disable_enable_tasks.Download_Popular_Series ?}-Download_Popular_Series'
-      - '{? disable_enable_tasks.Download_Trending_Series ?}-Download_Trending_Series'
-      - '{? disable_enable_tasks.Canceled ?}-Canceled'   
+      - '{? enable_disable.Download_Popular_Series ?}-Download_Popular_Series'
+      - '{? enable_disable.Download_Trending_Series ?}-Download_Trending_Series'
+      - '{? enable_disable.Canceled ?}-Canceled'   
       - Series_Lookup
       - German
       - Series_Streams_Singles
@@ -1403,7 +1399,7 @@ tasks:
       ascii: yes
     accept_all: yes
     template:
-      - '{? disable_enable_tasks.YouTube_Downloads ?}-YouTube_Downloads'
+      - '{? enable_disable.YouTube_Downloads ?}-YouTube_Downloads'
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-YouTube'
       - no_global
@@ -1419,7 +1415,7 @@ tasks:
         - Golden.State.Warriors
         - New.York.Knicks
     template:
-      - '{? disable_enable_tasks.Download_Sports ?}-Download_Sports'    
+      - '{? enable_disable.Download_Sports ?}-Download_Sports'    
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-Sports'
       - no_global
@@ -1434,7 +1430,7 @@ tasks:
 
   Specials: #custom-task
     template:
-      - '{? disable_enable_tasks.Download_Specials ?}-Download_Specials'
+      - '{? enable_disable.Download_Specials ?}-Download_Specials'
     priority: 10
 
 
@@ -1442,7 +1438,7 @@ tasks:
     template:
       - no_global
       - no_seen     
-      - '{? disable_enable_tasks.Download_Specials2 ?}-Download_Specials2'
+      - '{? enable_disable.Download_Specials2 ?}-Download_Specials2'
     priority: 10
 
   ######################################## Remove Collected trakt-Watchlist
@@ -1452,7 +1448,7 @@ tasks:
     template:
       - no_global
       - no_seen
-      - '{? disable_enable_tasks.IMDb_Actress ?}-IMDb_Actress'
+      - '{? enable_disable.IMDb_Actress ?}-IMDb_Actress'
     list_match:
       from:
         - trakt_list:
@@ -1470,7 +1466,7 @@ tasks:
 #   eBooks:
 #     template:
 #       - no_global
-#       - '{? disable_enable_tasks.Download_eBooks ?}-Download_eBooks'
+#       - '{? enable_disable.Download_eBooks ?}-Download_eBooks'
 #       - '{? DownloadManager ?}-Defaults'
 #       - '{? DownloadManager ?}-eBooks'
 #     priority: 10
@@ -1494,9 +1490,9 @@ tasks:
     accept_all: yes 
     regexp:
       reject:
-       - \btrailer\b
-       - \bsample\b    
-       - \bproof\b
+         - \btrailer\b
+         - \bsample\b
+         - \bproof\b
     no_entries_ok: yes
     filesystem:
       path: '{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Movies/'
@@ -1508,20 +1504,22 @@ tasks:
       to: "{? filesystem.Move2Library ?}/Movies/{{tmdb_name|default(movie_name)}}{% if imdb_id|default(False) %} [{{imdb_id}}]{% endif %}"
 #      rename: "{{tmdb_name|default(movie_name)}}{% if imdb_id|default(False) %} - [{{imdb_id}}]{% endif %}"
       along:
-       extensions:
-         - srt
-         - sub
-       subdirs:
-         - Subs
+        extensions:
+          - srt
+          - sub
+        subdirs:
+          - Subs
       clean_source: 600  #remove samples and trash (below 600MB)
     content_size:
       min: 600
     exec:
-     on_exit:
-      phase: 
-        - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type f \( -name "*sample*" -o -name "proof" \) -delete
-        - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type f -size -500k -delete
-        - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type d -size -900k -delete
+      on_exit:
+        phase: 
+          - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type f \( -name "*sample*" -o -name "proof" \) -delete
+          - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type f -size -500k -delete
+          - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type d -size -900k -delete
+
+
   move-Series:
     filesystem:
       path: '{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/'
@@ -1531,11 +1529,11 @@ tasks:
     template:
       - no_seen
       - Series_Lookup
-      - '{? disable_enable_tasks.Sorting ?}-Sorting'
+      - '{? enable_disable.Sorting ?}-Sorting'
     require_field: [tvdb_id, series_id]
     regexp:
       reject:
-       - \bsample\b 
+        - \bsample\b 
     accept_all: yes 
     no_entries_ok: yes
     move:
@@ -1543,11 +1541,11 @@ tasks:
       to: "{? filesystem.Move2Library ?}/Series/{{ tvdb_series_name|default(series_name) }}{% if tvdb_id|default(False) %} [{{tvdb_id}}]{% endif %}/{% if series_id_type == 'ep' %}Season {{ series_season|pad(2) }}/{% endif %}/{{ tvdb_series_name|default(series_name) }}-{{ series_id }}{% if tvdb_ep_name|default(False) %}-{{ tvdb_ep_name }}{% endif %}"
 #      rename: "{{ tvdb_series_name|default(series_name) }}-{{ series_id }}{% if tvdb_ep_name|default(False) %}-{{ tvdb_ep_name }}{% endif %}-{{ quality }}"
       along:
-       extensions:
-         - srt
-         - sub
-       subdirs:
-         - Subs
+        extensions:
+          - srt
+          - sub
+        subdirs:
+          - Subs
       clean_source: 200 #remove samples and trash (below 200MB)
     content_size:
       min: 200
@@ -1555,14 +1553,13 @@ tasks:
       # Don't actually filter
       parse_only: yes
       tracking: no
-    accept_all: yes
     # Don't attempt to move if we don't have valid metadata
     exec:
-     on_exit:
-      phase: 
-        - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type f \( -name "*sample*" -o -name "proof" \) -delete
-        - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type f -size -500k -delete
-        - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type d -size -900k -delete
+      on_exit:
+        phase: 
+          - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type f \( -name "*sample*" -o -name "proof" \) -delete
+          - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type f -size -500k -delete
+          - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type d -size -900k -delete
 
 ###############################################################################################################################################
 ## MISC ################################################################################################config#by#snickers2k###################
