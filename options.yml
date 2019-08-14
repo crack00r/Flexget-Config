@@ -112,14 +112,18 @@ quality: ## This will target your "main" quality, but falls back to "low" qualit
 ############ Movies
 movies:   
   different_qualities: better # "no" and "better" are possible values
-
+  trending: 200 #amound of trending Movies to add
+  popular: 6000  #amound of popular Movies to add
+  
 ############ Series
 series:
   tracking: backfill # "True" "False" and "backfill" are possible values
   backfill: enable # "enable" and "disable" are possible values
   upgrade: enable #  "enable" and "disable" are possible values
   different_qualities: better # "no" , "yes" and "better" are possible values
-  
+  trending: 20 #amound of trending Series to add
+  popular: 100  #amound of popular Series to add
+
   ## The Watchlist_Counter stops at given "Stop"-Number and Starts again, only when the given "Start"-Number is marked WATCHED in trakt. 
   ## So it downloads for example 7 Episodes, and after you watch 4 of it, there is a high chance you want to watch more. So it downloads anything else.
   ## This prevents endless downloading of Series you don't like maybe
