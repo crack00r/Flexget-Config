@@ -156,8 +156,8 @@ templates:
         - \biso\b # ISO-Files
       # Audio
         - \bflac\b   # flac
-        - \b(ac3(.|))md|(mic(.|)dubbed)\b # Microphone-Dubbed 
-        - \b(ac3(.|))ld|(line(.|)dubbed)\b # Line-Dubbed
+        - \b(ac3(.|)|)md|(mic(.|)dubbed)\b # Microphone-Dubbed 
+        - \b(ac3(.|)|)ld|(line(.|)dubbed)\b # Line-Dubbed #means it is manually dubbed
 
 
     ######################################## Global Log-Filter - what and how should be logged (flexget.log in the config directory)
@@ -206,8 +206,8 @@ templates:
 #    rottentomatoes_lookup: yes #Buggy - 403 Client Error: Forbidden
   ######################################## Series-Global
   Series_Lookup:
-#    plugin_priority:
-#      manipulate: 255       # manipulate must fix the titles before metainfo_series.
+    plugin_priority:
+      manipulate: 255       # manipulate must fix the titles before metainfo_series.
     metainfo_series: yes
     thetvdb_lookup:
       language: de
@@ -224,8 +224,8 @@ templates:
   ######################################## Download Streams
   Movie_Streams:
     inputs:
-      - rss: '{? flexget.path ?}/External-Plugins/HDWorld-Feed/HDWorld.xml'
-      - rss: '{? flexget.path ?}/External-Plugins/HDArea-Movies-Feed/HDArea.xml'
+#      - rss: '{? flexget.path ?}/External-Plugins/HDWorld-Feed/HDWorld.xml'
+#      - rss: '{? flexget.path ?}/External-Plugins/HDArea-Movies-Feed/HDArea.xml'
       - rss: 
           url: 'https://nima4k.org/rss_movies.xml'
           link:
@@ -477,6 +477,16 @@ templates:
   disable-Download_Popular_Movies:
     exec:
       - echo "no Popular Movies to consider"
+
+  Movie_Size_Main: 
+    content_size:
+      min: '{? Size.Main.Minimum ?}'
+      max: '{? Size.Main.Minimum ?}'
+
+  Movie_Size_Low: 
+    content_size:
+      min: '{? Size.Low.Minimum ?}'
+      max: '{? Size.Low.Minimum ?}'
 
   enable-Download_Popular_Series: 
     limit:
@@ -854,9 +864,9 @@ tasks:
   Sync_Movies_Flexget_Default:
     priority: 1
     interval: 48 hours #takes a long time if translated to german
-#     plugin_priority:
-#       only_new: 255 #only_new must run before running all the scripts on seen releases
-#       trakt_list: 200
+    plugin_priority:
+      only_new: 255 #only_new must run before running all the scripts on seen releases
+      trakt_list: 50
     template: 
       - no_seen
       - movies_lookup
@@ -868,7 +878,7 @@ tasks:
       type: movies
       language: de
     list_add:  
-      - movie_list: Default #no need to further manipulate, since already in Global-Filter
+      - movie_list: Default
 
   Populate_regexp_list:
     priority: 1
@@ -900,10 +910,10 @@ tasks:
 
   ######################################## # This searches the 50.000 most popular movies for Favorite Actors/Actress and add them to Watchlist
   Sync_Actors_Movies:
-    include: 
+    include:
       - Actors.yml
       - Actress.yml
-    interval: 14 days
+    interval: 14 days #this tasks takes multiple hours. plus no need to run more often
     template: 
       - no_global
       - no_seen
@@ -919,10 +929,8 @@ tasks:
     list_add:  
       - trakt_list:
           account: '{? trakt.acc ?}'
-          list: watchlist
+          list: Actors
           type: movies
-    if:
-      - trakt_collected: reject
 
      ######################################## offline check/delay - add back to watchlist, if the movie is not trakt-collected within 2 weeks
   Offline_Check_Passed:
@@ -949,12 +957,9 @@ tasks:
     if:
       - not trakt_collected: accept
     list_remove:
-      - regexp_list: offline_check
+      - regexp_list: offline_check #remove rejection used by other tasks
     list_add:  
-      - trakt_list:
-          account: '{? trakt.acc ?}'
-          list: watchlist
-          type: movies
+      - movie_list: Default #add again to downloads
 
   ######################################## Set_Series_Begin based on "Collected" in Trakt - for every show
   Update_Series_Begin:
@@ -968,9 +973,9 @@ tasks:
       account: '{? trakt.acc ?}'
       context: collected
       list: collection
-      strip_dates: yes
+      position: next
     accept_all: yes
-    set_series_begin: yes
+    set_series_begin: yes #this sets the series_begin for every task
 
   ############################################################## Removings
   #
@@ -1139,7 +1144,7 @@ tasks:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
-      - '{? enable_disable.Movie_Size_Main ?}-Movie_Size_Main'
+      - Movie_Size_Main
 #      - '{? enable_disable.3D ?}-3D'
       - movies_lookup
       - German
@@ -1177,7 +1182,7 @@ tasks:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
-      - '{? enable_disable.Movie_Size_Low ?}-Movie_Size_Low'
+      - Movie_Size_Low
       - movies_lookup
       - German
     quality: '{? quality.low ?}'
@@ -1213,8 +1218,7 @@ tasks:
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
       - '{? enable_disable.Upgrade_Movies ?}-Upgrade-Movies'
       - '{? enable_disable.Actors ?}-Actors'
-      - '{? enable_disable.Download_Best_on_IMDb ?}-Download_Best_on_IMDb'
-      - '{? enable_disable.Movie_Size_Main ?}-Movie_Size_Main'
+      - Movie_Size_Main
       - movies_lookup
       - German
       - Movie_Streams
@@ -1226,7 +1230,6 @@ tasks:
         - movie_list: Default
       single_match: yes
       remove_on_match: yes
-#    include: Movie_Size_Main.yml
     list_add:
       - movie_list: offline_check
 
@@ -1241,7 +1244,7 @@ tasks:
       - '{? enable_disable.Upgrade_Movies ?}-Upgrade-Movies'
       - '{? enable_disable.Actors ?}-Actors'
       - '{? enable_disable.Download_Best_on_IMDb ?}-Download_Best_on_IMDb'
-      - '{? enable_disable.Movie_Size_Main ?}-Movie_Size_Low'
+      - Movie_Size_Low
       - movies_lookup
       - German
       - Movie_Streams
@@ -1256,7 +1259,6 @@ tasks:
     regexp:
       reject:
         - \b3D\b
-#    include: Movie_Size_Low.yml
     list_add:
       - movie_list: offline_check
       
