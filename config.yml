@@ -224,8 +224,8 @@ templates:
   ######################################## Download Streams
   Movie_Streams:
     inputs:
-#      - rss: '{? flexget.path ?}/External-Plugins/HDWorld-Feed/HDWorld.xml'
-#      - rss: '{? flexget.path ?}/External-Plugins/HDArea-Movies-Feed/HDArea.xml'
+      - rss: '{? flexget.path ?}/External-Plugins/HDWorld-Feed/HDWorld.xml'
+      - rss: '{? flexget.path ?}/External-Plugins/HDArea-Movies-Feed/HDArea.xml'
       - rss: 
           url: 'https://nima4k.org/rss_movies.xml'
           link:
