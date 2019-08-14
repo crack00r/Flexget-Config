@@ -309,9 +309,9 @@ templates:
           type: shows
           strip_dates: yes
           language: de
-    exists_series:
-      path: "{? filesystem.Library.series ?}/{{series_name}}"
-      allow_different_qualities: '{? series.different_qualities ?}'
+#    exists_series:
+#      path: "{? filesystem.Library.series ?}/{{series_name}}"
+#      allow_different_qualities: '{? series.different_qualities ?}'
 
   disable-Upgrade-Series:
     configure_series:
@@ -330,9 +330,9 @@ templates:
           type: shows
           strip_dates: yes
           language: de
-    exists_series:
-      path: "{? filesystem.Library.series ?}/{{series_name}}"
-      allow_different_qualities: '{? series.different_qualities ?}'
+#    exists_series:
+#      path: "{? filesystem.Library.series ?}/{{series_name}}"
+#      allow_different_qualities: '{? series.different_qualities ?}'
 
   ######################################## Enable/Disable MOVIES Upgrade
 
@@ -457,7 +457,7 @@ templates:
 
   enable-Download_Trending_Movies: 
     limit:
-      amount: 200
+      amount: '{? movies.trending ?}'
       from: 
         trakt_list:
           list: trending
@@ -468,7 +468,7 @@ templates:
 
   enable-Download_Popular_Movies: 
     limit:
-      amount: 6000
+      amount: '{? movies.popular ?}'
       from: 
         trakt_list:
           list: popular
@@ -479,7 +479,7 @@ templates:
 
   enable-Download_Popular_Series: 
     limit:
-      amount: 100
+      amount: '{? series.popular ?}'
       from: 
         trakt_list:
           list: popular
@@ -490,7 +490,7 @@ templates:
 
   enable-Download_Trending_Series: 
     limit:
-      amount: 15
+      amount: '{? series.trending ?}'
       from: 
         trakt_list:
           list: trending
@@ -977,7 +977,7 @@ tasks:
       list: collection
       strip_dates: yes
     accept_all: yes
-    set_series_begin: yes   
+    set_series_begin: yes
 
   ############################################################## Removings
   #
