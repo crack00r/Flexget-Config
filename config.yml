@@ -27,6 +27,11 @@ templates:
       regexp: 200
     manipulate:
     # fix nonsense
+    manipulate:
+      - title:
+          replace:            
+            regexp: 'http://nima4k.org/release/..../'
+            format: ''
       - title:
           replace:            
             regexp: '.(Deutsch|Englisch).' #fix SJ naming
@@ -222,16 +227,23 @@ templates:
       - seen_info_hash
       - seen_movies
   ######################################## Download Streams
-  Movie_Streams:
+  Movie_Streams: #720p / 1080p
     inputs:
       - rss: '{? flexget.path ?}/External-Plugins/HDWorld-Feed/HDWorld.xml'
       - rss: '{? flexget.path ?}/External-Plugins/HDArea-Movies-Feed/HDArea.xml'
+
+  Movie_Streams_4K:
+    inputs:
       - rss: 
           url: 'https://nima4k.org/rss_movies.xml'
-          link:
-            - dl_shareonline
-            - dl_rapidgator
-#      - rss: '{? flexget.path ?}/External-Plugins/HDWorld-3D-Feed/HDWorld.xml'
+          title: link # as the title is too cropped
+          link: dl_shareonline
+
+
+#  Movie_Streams_3D:
+#    inputs:
+#      - rss: '{? flexget.path ?}/External-Plugins/HDWorld-3D-Feed/HDWorld.xml'    
+
 
   Series_Streams_Singles:
     inputs:
@@ -268,8 +280,6 @@ templates:
             hoster: '{? Settings.Hoster ?}'
             language: '{? Settings.Language ?}'
             staffelpack: False
-        - searchHdworldSeries:
-            hoster: '{? Settings.Hoster ?}'
 
   Discover-disable-Backfill:
     discover:
@@ -288,8 +298,6 @@ templates:
             hoster: '{? Settings.Hoster ?}'
             language: '{? Settings.Language ?}'
             staffelpack: False
-        - searchHdworldSeries:
-            hoster: '{? Settings.Hoster ?}'
 
   ######################################## Enable/Disable SERIES Upgrade
 
@@ -484,6 +492,11 @@ templates:
       max: '{? Size.Main.Minimum ?}'
 
   Movie_Size_Low: 
+    content_size:
+      min: '{? Size.Low.Minimum ?}'
+      max: '{? Size.Low.Minimum ?}'
+
+  Movie_Size_4K: 
     content_size:
       min: '{? Size.Low.Minimum ?}'
       max: '{? Size.Low.Minimum ?}'
@@ -819,7 +832,8 @@ tasks:
   ######################################## Sync to Trakt Movie-Watchlist
 
   Sync_Movies_Trending:
-    interval: 24 hours
+    interval: 48 hours
+    priority: 8
     accept_all: yes
     template: 
       - no_global
@@ -832,12 +846,12 @@ tasks:
           account: '{? trakt.acc ?}'
           list: watchlist
           type: movies        
-#       - regexp_list: Default
     if:
       - trakt_collected: reject
   
   Sync_Movies_Popular:
-    interval: 24 hours
+    interval: 7 days
+    priority: 8
     template: 
       - no_global
       - no_seen
@@ -856,7 +870,6 @@ tasks:
           account: '{? trakt.acc ?}'
           list: watchlist
           type: movies        
-#       - regexp_list: Default
     if:
       - trakt_collected: reject
 
@@ -864,9 +877,9 @@ tasks:
   Sync_Movies_Flexget_Default:
     priority: 1
     interval: 48 hours #takes a long time if translated to german
-    plugin_priority:
-      only_new: 255 #only_new must run before running all the scripts on seen releases
-      trakt_list: 50
+#     plugin_priority:
+#       only_new: 255 #only_new must run before running all the scripts on seen releases
+#       trakt_list: 50
     template: 
       - no_seen
       - movies_lookup
@@ -880,40 +893,41 @@ tasks:
     list_add:  
       - movie_list: Default
 
-  Populate_regexp_list:
+  Populate_CleanName_list:
     priority: 1
     disable: seen
     movie_list: Default
     list_add:
-      - regexp_list: Default
+      - entry_list: Default
 #    manipulate:  no need since already in Global-Filter
     accept_all: yes
 
   Merge_external_trakt_list_to_Watchlist:
-    priority: 1
+    priority: 8
     interval: 24 hours
     template: 
       - no_seen
       - movies_lookup
     accept_all: yes
     trakt_list:
-      username: '{? trakt.merge_list.username ?}'
-      list: '{? trakt.merge_list.listname ?}'
+      username: '{? trakt.merge_from.username ?}'
+      list: '{? trakt.merge_from.listname ?}'
       type: movies
     list_add:  
       - trakt_list:
           account: '{? trakt.acc ?}'
-          list: watchlist
+          list: '{? trakt.merge_to ?}'
           type: movies
     if:
       - trakt_collected: reject
 
   ######################################## # This searches the 50.000 most popular movies for Favorite Actors/Actress and add them to Watchlist
   Sync_Actors_Movies:
+    priority: 9
+    interval: 30 days #this tasks takes multiple hours. plus no need to run more often
     include:
       - Actors.yml
       - Actress.yml
-    interval: 14 days #this tasks takes multiple hours. plus no need to run more often
     template: 
       - no_global
       - no_seen
@@ -925,7 +939,6 @@ tasks:
         trakt_list:
           list: popular
           type: movies
-    priority: 1
     list_add:  
       - trakt_list:
           account: '{? trakt.acc ?}'
@@ -944,7 +957,11 @@ tasks:
     if: 
       - trakt_collected: accept
     list_remove: 
-      - regexp_list: offline_check
+      - entry_list: offline_check
+      - trakt_list:
+          account: '{? trakt.acc ?}'
+          list: watchlist
+          type: movies     
 
   Offline_Check_Failed:
     interval: 24 hours
@@ -957,7 +974,7 @@ tasks:
     if:
       - not trakt_collected: accept
     list_remove:
-      - regexp_list: offline_check #remove rejection used by other tasks
+      - entry_list: offline_check #remove rejection used by other tasks
     list_add:  
       - movie_list: Default #add again to downloads
 
@@ -1017,21 +1034,14 @@ tasks:
       account: '{? trakt.acc ?}'
       list: watchlist
       type: shows
-    crossmatch:
-      from:
-        - trakt_list:
-            account: '{? trakt.acc ?}'
-            list: collection
-            type: shows
-      fields:
-        - imdb_id
-      action: accept
     list_remove:
       - trakt_list:
           account: '{? trakt.acc ?}'
           list: watchlist
           type: shows
-  ######################################## Remove Collected trakt-Watchlist
+    if:
+      - trakt_collected: accept
+  ######################################## Remove Collected or less than 30 votes from trakt-Watchlist
   Remove_CollectedMoviesFromWatchlist:
     priority: 1
     interval: 1 hours
@@ -1042,22 +1052,16 @@ tasks:
       account: '{? trakt.acc ?}'
       list: watchlist
       type: movies
-    regexp_list: Default
-    crossmatch:
-      from:
-        - trakt_list:
-            account: '{? trakt.acc ?}'
-            list: collection
-            type: movies
-      fields:
-        - imdb_id
-      action: accept
+    entry_list: Default
+    if:
+      - trakt_votes < 30: accept
+      - trakt_collected: accept
     list_remove:
       - trakt_list:
           account: '{? trakt.acc ?}'
           list: watchlist
           type: movies
-      - regexp_list: Default
+      - entry_list: Default
 
   ######################################## Remove Series from OnHold automatically, if Episode 3 is already watched - so it starts Downloading again
   Remove_Watched_OnHold:
@@ -1155,8 +1159,7 @@ tasks:
     quality: '{? quality.main ?}'
     discover:
       what:
-        - movie_list: Default
-#        - regexp_list: Default ## Search with regexp_list is the best way - but not working right now with discover - needs fix flexget-wise
+        - entry_list: Default
       from:
         - searchHdarea:
             hoster: '{? Settings.Hoster ?}'
@@ -1176,7 +1179,7 @@ tasks:
  ######################################## Search for queued Movies on hdarea with the help of a custom  pipe
   Movies_Watchlist_Search_DE_Low:
     interval: 24 hours
-    delay: 24 hours
+    delay: 48 hours
     priority: 9
     template:
       - '{? DownloadManager ?}-Defaults'
@@ -1188,8 +1191,7 @@ tasks:
     quality: '{? quality.low ?}'
     discover:
       what:
-#        - regexp_list: Default ## Search with regexp_list is the best way - but not working right now with discover - needs fix flexget-wise
-        - movie_list: Default
+        - entry_list: Default
       from:
         - searchHdarea:
             hoster: '{? Settings.Hoster ?}'
@@ -1210,7 +1212,7 @@ tasks:
 
 
   ######################################## Search based on Stream
-  Movies_Watchlist_Stream_DE_Main:
+  Movies_Watchlist_Stream_Main:
     priority: 4
     template:
       - '{? DownloadManager ?}-Defaults'
@@ -1229,12 +1231,12 @@ tasks:
       from:
         - movie_list: Default
       single_match: yes
-      remove_on_match: yes
+      remove_on_match: yes # Main quality done, so remove. 4K has another 
     list_add:
       - movie_list: offline_check
 
   ######################################## Search based on Stream
-  Movies_Watchlist_Stream_DE_Low:
+  Movies_Watchlist_Stream_Low:
     delay: 24 hours
     priority: 5
     template:
@@ -1255,13 +1257,54 @@ tasks:
       from:
         - movie_list: Default
       single_match: yes
-      remove_on_match: no
+      remove_on_match: no #let it stay in movie_list: default, to still allow for Main and 4K task
     regexp:
       reject:
         - \b3D\b
     list_add:
       - movie_list: offline_check
-      
+
+  ######################################## Search based on 4K Stream -- Needs a trakt_list named "4K"
+  Movies_Watchlist_Stream_4K:
+    priority: 4
+    template:
+      - '{? DownloadManager ?}-Defaults'
+      - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
+      - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
+      - '{? enable_disable.Upgrade_Movies ?}-Upgrade-Movies'
+      - '{? enable_disable.Actors ?}-Actors'
+      - movies_lookup
+      - Movie_Size_4K
+      - Movie_Streams_4K
+      - Movies_Global
+    regexp:
+    regexp:
+      reject:
+        - \benglis.?h\b
+    quality: '{? quality.high ?}'
+    list_match:
+      from:
+        - trakt_list:
+            account: '{? trakt.acc ?}'
+            list: collection
+            type: movies
+    crossmatch:
+      from:
+        - trakt_list:
+            account: '{? trakt.acc ?}'
+            list: 4K
+            type: movies
+      fields:
+        - imdb_id
+      action: reject
+    seen: local
+    list_add: # TODO: offline_check_4K , as this will block 1080p from being downloaded, if 720p is first in library
+      - movie_list: offline_check
+      - trakt_list:
+          account: '{? trakt.acc ?}'
+          list: 4K
+          type: movies
+
 ############################################################################################################ Series ############################################################################################################
 ############################################################################################################
 
@@ -1441,6 +1484,28 @@ tasks:
       - '{? enable_disable.Download_Specials2 ?}-Download_Specials2'
     priority: 10   
 
+
+  Comedy_Shows:
+    manual: yes
+    priority: 10
+    regexp:
+      accept:
+        - Wolfgang.Trepper
+        - Dieter.Nuhr
+    template:
+      - '{? enable_disable.Download_Sports ?}-Download_Sports'
+      - '{? DownloadManager ?}-Defaults'
+      - '{? DownloadManager ?}-Sports'
+      - no_global
+    seen: local
+    verify_ssl_certificates: no
+    csv:
+      url: 'file://{? flexget.path ?}/External-Plugins/TVRex/TVRex.csv'
+      values:
+        title: 1
+        quality: 2
+        url: 3
+
   ######################################## eBooks
 # 
 #   eBooks:
@@ -1463,6 +1528,7 @@ tasks:
 ####################################################################################################################################################################################
 
   move-Movies:
+    priority: 10
     manual: yes
     template:
       - no_seen
@@ -1501,6 +1567,7 @@ tasks:
 
 
   move-Series:
+    priority: 10
     filesystem:
       path: '{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/'
       retrieve: files
