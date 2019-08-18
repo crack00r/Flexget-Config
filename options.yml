@@ -130,7 +130,7 @@ series:
   ## This prevents endless downloading of Series you don't like maybe
   Stop_watchlist_counter: 0 #1|2|3|4|5|6|7 # Must be this exact format. 7 is relatively ideal. 0 to disable the watchlist completely and load everything straight away. THIS IS DISABLED BY DEFAULT
   Start_Collection_counter: 04 # 04 is relatively ideal. 0 to disable the watchlist completely and load everything straight away.
-  
+  season_packs: only #https://flexget.com/Plugins/series/season_packs
 ########### YouTube-Playlist: 
 YouTube:
   Playlist: 'PLRXXXXXXXXXXXXXXXXXXXDfZ2Hhaac'
