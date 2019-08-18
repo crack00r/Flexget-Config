@@ -130,7 +130,6 @@ series:
   ## This prevents endless downloading of Series you don't like maybe
   Stop_watchlist_counter: 0 #1|2|3|4|5|6|7 # Must be this exact format. 7 is relatively ideal. 0 to disable the watchlist completely and load everything straight away. THIS IS DISABLED BY DEFAULT
   Start_Collection_counter: 04 # 04 is relatively ideal. 0 to disable the watchlist completely and load everything straight away.
-  season_packs: yes # To Fix ugly behavior, this is only working if a Season is completed - and is named completed in the title.
   
 ########### YouTube-Playlist: 
 YouTube:
@@ -142,6 +141,7 @@ English: 'enable' # "enable" and "disable" are possible values
 
 ############ Enable / Disable certain tasks:
 disable_enable_tasks: # "enable" and "disable" are possible values
+  4K: enable
   Upgrade_Movies: enable
   #Trending 
   Download_Trending_Movies: enable
@@ -152,7 +152,7 @@ disable_enable_tasks: # "enable" and "disable" are possible values
   #Best of
   Download_Best_on_IMDb: enable ## Based on Score
 
-  Download_Seasons: enable
+  Seasons: enable
   Series_Collection_DE_Stream: enable
 
   Actors: enable #  This refers to Actors.yml 
