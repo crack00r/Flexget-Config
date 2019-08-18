@@ -25,7 +25,6 @@ templates:
     plugin_priority:
       manipulate: 255       # manipulate must fix the titles before lookups
       regexp: 200
-    manipulate:
     # fix nonsense
     manipulate:
       - title:
@@ -35,6 +34,10 @@ templates:
       - title:
           replace:            
             regexp: '.(Deutsch|Englisch).' #fix SJ naming
+            format: ''
+      - title:
+          replace:
+            regexp: 'tvs|euhd|mdgp|rsg|4sj|tmsf|hrs' #remove known release-groups from titles and especially from the beginning of the title (especially local filenames) 
             format: ''
       - title:
           replace:
@@ -58,15 +61,15 @@ templates:
             format: ''
       - title:
           replace:
-            regexp: 'tv-film|!|,|´|`|\?|'
+            regexp: 'tv-film|!|,|´|`|’|\?'
             format: ''
       - title:
           replace:
-            regexp: '\(|\)|\[|\]'
+            regexp: '\(|\)|\[|\]' # ( ) and [ ]
             format: ''
       - title:
           replace:
-            regexp: '( |)-( |)' #remove minus (inclusive spaces)
+            regexp: ' (-|–|—) ' #remove minus with spaces - "en dash", "hyphen" and "em dash" (looks the same, but are different)
             format: ' '
       - title:
           replace:
@@ -78,12 +81,12 @@ templates:
             format: ""
       - title:
           replace:
-            regexp: ':'
+            regexp: ':|\+' # ":" and "+"
             format: ''
       - title:
           replace:
-            regexp: "[.]" #remove dot by space
-            format: " "
+            regexp: '[.]' #remove dot by space
+            format: ' '
       - title:
           replace:
             regexp: '  +' #remove multiple space by single-space
@@ -115,8 +118,8 @@ templates:
             format: 'a'
       - title:
           replace:
-            regexp: 'tvs|euhd|mdgp|rsg|4sj|tmsf|hrs' #remove known release-groups from titles and especially from the beginning of the title (especially local filenames) 
-            format: ''            
+            regexp: 'ó'
+            format: 'o'          
     ## Known Problematic Releasenames
       - title:
           replace:
@@ -143,7 +146,6 @@ templates:
       reject:
       # Release
         - \b(duo|tri|quadri|tetra|penta)logy\b # Movie-Collections (often we already have some single ones in our Library)
-#        - \bcollection\b   # Collections (usually stands for complete series - not working well with flexget)
         - \buntouched\b   # Untouched (usually complete BDs with extras - incompatible with Plex/Emby etc.)
         - \bdirectors.cut\b   # too often the extended Version has  parts without foreign language
         - \bextended\b # too often the extended Version has  parts without foreign language
@@ -208,6 +210,7 @@ templates:
     imdb_lookup: yes
     trakt_lookup:
       account: '{? trakt.acc ?}'
+    bluray_lookup: yes
 #    rottentomatoes_lookup: yes #Buggy - 403 Client Error: Forbidden
   ######################################## Series-Global
   Series_Lookup:
@@ -421,6 +424,11 @@ templates:
   enable-Download_Sports: 
     manual: no
   disable-Download_Sports: 
+    manual: yes
+
+  enable-4K: 
+    manual: no
+  disable-4K:
     manual: yes
 
   enable-Download_Seasons: 
@@ -840,7 +848,6 @@ tasks:
       - no_seen
       - '{? enable_disable.Download_Trending_Movies ?}-Download_Trending_Movies'
       - movies_lookup
-    priority: 1
     list_add:
       - trakt_list:
           account: '{? trakt.acc ?}'
@@ -857,7 +864,6 @@ tasks:
       - no_seen
       - '{? enable_disable.Download_Popular_Movies ?}-Download_Popular_Movies'
       - movies_lookup
-    priority: 1
     list_match:
       from:
         - trakt_list:
@@ -874,57 +880,54 @@ tasks:
       - trakt_collected: reject
 
   ######################################## Sync Trakt Movie-Watchlist to Flexget-Queue (strips dates and unconform-characters)
-  Sync_Movies_Flexget_Default:
+  Sync_Movies_to_Flexget:
     priority: 1
     interval: 48 hours #takes a long time if translated to german
-#     plugin_priority:
-#       only_new: 255 #only_new must run before running all the scripts on seen releases
-#       trakt_list: 50
     template: 
       - no_seen
-      - movies_lookup
-      - Movies_Global #crossmatch offline_check
-    only_new: yes
+    accept_all: yes 
+    crossmatch:
+      from:
+        - movie_list: offline_check
+      fields:
+        - trakt_id
+      action: reject
     trakt_list:
       account: '{? trakt.acc ?}'
       list: watchlist
       type: movies
       language: de
-    list_add:  
-      - movie_list: Default
-
-  Populate_CleanName_list:
-    priority: 1
-    disable: seen
-    movie_list: Default
+      strip_dates: yes
     list_add:
-      - entry_list: Default
-#    manipulate:  no need since already in Global-Filter
-    accept_all: yes
+      - movie_list: Default #save with ID (explicit matches)
+      - entry_list: Default #save with regexp (searchable titles)
 
-  Merge_external_trakt_list_to_Watchlist:
+
+  ######################################## Merge two Trakt Lists
+
+  Merge_Trakt_Lists:
     priority: 8
     interval: 24 hours
     template: 
       - no_seen
-      - movies_lookup
+      - no_global
+    trakt_lookup: yes
     accept_all: yes
     trakt_list:
-      username: '{? trakt.merge_from.username ?}'
-      list: '{? trakt.merge_from.listname ?}'
+      username: '{? trakt.merge_list.username ?}'
+      list: '{? trakt.merge_list.listname ?}'
       type: movies
     list_add:  
       - trakt_list:
           account: '{? trakt.acc ?}'
           list: '{? trakt.merge_to ?}'
           type: movies
-    if:
-      - trakt_collected: reject
 
   ######################################## # This searches the 50.000 most popular movies for Favorite Actors/Actress and add them to Watchlist
   Sync_Actors_Movies:
     priority: 9
     interval: 30 days #this tasks takes multiple hours. plus no need to run more often
+    require_field: [imdb_id]
     include:
       - Actors.yml
       - Actress.yml
@@ -934,7 +937,7 @@ tasks:
       - movies_lookup
       - '{? enable_disable.Actors ?}-Actors'
     limit:
-      amount: 50000
+      amount: 5000
       from: 
         trakt_list:
           list: popular
@@ -944,7 +947,9 @@ tasks:
           account: '{? trakt.acc ?}'
           list: Actors
           type: movies
-
+    if:
+      - trakt_collected: reject
+      
      ######################################## offline check/delay - add back to watchlist, if the movie is not trakt-collected within 2 weeks
   Offline_Check_Passed:
     interval: 24 hours
@@ -974,7 +979,7 @@ tasks:
     if:
       - not trakt_collected: accept
     list_remove:
-      - entry_list: offline_check #remove rejection used by other tasks
+      - movie_list: offline_check #remove rejection used by other tasks
     list_add:  
       - movie_list: Default #add again to downloads
 
@@ -997,34 +1002,29 @@ tasks:
   ############################################################## Removings
   #
   ######################################## Remove canceled Series (Nobody wants to start watching canceled Series, or ?!)
-  Remove_Canceled:
-    priority: 1
-    template:
-      - no_seen
-      - no_global
-      - Series_Lookup
-    trakt_list:
-      account: '{? trakt.acc ?}'
-      list: watchlist
-      type: shows
-    if:
-      - trakt_series_status == 'canceled': accept
-    list_remove:
-      - trakt_list:
-          account: '{? trakt.acc ?}'
-          list: watchlist
-          type: shows
-      - trakt_list:
-          account: '{? trakt.acc ?}'
-          list: '{? trakt.foreign ?}'
-          type: shows
-  #########
-  Keep_Canceled_Collection:
-    exec:
-      - echo "Canceled Collections won't be deleted"
-    manual: yes
+#   Remove_Canceled:
+#     priority: 1
+#     template:
+#       - no_seen
+#       - no_global
+#       - Series_Lookup
+#     trakt_list:
+#       account: '{? trakt.acc ?}'
+#       list: watchlist
+#       type: shows
+#     if:
+#       - trakt_series_status == 'canceled': accept
+#     list_remove:
+#       - trakt_list:
+#           account: '{? trakt.acc ?}'
+#           list: watchlist
+#           type: shows
+#       - trakt_list:
+#           account: '{? trakt.acc ?}'
+#           list: '{? trakt.foreign ?}'
+#           type: shows
   ######################################## Remove Collected
-  Remove_CollectedSeriesFromWatchlist:
+  Clear_Collected_Series:
     priority: 1
     interval: 24 hours
     template:
@@ -1042,19 +1042,18 @@ tasks:
     if:
       - trakt_collected: accept
   ######################################## Remove Collected or less than 30 votes from trakt-Watchlist
-  Remove_CollectedMoviesFromWatchlist:
+  Clear_Collected_Movies:
     priority: 1
-    interval: 1 hours
     template:
       - no_global
       - no_seen
+    trakt_lookup: yes
     trakt_list:
       account: '{? trakt.acc ?}'
       list: watchlist
       type: movies
-    entry_list: Default
     if:
-      - trakt_votes < 30: accept
+      - trakt_votes < 20: accept #wrong item added?
       - trakt_collected: accept
     list_remove:
       - trakt_list:
@@ -1062,6 +1061,8 @@ tasks:
           list: watchlist
           type: movies
       - entry_list: Default
+      - movie_list: Default
+      - movie_list: offline_check
 
   ######################################## Remove Series from OnHold automatically, if Episode 3 is already watched - so it starts Downloading again
   Remove_Watched_OnHold:
@@ -1143,7 +1144,7 @@ tasks:
   Movies_Watchlist_Search_DE_Main:
 #    proper_movies: yes  #accept Quality-fixes (Proper means there was a bug in the release before) TOO MANY BUGS
     interval: 24 hours
-    priority: 9
+    priority: 8
     template:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
@@ -1213,7 +1214,7 @@ tasks:
 
   ######################################## Search based on Stream
   Movies_Watchlist_Stream_Main:
-    priority: 4
+    priority: 5
     template:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
@@ -1238,7 +1239,7 @@ tasks:
   ######################################## Search based on Stream
   Movies_Watchlist_Stream_Low:
     delay: 24 hours
-    priority: 5
+    priority: 6
     template:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
@@ -1266,18 +1267,18 @@ tasks:
 
   ######################################## Search based on 4K Stream -- Needs a trakt_list named "4K"
   Movies_Watchlist_Stream_4K:
-    priority: 4
+    priority: 7
     template:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
       - '{? enable_disable.Upgrade_Movies ?}-Upgrade-Movies'
+      - '{? enable_disable.4K ?}-4K'
       - '{? enable_disable.Actors ?}-Actors'
       - movies_lookup
       - Movie_Size_4K
       - Movie_Streams_4K
       - Movies_Global
-    regexp:
     regexp:
       reject:
         - \benglis.?h\b
@@ -1319,7 +1320,7 @@ tasks:
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
       - 'Discover-{? series.backfill ?}-Backfill'
       - '{? series.backfill ?}-Upgrade-Series'
-      - '{? enable_disable.OnHold ?}-OnHold'      
+      - '{? enable_disable.OnHold ?}-OnHold'  
       - '{? enable_disable.Canceled ?}-Canceled'   
       - German
       - Series_Lookup   
@@ -1396,6 +1397,7 @@ tasks:
   ######################################## Watchlist-Premieres | Needs work for: Prefer DE, otherwise EN
   ################################## What it does: Download Episode 1-3 and add to custom trakt-OnHold-List 
   Series_Watchlist:
+    manual: yes
     plugin_priority:
       regexp: 250
 #    series_premiere:
@@ -1407,8 +1409,6 @@ tasks:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Series'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
-      - '{? enable_disable.Download_Popular_Series ?}-Download_Popular_Series'
-      - '{? enable_disable.Download_Trending_Series ?}-Download_Trending_Series'
       - '{? enable_disable.Canceled ?}-Canceled'   
       - Series_Lookup
       - German
@@ -1430,7 +1430,7 @@ tasks:
       reject_excluding:
         - \bS01(.E0|E0)('{? series.Stop_watchlist_counter ?}')\b  # counter has to be set in options.yml
       reject:
-        - \bs[0-9][0-9]\b
+        - \bs[0-9][0-9]\b #reject seasons
 
 ############################################################################################################ YouTube ############################################################################################################
   YouTube-Personal-Playlist:
@@ -1541,7 +1541,8 @@ tasks:
          - \bproof\b
     no_entries_ok: yes
     filesystem:
-      path: '{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Movies/'
+      path: 
+        - '{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Movies/'
       retrieve: files
       recursive: yes 
       regexp: '.*\.(avi|mkv|mp4|m4v)$'
