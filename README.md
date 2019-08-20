@@ -30,7 +30,7 @@ https://board.jdownloader.org/showthread.php?t=67579  <br>
 #
 #### Best Multi-Hoster
 [Premiumize](https://www.premiumize.me/ref/709558658) <br>
-- Best All-In-One Provider (VPN, Torrent, Share-Hoster, cloud-space) <br>
+- Best All-In-One Provider (unlimited VPN, unlimited-Torrent, Share-Hoster, 1TB cloud-space and more) <br>
 
  # Installation :
 `sudo apt-get install unzip python python-beautifulsoup python3-bs4 python-pip` <br>
