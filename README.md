@@ -15,11 +15,11 @@ You only need to fill in your credentials. <br>
 <br>
 - merge any (Public) trakt list to own lists <br>
 <br>
-Download:
+Download:<br>
 - perform search on multiple sites <br>
 - perform daily crawl on multiple sites <br>
 <br>
-Move:
+Move:<br>
 - Filebot-like file-moving and sorting of Library (coming soon) <br>
 <br>
 - Supported-Downloaders: JDownloader and pyLoad <br>
