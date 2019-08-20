@@ -13,9 +13,13 @@ You only need to fill in your credentials. <br>
 - Manual adding via trakt.tv Watchlist <br>
 - Automatic adding via trakt_popular, trakt_trending and Ombi <br>
 <br>
-- merge any external trakt list to own watchlist <br>
+- merge any (Public) trakt list to own lists <br>
+<br>
+Download:
 - perform search on multiple sites <br>
 - perform daily crawl on multiple sites <br>
+<br>
+Move:
 - Filebot-like file-moving and sorting of Library (coming soon) <br>
 <br>
 - Supported-Downloaders: JDownloader and pyLoad <br>
