@@ -1,3 +1,4 @@
+
 # Flexget-Config
 
 Flexget-Config by snickers<br>
@@ -5,10 +6,10 @@ thanks to [topy](https://github.com/topy) for Plugins <br>
 
 Mainly for German Users, but help with other languages is appreciated <br>
 <br>
-- Easy to use Flexget config with support of secrets file. <br> 
-You only need to fill in your credentials. <br>
+### Easy to use Flexget config with support of secrets file. <br>  You only need to fill in your credentials. <br>
 <br>
-### Add:<br>
+
+### Add: <br>
 - Manual adding via trakt.tv Watchlist <br>
 - Automatic adding via trakt_popular, trakt_trending and Ombi <br>
 <br>
