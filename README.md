@@ -15,12 +15,14 @@ Mainly for German Users, but help with other languages is appreciated <br>
 <br>
 - merge any (Public) trakt list to own lists <br>
 <br>
+
 ### Download:<br>
 - perform search on multiple sites <br>
 - perform daily crawl on multiple sites <br>
 <br>
 - Supported-Downloaders: JDownloader and pyLoad <br>
 <br>
+
 ### Move:<br>
 - Filebot-like file-moving and sorting of Library (coming soon) <br>
 
