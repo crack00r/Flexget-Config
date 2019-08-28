@@ -159,7 +159,9 @@ disable_enable_tasks: # "enable" and "disable" are possible values
 
   OnHold: disable # Enable/disable OnHold Watchlist Series feature
   Canceled: disable # enable/disable downloading canceled Series (ENABLE stops downloading canceled Series)
-  
+
+  Merge_Trakt_List: disable #this merges one trakt list to another (further below)
+
 ##########################################################################################################################################################################
 ##########################################################################################################################################################################
 ##########################################################################################################################################################################
