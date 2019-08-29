@@ -94,8 +94,12 @@ trakt: #trakt.tv
 
   ##///////////////////////// TRAKT MERGE EXTERNAL LIST TO WATCHLIST (only working with public lists) ////////////////////
   merge_list:
-    username: USERNAME #username of list owner
-    listname: LISTNAME #listname
+    from:
+      username: spirann #username of list owner
+      listname: mr-skin-top-150 #listname
+      
+    to: Watchlist #can be any existing list name in trakt Acc
+    MinVotes: 50
        
     
 ombi:
@@ -161,6 +165,8 @@ disable_enable_tasks: # "enable" and "disable" are possible values
   Canceled: disable # enable/disable downloading canceled Series (ENABLE stops downloading canceled Series)
 
   Merge_Trakt_List: disable #this merges one trakt list to another (further below)
+  
+  Ombi_Movies: disable
 
 ##########################################################################################################################################################################
 ##########################################################################################################################################################################
