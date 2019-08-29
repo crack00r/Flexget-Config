@@ -11,7 +11,9 @@ Mainly for German Users, but help with other languages is appreciated <br>
 
 ### Add: <br>
 - Manual adding via trakt.tv Watchlist <br>
-- Automatic adding via trakt_popular, trakt_trending and Ombi <br>
+- trakt_popular <br>
+- trakt_trending <br>
+- Ombi <br>
 - merge any (Public) trakt list to own lists <br>
 <br>
 
