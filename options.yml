@@ -42,6 +42,9 @@ filesystem:
 JDownloader: #JDownloaders Path
   path: '/home/USERNAME/jd2' #Do not put an "/" at the end (ABSOLUTE PATH)
   
+  priority: #JDownloader Priorities
+    Archive: DEFAULT # HIGHEST, HIGHER, HIGH, DEFAULT, LOW, LOWER, LOWEST
+    Watchlist: DEFAULT # HIGHEST, HIGHER, HIGH, DEFAULT, LOW, LOWER, LOWEST  
 #------------------- ## NOT SUPPORTED - I'M NOT A PYLOAD USER ANYMORE!
 pyload: #pyload.org
   usr: 'USERNAME'
@@ -69,13 +72,16 @@ Parser:
   Movies: guessit # "guessit" and "internal" are possible values
 
 
-Size: #look enable/disable tasks
+Size: #Movies
   Main:
-    Minimum: '20000'
-    Maximum: '300000'
+    Minimum: '3000'
+    Maximum: '30000'
   Low:
     Minimum: '1500'
-    Maximum: '20000'   
+    Maximum: '10000'
+  4K:
+    Minimum: '10000'
+    Maximum: '40000' 
 ########## LOGINS
 imdb: #imdb.com
   listID1: 'ls050713726' ## NOT SUPPORTED ANYMORE #IMDB API SUCKS
