@@ -36,7 +36,7 @@ https://board.jdownloader.org/showthread.php?t=67579  <br>
 
  # Installation :
 `sudo apt-get install unzip python python-beautifulsoup python3-bs4 python-pip` <br>
-`sudo pip install --upgrade pip setuptools flexget rebulk lxml`<br>
+`sudo pip install --upgrade pip setuptools flexget rebulk lxml subliminal`<br>
 <br>
 `cd /tmp/ && wget https://github.com/crack00r/Flexget-Config/archive/master.zip`<br>
 `unzip  master.zip`<br>
