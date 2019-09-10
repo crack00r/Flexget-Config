@@ -35,7 +35,7 @@ https://board.jdownloader.org/showthread.php?t=67579  <br>
 - Best All-In-One Provider (unlimited VPN, unlimited-Torrent, Share-Hoster, 1TB cloud-space and more) <br>
 
  # Installation :
-`sudo apt-get install unzip python python-beautifulsoup python3-bs4 python-pip` <br>
+`sudo apt-get install unzip python python-beautifulsoup python3-bs4 python-pip python3` <br>
 `sudo pip install --upgrade pip setuptools flexget rebulk lxml subliminal`<br>
 <br>
 `cd /tmp/ && wget https://github.com/crack00r/Flexget-Config/archive/master.zip`<br>
