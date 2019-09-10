@@ -77,7 +77,7 @@ templates:
             format: ' '
       - title:            
           replace:
-            regexp: "[']" # remove apostrophes
+            regexp: "\'" # remove apostrophes
             format: ""
       - title:
           replace:
@@ -85,7 +85,7 @@ templates:
             format: ''
       - title:
           replace:
-            regexp: '[.]' #remove dot by space
+            regexp: '\.' #remove dot by space
             format: ' '
       - title:
           replace:
@@ -110,7 +110,7 @@ templates:
             format: 'ss'
       - title:
           replace:
-            regexp: '$'
+            regexp: '\$'
             format: 's'
       - title:
           replace:
@@ -1719,219 +1719,6 @@ tasks:
           list: FromIMDb
           type: movies
     disable: seen
-
-####################################################################################################################################################################################
-## MOVE ################################################################################################config#by#snickers2k########################################################
-####################################################################################################################################################################################
-
-################### move Movies
-  move-Movies:
-    priority: 10
-    nfo_lookup: yes
-    manual: yes
-    template:
-      - no_seen
-      - Movies_Lookup
-      - '{? enable_disable.Sorting ?}-Sorting'
-    accept_all: yes 
-    regexp:
-      reject:
-         - \btrailer\b
-         - \bsample\b
-         - \bproof\b
-    no_entries_ok: yes
-    filesystem:
-      path: 
-        - '{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Movies/'
-      retrieve: files
-      recursive: yes 
-      regexp: '.*\.(avi|mkv|mp4|m4v)$'
-    move:
-      unpack_safety: yes
-      to: "{? filesystem.Move2Library ?}/Movies/{{tmdb_name|default(movie_name)}}{% if imdb_year|default(False) %} ({{imdb_year}}){% endif %} {% if imdb_id|default(False) %} [{{imdb_id}}]{% endif %}"
-#      rename: "{{tmdb_name|default(movie_name)}}{% if imdb_id|default(False) %} - [{{imdb_id}}]{% endif %}"
-      along:
-        extensions:
-          - srt
-          - sub
-          - nfo
-          - eng
-          - jpg
-          - idx
-          - eng
-          - ger
-        subdirs:
-          - Subs
-          - extras
-          - posters
-      clean_source: 600  #remove samples and trash (below 600MB)
-    # Don't attempt to move if we don't have valid metadata
-    require_field: [movie_name, movie_id]
-    content_size:
-      min: 600
-    list_add:
-      - subtitle_list:
-          list: subtitles
-          path: "{{location}}"
-          remove_after: 7 days
-    exec:
-      on_exit:
-        for_accepted: 
-          - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type f \( -name "*sample*" -o -name "proof" \) -delete
-          - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type f -size -50k -delete
-          - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type d -size -200k -delete
-          - chmod 775 -R {? filesystem.Move2Library ?}/Movies
-
-################### move Series
-  move-Series:
-    priority: 10
-    manual: yes
-    nfo_lookup: yes
-    filesystem:
-      path: '{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/'
-      retrieve: files
-      recursive: yes 
-      regexp: '.*\.(avi|mkv|mp4|m4v)$'
-    metainfo_series: yes
-    template:
-      - no_seen
-      - Series_Lookup
-      - '{? enable_disable.Sorting ?}-Sorting'
-    regexp:
-      reject:
-        - \bsample\b 
-    accept_all: yes 
-    no_entries_ok: yes
-    move:
-      unpack_safety: yes
-      to: "{? filesystem.Move2Library ?}/Series/{{ tvdb_series_name|default(series_name)|replace('/', '_')|replace(':', ' -')|replace(',', '') }}{% if trakt_id|default(False) %} ({{ trakt_series_year }}){{ [tvdb_id] }} {{ [tvdb_id] }}{% endif %}/{% if series_id_type == 'ep' %}Season {{ series_season }}/{% endif %}/{{ tvdb_series_name|default(series_name)|replace('/', '_')|replace(':', ' -')|replace(',', '') }} - {{ tvdb_series_name|default(series_name) }}{% if tvdb_ep_name|default(False) %} - {{ tvdb_ep_name|replace('/', '_')|replace(':', ' -')|replace(',', '') }}{% endif %}/"
-      rename: >
-        {{ tvdb_series_name|default(series_name)|replace('/', '_')|replace(':', ' -')|replace(',', '') }} - {{ series_id }}{% if tvdb_ep_name|default(False) %} - {{ tvdb_ep_name|replace('/', '_')|replace(':', ' -')|replace(',', '') }}{% endif %} - {{ quality }}.{{ location[-3:] }}
-      along:
-        extensions:
-          - srt
-          - sub
-          - nfo
-          - eng
-          - jpg
-          - idx
-          - eng
-          - ger
-        subdirs:
-          - Subs
-          - extras
-          - posters
-      clean_source: 200 #remove samples and trash (below 200MB)
-    content_size:
-      min: 200
-    all_series:
-      # Don't actually filter
-      parse_only: yes
-      tracking: no
-    # Don't attempt to move if we don't have valid metadata
-    require_field: [tvdb_series_name, series_id]
-#    require_field: [series_name, series_id]
-    list_add:
-      - subtitle_list:
-          list: subtitles
-          path: "{{location}}"
-          remove_after: 7 days
-    exec:
-      on_exit:
-        for_accepted: 
-          - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type f \( -name "*sample*" -o -name "proof" \) -delete
-          - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type f -size -50k -delete
-          - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type d -size -200k -delete
-          - chmod 775 -R {? filesystem.Move2Library ?}/Series
-
-
-
-  Series-Sort-Decompressed:
-    manual: yes
-    template:
-#      - no_global # None of the global templates make sense here
-      - Series_Lookup
-    # Where to get the unpacked (staged) files from
-    filesystem:
-      path: '{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/'
-      retrieve: files
-      recursive: yes 
-      regexp: '.*\.(avi|mkv|mp4|m4v)$'
-    # Where to get the metadata
-    # This is needed to get my season offset values
-    sequence:
-      - configure_series:
-          settings:
-            parse_only: yes
-            tracking: no
-            set:
-              move_to: >-
-                {? filesystem.Move2Library ?}/Series/{{ tvdb_series_name|default(series_name)|replace('/', '_')|replace(':', ' -')|replace(',', '') }}/{% if series_id_type == 'ep' %}Season {{ series_season }}/{% endif %}/{{ tvdb_series_name|default(series_name)|replace('/', '_')|replace(':', ' -')|replace(',', '') }} - {{ series_id }}{% if tvdb_ep_name|default(False) %} - {{ tvdb_ep_name|replace('/', '_')|replace(':', ' -')|replace(',', '') }}{% endif %}/
-          from:
-            trakt_list:
-              account: '{? trakt.acc ?}'
-              list: collection
-              type: shows
-      - configure_series:
-          settings:
-            parse_only: yes
-            tracking: no
-            set:
-              move_to: >-
-                {? filesystem.Move2Library ?}/Series/{{ tvdb_series_name|default(series_name)|replace('/', '_')|replace(':', ' -')|replace(',', '') }}/{% if series_id_type == 'ep' %}Season {{ series_season }}/{% endif %}/{{ tvdb_series_name|default(series_name)|replace('/', '_')|replace(':', ' -')|replace(',', '') }} - {{ series_id }}{% if tvdb_ep_name|default(False) %} - {{ tvdb_ep_name|replace('/', '_')|replace(':', ' -')|replace(',', '') }}{% endif %}/
-          from:
-            trakt_list:
-              account: '{? trakt.acc ?}'
-              list: collection
-              type: shows
-    all_series:
-      # Don't actually filter
-      parse_only: yes
-      tracking: no
-    accept_all: yes
-    # Don't attempt to move if we don't have valid metadata
-    require_field: [tvdb_series_name, series_id, move_to]
-    move:
-      rename: >
-        {{ tvdb_series_name|default(series_name)|replace('/', '_')|replace(':', ' -')|replace(',', '') }} - {{ series_id }}{% if tvdb_ep_name|default(False) %} - {{ tvdb_ep_name|replace('/', '_')|replace(':', ' -')|replace(',', '') }}{% endif %} - {{ quality }}.{{ location[-3:] }}
-      clean_source: 40
-
-################### Download subtitles for the previously queued files
-#
-  download-subtitles: # task
-    priority: 140
-    template:
-      - no_seen
-      - '{? enable_disable.Download_Subtitles ?}-Download_Subtitles'
-    subtitle_list:
-      list: subtitles
-    list_match:
-      from:
-        - subtitle_list:
-            list: subtitles
-    subliminal:
-      exact_match: yes
-      languages:
-        - ger
-        - eng
-      hearing_impaired: no
-      single: no
-      providers:
-        - addic7ed
-        - opensubtitles
-        - podnapisi
-#        - tvsubtitles # no german subs
-#        - thesubdb # no german subs
-      authentication:
-        addic7ed:
-          username: "{? addic7ed.user ?}"
-          password: "{? addic7ed.password ?}"
-        opensubtitles:
-          username: "{? opensubtitles.user ?}"
-          password: "{? opensubtitles.passsword ?}"
-        podnapisi:
-          username: "{? podnapisi.user ?}"
-          password: "{? podnapisi.passsword ?}"
 
 
 ####################################################################################################################################################################################
