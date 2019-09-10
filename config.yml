@@ -37,7 +37,7 @@ templates:
             format: ''
       - title:
           replace:
-            regexp: 'tvs|euhd|mdgp|rsg|4sj|tmsf|hrs' #remove known release-groups from titles and especially from the beginning of the title (especially local filenames) 
+            regexp: 'tvs-|euhd-|mdgp-|rsg-|4sj-|tmsf-|hrs-|pl3x-|encounters-' #remove known release-groups from the beginning of filename's 
             format: ''
       - title:
           replace:
@@ -110,17 +110,21 @@ templates:
             format: 'ss'
       - title:
           replace:
-            regexp: 'é'
+            regexp: '$'
+            format: 's'
+      - title:
+          replace:
+            regexp: 'é|è'
             format: 'e'
       - title:
           replace:
-            regexp: 'á'
+            regexp: 'á|à'
             format: 'a'
       - title:
           replace:
-            regexp: 'ó'
-            format: 'o'          
-    ## Known Problematic Releasenames
+            regexp: 'ó|ò'
+            format: 'o'
+     ## Known Problematic Releasenames
       - title:
           replace:
             regexp: 'greys' 
@@ -149,7 +153,7 @@ templates:
         - \buntouched\b   # Untouched (usually complete BDs with extras - incompatible with Plex/Emby etc.)
         - \bdirectors.cut\b   # too often the extended Version has  parts without foreign language
         - \bextended\b # too often the extended Version has  parts without foreign language
-        - \bread.nfo\b # usually means there is something in the nfo-file to read about, mostly likely about hardcoded subs or other "bad"-Info
+        - \bread.nfo\b # usually means there is something in the nfo-file to read about, most likely about hardcoded subs or other "bad"-Info
 #        - \bhdtv\b # HDTV
       # Video
         - \b((hd|)ts|telesync)\b   # Bad-Quality
@@ -165,8 +169,7 @@ templates:
         - \bflac\b   # flac
         - \b(ac3(.|)|)md|(mic(.|)dubbed)\b # Microphone-Dubbed 
         - \b(ac3(.|)|)ld|(line(.|)dubbed)\b # Line-Dubbed #means it is manually dubbed
-
-
+        
     ######################################## Global Log-Filter - what and how should be logged (flexget.log in the config directory)
 #     log_filter:
 #       task:
@@ -203,7 +206,7 @@ templates:
 ########################################################################################################################################################################
 
   ######################################## Movie-Global
-  movies_lookup:
+  Movies_Lookup:
     metainfo_movie: yes
     tmdb_lookup:
       language: de
@@ -212,6 +215,7 @@ templates:
       account: '{? trakt.acc ?}'
     bluray_lookup: yes
 #    rottentomatoes_lookup: yes #Buggy - 403 Client Error: Forbidden
+
   ######################################## Series-Global
   Series_Lookup:
     plugin_priority:
@@ -229,11 +233,13 @@ templates:
       - seen
       - seen_info_hash
       - seen_movies
+      
   ######################################## Download Streams
-  Movie_Streams: #720p / 1080p
+  Movie_Streams: #720p / 1080p 
     inputs:
-      - rss: '{? flexget.path ?}/External-Plugins/HDWorld-Feed/HDWorld.xml'
-      - rss: '{? flexget.path ?}/External-Plugins/HDArea-Movies-Feed/HDArea.xml'
+      - rss: '{? flexget.path ?}/rss/HDWorld-Movies.xml'
+      - rss: '{? flexget.path ?}/rss/HDArea-Movies.xml'
+      - rss: '{? flexget.path ?}/rss/MovieBlog-Movies.xml'
 
   Movie_Streams_4K:
     inputs:
@@ -245,25 +251,27 @@ templates:
 
 #  Movie_Streams_3D:
 #    inputs:
-#      - rss: '{? flexget.path ?}/External-Plugins/HDWorld-3D-Feed/HDWorld.xml'    
+#      - rss: '{? flexget.path ?}/rss/HDWorld-3D-Feed/HDWorld.xml'    
 
 
   Series_Streams_Singles:
     inputs:
-      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_1.xml'
-      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_2.xml'
-      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_3.xml'
-      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_4.xml'
-      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_5.xml'
-      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_6.xml'
-      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_7.xml'
-      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_8.xml'
-      - rss: '{? flexget.path ?}/External-Plugins/Serienjunkies-Feed/rss_feed_9.xml'
+      - rss: '{? flexget.path ?}/rss/rss_feed_1.xml'
+      - rss: '{? flexget.path ?}/rss/rss_feed_2.xml'
+      - rss: '{? flexget.path ?}/rss/rss_feed_3.xml'
+      - rss: '{? flexget.path ?}/rss/rss_feed_4.xml'
+      - rss: '{? flexget.path ?}/rss/rss_feed_5.xml'
+      - rss: '{? flexget.path ?}/rss/rss_feed_6.xml'
+      - rss: '{? flexget.path ?}/rss/rss_feed_7.xml'
+      - rss: '{? flexget.path ?}/rss/rss_feed_8.xml'
+      - rss: '{? flexget.path ?}/rss/rss_feed_9.xml'
 
   Series_Streams_Seasons:
     inputs:
-      - rss: '{? flexget.path ?}/External-Plugins/HDWorld-Feed/HDWorld.xml' # HDWorld      
-      - rss: '{? flexget.path ?}/External-Plugins/HDArea-Series-Feed/HDArea.xml'
+      - rss: '{? flexget.path ?}/rss/HDWorld-Series.xml' # HDWorld      
+      - rss: '{? flexget.path ?}/rss/HDArea-Series.xml'
+      - rss: '{? flexget.path ?}/rss/MovieBlog-Series.xml'
+
 
   ######################################## Enable/Disable Discover
   Discover-enable-Backfill:
@@ -307,8 +315,8 @@ templates:
   enable-Upgrade-Series:
     configure_series:
       settings:
-        target: '{? quality.main ?}'
-        quality: '{? quality.low ?}'
+        target: '{? quality_series.main ?}'
+        quality: '{? quality_series.low ?}'
         propers: 2 weeks        
         timeframe: 24 hours
         identified_by: ep
@@ -328,8 +336,8 @@ templates:
   disable-Upgrade-Series:
     configure_series:
       settings:
-        target: '{? quality.main ?}'
-        quality: '{? quality.low ?}'
+        target: '{? quality_series.main ?}'
+        quality: '{? quality_series.low ?}'
         propers: 2 weeks        
         timeframe: 24 hours
         identified_by: ep
@@ -353,7 +361,8 @@ templates:
       path: 
         - "{? filesystem.Library.movies ?}/"
       allow_different_qualities: '{? movies.different_qualities ?}'
-      lookup: imdb
+#      lookup: imdb
+      type: dirs
 
   disable-Upgrade-Movies:
     exec:
@@ -362,15 +371,6 @@ templates:
 
 
   ######################################## Enable/Disable Special (Author) Tasks
-  enable-Download_Second_IMDb_Movies:
-    manual: no
-  disable-Download_Second_IMDb_Movies:
-    manual: yes    
-
-  enable-Sync_Main_IMDb_to_Second:
-    manual: no
-  disable-Sync_Main_IMDb_to_Second:
-    manual: yes
 
   enable-Studio_Downloads:
     manual: no
@@ -431,6 +431,22 @@ templates:
   disable-4K:
     manual: yes
 
+  enable-Merge_Trakt_List: 
+    manual: no
+  disable-Merge_Trakt_List: 
+    manual: yes
+
+  enable-Ombi_Movies:
+    manual: no   
+  disable-Ombi_Movies: 
+    manual: yes
+
+  enable-Ombi_Series: 
+    manual: no
+  disable-Ombi_Series: 
+    manual: yes
+
+      
   enable-Download_Seasons: 
     manual: no
   disable-Download_Seasons: 
@@ -473,26 +489,15 @@ templates:
       - echo "Download canceled Series"
 
   enable-Download_Trending_Movies: 
-    limit:
-      amount: '{? movies.trending ?}'
-      from: 
-        trakt_list:
-          list: trending
-          type: movies
+    manual: no
   disable-Download_Trending_Movies:
-    exec:
-      - echo "no Trending Movies to consider"
+    manual: yes
 
   enable-Download_Popular_Movies: 
-    limit:
-      amount: '{? movies.popular ?}'
-      from: 
-        trakt_list:
-          list: popular
-          type: movies
+    manual: no
+    
   disable-Download_Popular_Movies:
-    exec:
-      - echo "no Popular Movies to consider"
+    manual: yes
 
   Movie_Size_Main: 
     content_size:
@@ -510,26 +515,14 @@ templates:
       max: '{? Size.Low.Minimum ?}'
 
   enable-Download_Popular_Series: 
-    limit:
-      amount: '{? series.popular ?}'
-      from: 
-        trakt_list:
-          list: popular
-          type: shows
+    manual: no
   disable-Download_Popular_Series:
-    exec:
-      - echo "no Popular Shows to consider"
+    manual: yes
 
   enable-Download_Trending_Series: 
-    limit:
-      amount: '{? series.trending ?}'
-      from: 
-        trakt_list:
-          list: trending
-          type: shows
+    manual: no
   disable-Download_Trending_Series:
-    exec:
-      - echo "no Trending Shows to consider"
+    manual: yes
 
   enable-Actors: 
     include: 
@@ -562,10 +555,11 @@ templates:
     regexp:
       reject:
         - \bcomplete\b #In Movie-Titles, this usually means Complete-Bluray (iso)
-        - \b\S[0-9][0-9](|e[0-9][0-9])\b
-    if:
-      - trakt_movie_user_rating > 9: ## 9-10 is ideal for usage with Plex (4 Plex Stars = 8 trakt/imdb Stars ---- 5 Plex Stars = 10 trakt/imdb Stars)
-          quality: '{? quality.high ?}'
+        - \b\S[0-9][0-9](|e[0-9][0-9])\b: {from: title}
+        - \b'{? reject.crew ?}'\b
+#    if:
+#      - trakt_movie_user_rating >= 9: ## 9-10 is ideal for usage with Plex (4 Plex Stars = 8 trakt/imdb Stars ---- 5 Plex Stars = 10 trakt/imdb Stars)
+#          quality: '{? quality_movies.high ?}'
     crossmatch:
       from:
         - movie_list: offline_check
@@ -577,7 +571,11 @@ templates:
     sort_by:
       field: quality
       reverse: yes
-
+    regexp:
+      reject:
+        - \bcomplete\b #In Movie-Titles, this usually means Complete-Bluray (iso)
+        - \b'{? reject.crew ?}'\b
+        
   ######################################## Languages
   German:
   # Accept Only German, by Title
@@ -607,13 +605,13 @@ templates:
       - echo " " >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
       - echo "text={{url}}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
       - echo "autoConfirm=TRUE" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
-      - echo "priority=LOWER" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
       - echo "addOfflineLink=false" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
   ######## Archive-Series
   jdownloader-Archive-Series:
     exec:
       - echo "downloadPassword=serienjunkies.org"  >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
       - echo "extractPasswords=serienjunkies.org"  >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+      - echo "priority={? JDownloader.priority.Archive ?}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
     if:
       - trakt_ep_id:
           exec: 
@@ -625,6 +623,8 @@ templates:
             - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/{{title}}-({{series_name}})-({{series_id}})/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
   ######## Archive-Movies
   jdownloader-Archive-Movies:
+    exec:
+      - echo "priority={? JDownloader.priority.Archive ?}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
     if:
       - imdb_id:
           exec: 
@@ -641,6 +641,7 @@ templates:
     exec:
       - echo "downloadPassword=serienjunkies.org"  >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
       - echo "extractPasswords=serienjunkies.org"  >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+      - echo "priority={? JDownloader.priority.Watchlist ?}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
     if:
       - trakt_ep_id:
           exec: 
@@ -652,6 +653,8 @@ templates:
             - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Watchlist ?}/Series/{{title}}-({{series_name}})-({{series_id}})/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
   ######## Watchlist
   jdownloader-Watchlist-Movies:
+    exec:
+      - echo "priority={? JDownloader.priority.Watchlist ?}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
     if:
       - imdb_id:
           exec: 
@@ -666,6 +669,10 @@ templates:
   jdownloader-YouTube:
     exec:
       - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.YouTube ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+  ######## YouTube
+  jdownloader-YouTube:
+    exec:
+      - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Spielshows ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
   ######## 3D
   jdownloader-3D:
     exec:
@@ -832,10 +839,11 @@ tasks:
     exec:
       on_start:
         phase: 
-          - "cd {? flexget.path ?}/External-Plugins/HDArea-Movies-Feed/ && rm *.xml; python ./HDAreaOrg-RSS.py"
-          - "cd {? flexget.path ?}/External-Plugins/HDWorld-Feed/ && rm *.xml; python ./HDWorld-RSS.py"
-          - "cd {? flexget.path ?}/External-Plugins/Serienjunkies-Feed/ && rm *.xml; python ./Serienjunkies-RSS.py"          
-          - "cd {? flexget.path ?}/External-Plugins/HDArea-Series-Feed/ && rm *.xml; python ./HDAreaOrg-RSS.py"
+          - "cd {? flexget.path ?}/rss/ && rm *.xml; cd {? flexget.path ?}/ && python3 ./streams.py"
+#           - "cd {? flexget.path ?}/rss/HDArea-Movies-Feed/ && rm *.xml; python ./HDAreaOrg-RSS.py"
+#           - "cd {? flexget.path ?}/rss/HDWorld-Feed/ && rm *.xml; python ./HDWorld-RSS.py"
+#           - "cd {? flexget.path ?}/rss/SJ_ && rm *.xml; python ./Serienjunkies-RSS.py"          
+#           - "cd {? flexget.path ?}/rss/HDArea-Series-Feed/ && rm *.xml; python ./HDAreaOrg-RSS.py"
 
   ######################################## Sync to Trakt Movie-Watchlist
 
@@ -847,12 +855,19 @@ tasks:
       - no_global
       - no_seen
       - '{? enable_disable.Download_Trending_Movies ?}-Download_Trending_Movies'
-      - movies_lookup
+    trakt_lookup: yes
+    limit:
+      amount: '{? movies.amount.trending ?}'
+      from: 
+        trakt_list:
+          account: '{? trakt.acc ?}'
+          list: trending
+          type: movies
     list_add:
       - trakt_list:
           account: '{? trakt.acc ?}'
-          list: watchlist
-          type: movies        
+          list: '{? movies.list.trending ?}'
+          type: movies   
     if:
       - trakt_collected: reject
   
@@ -863,14 +878,108 @@ tasks:
       - no_global
       - no_seen
       - '{? enable_disable.Download_Popular_Movies ?}-Download_Popular_Movies'
-      - movies_lookup
-    list_match:
-      from:
-        - trakt_list:
-            account: '{? trakt.acc ?}'
-            list: watchlist
-            type: movies
-      action: reject 
+    trakt_lookup: yes
+    accept_all: yes
+    limit:
+      amount: '{? movies.amount.popular ?}'
+      from: 
+        trakt_list:
+          account: '{? trakt.acc ?}'
+          list: '{? movies.list.popular ?}'
+          type: movies
+    list_add:
+      - trakt_list:
+          account: '{? trakt.acc ?}'
+          list: watchlist
+          type: movies        
+    if:
+      - trakt_collected: reject
+
+  Sync_Series_Popular:
+    interval: 7 days
+    priority: 8
+    template: 
+      - no_global
+      - no_seen
+      - '{? enable_disable.Download_Popular_Movies ?}-Download_Popular_Movies'
+    trakt_lookup: yes
+    accept_all: yes
+    limit:
+      amount: '{? series.amount.popular ?}'
+      from: 
+        trakt_list:
+          account: '{? trakt.acc ?}'
+          list: '{? series.list.popular ?}'
+          type: shows
+    list_add:
+      - trakt_list:
+          account: '{? trakt.acc ?}'
+          list: '{? series.list.popular ?}'
+          type: shows        
+    if:
+      - trakt_collected: reject
+
+
+  Sync_Series_Trending:
+    interval: 7 days
+    priority: 8
+    template: 
+      - no_global
+      - no_seen
+      - '{? enable_disable.Download_Popular_Movies ?}-Download_Popular_Movies'
+    trakt_lookup: yes
+    accept_all: yes
+    limit:
+      amount: '{? series.amount.trending ?}'
+      from: 
+        trakt_list:
+          account: '{? trakt.acc ?}'
+          list: '{? series.list.trending ?}'
+          type: shows
+    list_add:
+      - trakt_list:
+          account: '{? trakt.acc ?}'
+          list: '{? series.list.trending ?}'
+          type: shows        
+    if:
+      - trakt_collected: reject
+
+  Sync_Ombi_Movies:
+    interval: 2 days
+    priority: 8
+    template: 
+      - no_global
+      - no_seen
+      - '{? enable_disable.Ombi_Movies ?}-Ombi_Movies'
+    ombi_list:
+      base_url: '{? ombi.url ?}'
+      port: '{? ombi.port ?}'
+      api_key: '{? ombi.api ?}'
+      type: movies
+    trakt_lookup: yes
+    accept_all: yes
+    list_add:
+      - trakt_list:
+          account: '{? trakt.acc ?}'
+          list: watchlist
+          type: movies        
+    if:
+      - trakt_collected: reject
+
+  Sync_Ombi_Series:
+    interval: 2 days
+    priority: 8
+    template: 
+      - no_global
+      - no_seen
+      - '{? enable_disable.Ombi_Movies ?}-Ombi_Series'
+    ombi_list:
+      base_url: '{? ombi.url ?}'
+      port: '{? ombi.port ?}'
+      api_key: '{? ombi.api ?}'
+      type: shows
+    trakt_lookup: yes
+    accept_all: yes
     list_add:
       - trakt_list:
           account: '{? trakt.acc ?}'
@@ -892,15 +1001,30 @@ tasks:
       fields:
         - trakt_id
       action: reject
-    trakt_list:
-      account: '{? trakt.acc ?}'
-      list: watchlist
-      type: movies
-      language: de
-      strip_dates: yes
+    list_match:
+      from:
+        - trakt_list:
+            account: '{? trakt.acc ?}'
+            list: watchlist
+            type: movies
+            language: de
+            strip_dates: yes
+        - trakt_list:
+            account: '{? trakt.acc ?}'
+            list: '{? movies.list.popular ?}'
+            type: movies
+            language: de
+            strip_dates: yes
+        - trakt_list:
+            account: '{? trakt.acc ?}'
+            list: '{? movies.list.trending ?}'
+            type: movies
+            language: de
+            strip_dates: yes
+      remove_on_match: no
     list_add:
-      - movie_list: Default #save with ID (explicit matches)
-      - entry_list: Default #save with regexp (searchable titles)
+      - movie_list: Default #save with unique-ID for explicit matches after searching with regexp
+      - entry_list: Default #save with regexp (global-filter) so we get searchable titles
 
 
   ######################################## Merge two Trakt Lists
@@ -911,20 +1035,26 @@ tasks:
     template: 
       - no_seen
       - no_global
+      - '{? enable_disable.Merge_Trakt_List ?}-Merge_Trakt_List'
     trakt_lookup: yes
     accept_all: yes
     trakt_list:
-      username: '{? trakt.merge_list.username ?}'
-      list: '{? trakt.merge_list.listname ?}'
-      type: movies
+      username: '{? Merge_Trakt_List.from.username ?}'
+      list: '{? Merge_Trakt_List.from.listname ?}'
+    trakt_list:
+      username: '{? Merge_Trakt_List.from.username2 ?}'
+      list: '{? Merge_Trakt_List.from.listname2 ?}'
+    if:
+      - trakt_votes > '{? Merge_Trakt_List.min_votes ?}': accept
+      - trakt_rating > '{? Merge_Trakt_List.min_rating ?}': accept 
     list_add:  
       - trakt_list:
           account: '{? trakt.acc ?}'
-          list: '{? trakt.merge_to ?}'
+          list: '{? Merge_Trakt_List.to ?}'
           type: movies
-
-  ######################################## # This searches the 50.000 most popular movies for Favorite Actors/Actress and add them to Watchlist
-  Sync_Actors_Movies:
+                    
+  ######################################## # Actors, Actress, Directors, Writers or Studio's ## DEVELOPING
+  Sync_Special_Movies: 
     priority: 9
     interval: 30 days #this tasks takes multiple hours. plus no need to run more often
     require_field: [imdb_id]
@@ -934,7 +1064,7 @@ tasks:
     template: 
       - no_global
       - no_seen
-      - movies_lookup
+      - Movies_Lookup
       - '{? enable_disable.Actors ?}-Actors'
     limit:
       amount: 5000
@@ -947,31 +1077,12 @@ tasks:
           account: '{? trakt.acc ?}'
           list: Actors
           type: movies
-    if:
-      - trakt_collected: reject
-      
-     ######################################## offline check/delay - add back to watchlist, if the movie is not trakt-collected within 2 weeks
-  Offline_Check_Passed:
-    interval: 24 hours
-    delay: 2 weeks
-    template: 
-      - no_global
-      - no_seen
-    priority: 2
-    movie_list: offline_check
-    if: 
-      - trakt_collected: accept
-    list_remove: 
-      - entry_list: offline_check
-      - trakt_list:
-          account: '{? trakt.acc ?}'
-          list: watchlist
-          type: movies     
 
+  ######################################## offline check/delay - add back to watchlist, if the movie is not trakt-collected within 2 weeks -- if Collected successfully, Clear-Task will keep track
   Offline_Check_Failed:
     interval: 24 hours
     delay: 2 weeks
-    template: 
+    template:
       - no_global
       - no_seen
     priority: 2
@@ -980,7 +1091,7 @@ tasks:
       - not trakt_collected: accept
     list_remove:
       - movie_list: offline_check #remove rejection used by other tasks
-    list_add:  
+    list_add:
       - movie_list: Default #add again to downloads
 
   ######################################## Set_Series_Begin based on "Collected" in Trakt - for every show
@@ -1024,7 +1135,7 @@ tasks:
 #           list: '{? trakt.foreign ?}'
 #           type: shows
   ######################################## Remove Collected
-  Clear_Collected_Series:
+  Clean_up_Series:
     priority: 1
     interval: 24 hours
     template:
@@ -1042,7 +1153,7 @@ tasks:
     if:
       - trakt_collected: accept
   ######################################## Remove Collected or less than 30 votes from trakt-Watchlist
-  Clear_Collected_Movies:
+  Clean_up_Movies:
     priority: 1
     template:
       - no_global
@@ -1088,49 +1199,6 @@ tasks:
           list: watchlist
           type: shows
 
-  ######################################## Add Items based on Ombi-requests ### WORK IN PROGRESS - PLUGIN NOT IMPLEMENTED BY FLEXGET YET
-
-#   Ombi_Movies:
-#     priority: 2
-#     template:
-#       - no_global
-#       - movies_lookup
-#     seen:
-#       local: yes
-#       fields: [ombi_request_id]
-#     ombi_list:
-#       base_url: '{? ombi.url ?}'
-#       port: 443
-#       username: '{? ombi.usr ?}'
-#       password: '{? ombi.pwd ?}'
-#       type: movies
-#     accept_all: yes
-#     list_add:
-#       - trakt_list:
-#           account: '{? trakt.acc ?}'
-#           list: watchlist
-#           type: movies
-# 
-#   TV_Ombi:
-#     priority: 2
-#     template:
-#       - no_global
-#       - Series_Lookup
-#     seen:
-#       local: yes
-#       fields: [ombi_request_id]
-#     ombi_list:
-#       base_url: '{? ombi.url ?}'
-#       port: 443
-#       username: '{? ombi.usr ?}'
-#       password: '{? ombi.pwd ?}'
-#       type: shows
-#     accept_all: yes
-#     list_add:
-#       - trakt_list:
-#           account: '{? trakt.acc ?}'
-#           list: watchlist
-#           type: shows
 
 ####################################################################################################################################################################################
 ### DOWNLOADS ######################################################################################################################################################################
@@ -1151,13 +1219,13 @@ tasks:
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
       - Movie_Size_Main
 #      - '{? enable_disable.3D ?}-3D'
-      - movies_lookup
+      - Movies_Lookup
       - German
       - Movies_Global
-    regexp:
-      reject_excluding:
-        - \bdl|dual\b # Dual-Language
-    quality: '{? quality.main ?}'
+#     regexp:
+#       reject_excluding:
+#         - \bdl|dual\b # Dual-Language
+    quality: '{? quality_movies.main ?}'
     discover:
       what:
         - entry_list: Default
@@ -1168,6 +1236,7 @@ tasks:
             hoster: '{? Settings.Hoster ?}'
         - searchMovieBlog:
             hoster: '{? Settings.Hoster ?}'
+      release_estimations: ignore
     list_match:
       from:
         - movie_list: Default
@@ -1187,9 +1256,9 @@ tasks:
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
       - Movie_Size_Low
-      - movies_lookup
+      - Movies_Lookup
       - German
-    quality: '{? quality.low ?}'
+    quality: '{? quality_movies.low ?}'
     discover:
       what:
         - entry_list: Default
@@ -1222,12 +1291,12 @@ tasks:
       - '{? enable_disable.Upgrade_Movies ?}-Upgrade-Movies'
       - '{? enable_disable.Actors ?}-Actors'
       - Movie_Size_Main
-      - movies_lookup
+      - Movies_Lookup
       - German
       - Movie_Streams
       - Movies_Global
 #      - '{? enable_disable.3D ?}-3D'
-    quality: '{? quality.main ?}'
+    quality: '{? quality_movies.main ?}'
     list_match:
       from:
         - movie_list: Default
@@ -1248,11 +1317,11 @@ tasks:
       - '{? enable_disable.Actors ?}-Actors'
       - '{? enable_disable.Download_Best_on_IMDb ?}-Download_Best_on_IMDb'
       - Movie_Size_Low
-      - movies_lookup
+      - Movies_Lookup
       - German
       - Movie_Streams
       - Movies_Global
-    quality: '{? quality.low ?}'
+    quality: '{? quality_movies.low ?}'
     seen: local #still upgradable by Main
     list_match:
       from:
@@ -1273,16 +1342,16 @@ tasks:
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Movies'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
       - '{? enable_disable.Upgrade_Movies ?}-Upgrade-Movies'
-      - '{? enable_disable.4K ?}-4K'
+      - '{? enable_disable.UltraHD ?}-4K'
       - '{? enable_disable.Actors ?}-Actors'
-      - movies_lookup
+      - Movies_Lookup
       - Movie_Size_4K
       - Movie_Streams_4K
       - Movies_Global
     regexp:
       reject:
         - \benglis.?h\b
-    quality: '{? quality.high ?}'
+    quality: '{? quality_movies.high ?}'
     list_match:
       from:
         - trakt_list:
@@ -1307,9 +1376,9 @@ tasks:
           type: movies
 
 ############################################################################################################ Series ############################################################################################################
-############################################################################################################
-
-  ######################################## Stream and Search for Serienunkies
+#
+#
+########################################## Stream and Search for Serienunkies
 
   Series_Collection_DE_Search:
     interval: 24 hours
@@ -1325,7 +1394,7 @@ tasks:
       - German
       - Series_Lookup   
       - Series_Global
-    quality: '{? quality.main ?}'
+    quality: '{? quality_series.main ?}'
     list_match:
       from:
         - trakt_list:
@@ -1352,7 +1421,8 @@ tasks:
       - Series_Lookup
       - Series_Global
       - Series_Streams_Singles
-    quality: '{? quality.main ?}'
+    quality: '{? quality_series.main ?}'
+    redirect_url: yes
     list_match:
       from:
         - trakt_list:
@@ -1375,14 +1445,30 @@ tasks:
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Series'
       - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
       - '{? series.backfill ?}-Upgrade-Series'
-      - '{? enable_disable.OnHold ?}-OnHold'      
-      - '{? enable_disable.Seasons ?}-Seasons'      
-      - '{? enable_disable.Canceled ?}-Canceled'     
+      - '{? enable_disable.OnHold ?}-OnHold'    
+      - '{? enable_disable.Seasons ?}-Seasons'    
+      - '{? enable_disable.Canceled ?}-Canceled'
       - German
       - Series_Lookup
       - Series_Global
       - Series_Streams_Seasons
-    quality: '{? quality.main ?}'
+    configure_series:
+      settings:
+        target: '{? quality_series.main ?}'
+        quality: '{? quality_series.low ?}'
+        propers: 2 weeks        
+        timeframe: 24 hours
+        identified_by: ep
+        tracking: '{? series.tracking ?}'
+        season_packs: '{? series.season_packs ?}'
+      from:
+        trakt_list:
+          account: '{? trakt.acc ?}'
+          list: collection
+          type: shows
+          strip_dates: yes
+          language: de
+    quality: '{? quality_series.main ?}'
     list_match:
       from:
         - trakt_list:
@@ -1404,7 +1490,7 @@ tasks:
 #     allow_teasers: no
 #     allow_seasonless: yes
     priority: 8
-    quality: '{? quality.main ?}'
+    quality: '{? quality_series.main ?}'
     template:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Series'
@@ -1437,7 +1523,7 @@ tasks:
     priority: 10
     seen: local
     only_new: yes
-    rss:
+    rss: 
       url: "http://www.youtube.com/feeds/videos.xml?playlist_id={? YouTube.Playlist ?}"
       ascii: yes
     accept_all: yes
@@ -1446,6 +1532,105 @@ tasks:
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-YouTube'
       - no_global
+
+
+  YouTube-Trailers:
+    manual: yes
+    priority: 10
+    seen: local
+    only_new: yes
+    tmdb_lookup:
+      language: de
+    require_field: [tmdb_name, tmdb_year]
+#     filesystem: 
+#       path: 
+#         - '{? filesystem.Library.movies ?}/'
+#       retrieve: dirs
+#       recursive: no
+    limit:
+      amount: 10
+      from: 
+        trakt_list: 
+          account: '{? trakt.acc ?}'
+          list: collection
+          type: movies
+    exec:
+      auto_escape: yes
+      on_output:
+        for_entries: 
+          - echo "got {{tmdb_name}}"
+          - "youtube-dl ytsearch20:'{{tmdb_name}} {{tmdb_year}} Trailer Deutsch' --match-title '{{tmdb_name}}.*(Trailer|Deutsch).*(Trailer|Deutsch).*' -f best -o '/home/snikay/Trailers/Movies/{{tmdb_name|default(movie_name)}} ({{tmdb_year}})/{{tmdb_name}}.{{tmdb_year}}.German-trailer.mp4'" # -f 'bestvideo[height>=720]+bestaudio/best[height>=720]'
+    accept_all: yes
+    template:
+      - no_global
+      - no_seen
+#      - '{? enable_disable.YouTube_Downloads ?}-YouTube_Downloads'
+#      - '{? DownloadManager ?}-Defaults'
+#      - '{? DownloadManager ?}-YouTube'
+
+
+############################################################################################################ MediathekView ############################################################################################################
+
+
+  MediathekView-Information:
+    priority: 10
+    manual: yes
+    seen: local
+    only_new: yes
+    rss: 
+      url: 'https://mediathekviewweb.de/feed'
+      title: category
+      link: "enclosure url"
+    accept_all: yes
+    template:
+      - '{? enable_disable.MediathekView ?}-MediathekView'
+      - '{? DownloadManager ?}-Defaults'
+      - '{? DownloadManager ?}-MediathekView-Information'
+      - no_global      
+    regexp:
+      accept:
+        - Hauptsache.gesund
+        - Visite
+        - Quarks
+        - tagesschau.*20.00.Uhr
+
+
+  MediathekView-Spielshows:
+    priority: 10
+    manual: yes
+    seen: local
+    only_new: yes
+    rss: 'https://mediathekviewweb.de/feed'
+    accept_all: yes
+    template:
+      - '{? enable_disable.MediathekView ?}-MediathekView'
+      - '{? DownloadManager ?}-Defaults'
+      - '{? DownloadManager ?}-MediathekView-Spielshows'
+      - no_global      
+    regexp:
+      accept:
+        - Verstehen.Sie.Spa(ss|ß).*
+        - Wetten.dass.* # die Hoffnung stirbt zuletzt
+
+  MediathekView-Series:
+    priority: 10
+    manual: yes
+    seen: local
+    only_new: yes
+    rss: 'https://mediathekviewweb.de/feed'
+    accept_all: yes
+    template:
+      - '{? enable_disable.MediathekView ?}-MediathekView'
+      - '{? DownloadManager ?}-Defaults'
+      - '{? DownloadManager ?}-{? ArchiveOrWatchlist ?}-Series'
+      - '{? DownloadManager ?}-{? DownloadManagerQueue ?}-Queue'
+      - no_global
+      - Series_Lookup
+    regexp:
+      accept:
+        - In.aller.Freundschaft
+        - Tatort
+      
 ####################################################################################################################################################################################
 ## SPECIALS ############################################################################################config#by#snickers2k########################################################
 ####################################################################################################################################################################################
@@ -1458,14 +1643,14 @@ tasks:
         - Golden.State.Warriors
         - New.York.Knicks
     template:
-      - '{? enable_disable.Download_Sports ?}-Download_Sports'    
+      - '{? custom.Download_Sports ?}-Download_Sports'    
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-Sports'
       - no_global
     seen: local
     verify_ssl_certificates: no
     csv:
-      url: 'file://{? flexget.path ?}/External-Plugins/TVRex/TVRex.csv'
+      url: 'file://{? flexget.path ?}/rss/TVRex/TVRex.csv'
       values:
         title: 1
         quality: 2
@@ -1473,7 +1658,7 @@ tasks:
 
   Specials: #custom-task
     template:
-      - '{? enable_disable.Download_Specials ?}-Download_Specials'
+      - '{? custom.Download_Specials ?}-Download_Specials'
     priority: 10
 
 
@@ -1481,7 +1666,7 @@ tasks:
     template:
       - no_global
       - no_seen     
-      - '{? enable_disable.Download_Specials2 ?}-Download_Specials2'
+      - '{? custom.Download_Specials2 ?}-Download_Specials2'
     priority: 10   
 
 
@@ -1493,14 +1678,14 @@ tasks:
         - Wolfgang.Trepper
         - Dieter.Nuhr
     template:
-      - '{? enable_disable.Download_Sports ?}-Download_Sports'
+      - '{? custom.Download_Sports ?}-Download_Sports'
       - '{? DownloadManager ?}-Defaults'
       - '{? DownloadManager ?}-Sports'
       - no_global
     seen: local
     verify_ssl_certificates: no
     csv:
-      url: 'file://{? flexget.path ?}/External-Plugins/TVRex/TVRex.csv'
+      url: 'file://{? flexget.path ?}/rss/TVRex/TVRex.csv'
       values:
         title: 1
         quality: 2
@@ -1511,7 +1696,7 @@ tasks:
 #   eBooks:
 #     template:
 #       - no_global
-#       - '{? enable_disable.Download_eBooks ?}-Download_eBooks'
+#       - '{? custom.Download_eBooks ?}-Download_eBooks'
 #       - '{? DownloadManager ?}-Defaults'
 #       - '{? DownloadManager ?}-eBooks'
 #     priority: 10
@@ -1522,17 +1707,32 @@ tasks:
 # 
 #   
 
+  imdb_to_trakt:  # This task adds all the movies in your imdb watchlist to your trakt watchlist
+    imdb_list:
+      login: '{? imdb.acc ?}'
+      password: '{? imdb.pwd ?}'
+      list: watchlist
+    accept_all: yes
+    list_add:
+      - trakt_list:
+          account: '{? trakt.acc ?}'
+          list: FromIMDb
+          type: movies
+    disable: seen
 
 ####################################################################################################################################################################################
 ## MOVE ################################################################################################config#by#snickers2k########################################################
 ####################################################################################################################################################################################
 
+################### move Movies
   move-Movies:
     priority: 10
+    nfo_lookup: yes
     manual: yes
     template:
       - no_seen
-      - movies_lookup
+      - Movies_Lookup
+      - '{? enable_disable.Sorting ?}-Sorting'
     accept_all: yes 
     regexp:
       reject:
@@ -1548,37 +1748,55 @@ tasks:
       regexp: '.*\.(avi|mkv|mp4|m4v)$'
     move:
       unpack_safety: yes
-      to: "{? filesystem.Move2Library ?}/Movies/{{tmdb_name|default(movie_name)}}{% if imdb_id|default(False) %} [{{imdb_id}}]{% endif %}"
+      to: "{? filesystem.Move2Library ?}/Movies/{{tmdb_name|default(movie_name)}}{% if imdb_year|default(False) %} ({{imdb_year}}){% endif %} {% if imdb_id|default(False) %} [{{imdb_id}}]{% endif %}"
 #      rename: "{{tmdb_name|default(movie_name)}}{% if imdb_id|default(False) %} - [{{imdb_id}}]{% endif %}"
       along:
         extensions:
           - srt
           - sub
+          - nfo
+          - eng
+          - jpg
+          - idx
+          - eng
+          - ger
         subdirs:
           - Subs
+          - extras
+          - posters
       clean_source: 600  #remove samples and trash (below 600MB)
+    # Don't attempt to move if we don't have valid metadata
+    require_field: [movie_name, movie_id]
     content_size:
       min: 600
+    list_add:
+      - subtitle_list:
+          list: subtitles
+          path: "{{location}}"
+          remove_after: 7 days
     exec:
       on_exit:
-        phase: 
+        for_accepted: 
           - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type f \( -name "*sample*" -o -name "proof" \) -delete
-          - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type f -size -500k -delete
-          - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type d -size -900k -delete
+          - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type f -size -50k -delete
+          - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type d -size -200k -delete
+          - chmod 775 -R {? filesystem.Move2Library ?}/Movies
 
-
+################### move Series
   move-Series:
     priority: 10
+    manual: yes
+    nfo_lookup: yes
     filesystem:
       path: '{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/'
       retrieve: files
       recursive: yes 
       regexp: '.*\.(avi|mkv|mp4|m4v)$'
+    metainfo_series: yes
     template:
       - no_seen
       - Series_Lookup
       - '{? enable_disable.Sorting ?}-Sorting'
-    require_field: [tvdb_id, series_id]
     regexp:
       reject:
         - \bsample\b 
@@ -1586,14 +1804,23 @@ tasks:
     no_entries_ok: yes
     move:
       unpack_safety: yes
-      to: "{? filesystem.Move2Library ?}/Series/{{ tvdb_series_name|default(series_name) }}{% if tvdb_id|default(False) %} [{{tvdb_id}}]{% endif %}/{% if series_id_type == 'ep' %}Season {{ series_season|pad(2) }}/{% endif %}/{{ tvdb_series_name|default(series_name) }}-{{ series_id }}{% if tvdb_ep_name|default(False) %}-{{ tvdb_ep_name }}{% endif %}"
-#      rename: "{{ tvdb_series_name|default(series_name) }}-{{ series_id }}{% if tvdb_ep_name|default(False) %}-{{ tvdb_ep_name }}{% endif %}-{{ quality }}"
+      to: "{? filesystem.Move2Library ?}/Series/{{ tvdb_series_name|default(series_name)|replace('/', '_')|replace(':', ' -')|replace(',', '') }}{% if trakt_id|default(False) %} ({{ trakt_series_year }}){{ [tvdb_id] }} {{ [tvdb_id] }}{% endif %}/{% if series_id_type == 'ep' %}Season {{ series_season }}/{% endif %}/{{ tvdb_series_name|default(series_name)|replace('/', '_')|replace(':', ' -')|replace(',', '') }} - {{ tvdb_series_name|default(series_name) }}{% if tvdb_ep_name|default(False) %} - {{ tvdb_ep_name|replace('/', '_')|replace(':', ' -')|replace(',', '') }}{% endif %}/"
+      rename: >
+        {{ tvdb_series_name|default(series_name)|replace('/', '_')|replace(':', ' -')|replace(',', '') }} - {{ series_id }}{% if tvdb_ep_name|default(False) %} - {{ tvdb_ep_name|replace('/', '_')|replace(':', ' -')|replace(',', '') }}{% endif %} - {{ quality }}.{{ location[-3:] }}
       along:
         extensions:
           - srt
           - sub
+          - nfo
+          - eng
+          - jpg
+          - idx
+          - eng
+          - ger
         subdirs:
           - Subs
+          - extras
+          - posters
       clean_source: 200 #remove samples and trash (below 200MB)
     content_size:
       min: 200
@@ -1602,12 +1829,110 @@ tasks:
       parse_only: yes
       tracking: no
     # Don't attempt to move if we don't have valid metadata
+    require_field: [tvdb_series_name, series_id]
+#    require_field: [series_name, series_id]
+    list_add:
+      - subtitle_list:
+          list: subtitles
+          path: "{{location}}"
+          remove_after: 7 days
     exec:
       on_exit:
-        phase: 
+        for_accepted: 
           - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type f \( -name "*sample*" -o -name "proof" \) -delete
-          - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type f -size -500k -delete
-          - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type d -size -900k -delete
+          - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type f -size -50k -delete
+          - find "{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/" -type d -size -200k -delete
+          - chmod 775 -R {? filesystem.Move2Library ?}/Series
+
+
+
+  Series-Sort-Decompressed:
+    manual: yes
+    template:
+#      - no_global # None of the global templates make sense here
+      - Series_Lookup
+    # Where to get the unpacked (staged) files from
+    filesystem:
+      path: '{? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/'
+      retrieve: files
+      recursive: yes 
+      regexp: '.*\.(avi|mkv|mp4|m4v)$'
+    # Where to get the metadata
+    # This is needed to get my season offset values
+    sequence:
+      - configure_series:
+          settings:
+            parse_only: yes
+            tracking: no
+            set:
+              move_to: >-
+                {? filesystem.Move2Library ?}/Series/{{ tvdb_series_name|default(series_name)|replace('/', '_')|replace(':', ' -')|replace(',', '') }}/{% if series_id_type == 'ep' %}Season {{ series_season }}/{% endif %}/{{ tvdb_series_name|default(series_name)|replace('/', '_')|replace(':', ' -')|replace(',', '') }} - {{ series_id }}{% if tvdb_ep_name|default(False) %} - {{ tvdb_ep_name|replace('/', '_')|replace(':', ' -')|replace(',', '') }}{% endif %}/
+          from:
+            trakt_list:
+              account: '{? trakt.acc ?}'
+              list: collection
+              type: shows
+      - configure_series:
+          settings:
+            parse_only: yes
+            tracking: no
+            set:
+              move_to: >-
+                {? filesystem.Move2Library ?}/Series/{{ tvdb_series_name|default(series_name)|replace('/', '_')|replace(':', ' -')|replace(',', '') }}/{% if series_id_type == 'ep' %}Season {{ series_season }}/{% endif %}/{{ tvdb_series_name|default(series_name)|replace('/', '_')|replace(':', ' -')|replace(',', '') }} - {{ series_id }}{% if tvdb_ep_name|default(False) %} - {{ tvdb_ep_name|replace('/', '_')|replace(':', ' -')|replace(',', '') }}{% endif %}/
+          from:
+            trakt_list:
+              account: '{? trakt.acc ?}'
+              list: collection
+              type: shows
+    all_series:
+      # Don't actually filter
+      parse_only: yes
+      tracking: no
+    accept_all: yes
+    # Don't attempt to move if we don't have valid metadata
+    require_field: [tvdb_series_name, series_id, move_to]
+    move:
+      rename: >
+        {{ tvdb_series_name|default(series_name)|replace('/', '_')|replace(':', ' -')|replace(',', '') }} - {{ series_id }}{% if tvdb_ep_name|default(False) %} - {{ tvdb_ep_name|replace('/', '_')|replace(':', ' -')|replace(',', '') }}{% endif %} - {{ quality }}.{{ location[-3:] }}
+      clean_source: 40
+
+################### Download subtitles for the previously queued files
+#
+  download-subtitles: # task
+    priority: 140
+    template:
+      - no_seen
+      - '{? enable_disable.Download_Subtitles ?}-Download_Subtitles'
+    subtitle_list:
+      list: subtitles
+    list_match:
+      from:
+        - subtitle_list:
+            list: subtitles
+    subliminal:
+      exact_match: yes
+      languages:
+        - ger
+        - eng
+      hearing_impaired: no
+      single: no
+      providers:
+        - addic7ed
+        - opensubtitles
+        - podnapisi
+#        - tvsubtitles # no german subs
+#        - thesubdb # no german subs
+      authentication:
+        addic7ed:
+          username: "{? addic7ed.user ?}"
+          password: "{? addic7ed.password ?}"
+        opensubtitles:
+          username: "{? opensubtitles.user ?}"
+          password: "{? opensubtitles.passsword ?}"
+        podnapisi:
+          username: "{? podnapisi.user ?}"
+          password: "{? podnapisi.passsword ?}"
+
 
 ####################################################################################################################################################################################
 ## MISC ################################################################################################config#by#snickers2k########################################################
