@@ -551,17 +551,17 @@ templates:
   Movie_Size_Main: 
     content_size:
       min: '{? Size.Main.Minimum ?}'
-      max: '{? Size.Main.Minimum ?}'
+      max: '{? Size.Main.Maximum ?}'
 
   Movie_Size_Low: 
     content_size:
       min: '{? Size.Low.Minimum ?}'
-      max: '{? Size.Low.Minimum ?}'
+      max: '{? Size.Low.Maximum ?}'
 
   Movie_Size_4K: 
     content_size:
       min: '{? Size.Low.Minimum ?}'
-      max: '{? Size.Low.Minimum ?}'
+      max: '{? Size.Low.Maximum ?}'
 
   enable-Download_Popular_Series: 
     manual: no
