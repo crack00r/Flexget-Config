@@ -32,7 +32,7 @@ templates:
     manipulate:
       #Quality 
       - title:
-          replace:
+          replace:            
             regexp: 'DTSD'
             format: 'DTS\.dubbed'
       - title:
@@ -102,11 +102,11 @@ templates:
             format: ' '
       - title:            
           replace:
-            regexp: "[\']" # remove apostrophes
+            regexp: "[']" # remove apostrophes
             format: ""
       - title:            
           replace:
-            regexp: '[\"]' # remove apostrophes
+            regexp: '\"' # remove apostrophes
             format: ''
       - title:
           replace:
@@ -114,7 +114,7 @@ templates:
             format: ''
       - title:
           replace:
-            regexp: '[\.]' #remove dot by space
+            regexp: '\.' #remove dot by space
             format: ' '
       - title:
           replace:
@@ -551,17 +551,17 @@ templates:
   Movie_Size_Main: 
     content_size:
       min: '{? Size.Main.Minimum ?}'
-      max: '{? Size.Main.Maximum ?}'
+      max: '{? Size.Main.Minimum ?}'
 
   Movie_Size_Low: 
     content_size:
       min: '{? Size.Low.Minimum ?}'
-      max: '{? Size.Low.Maximum ?}'
+      max: '{? Size.Low.Minimum ?}'
 
   Movie_Size_4K: 
     content_size:
       min: '{? Size.Low.Minimum ?}'
-      max: '{? Size.Low.Maximum ?}'
+      max: '{? Size.Low.Minimum ?}'
 
   enable-Download_Popular_Series: 
     manual: no
