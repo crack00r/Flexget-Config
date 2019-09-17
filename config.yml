@@ -20,6 +20,9 @@ templates:
       retry_time: 60 seconds
       retry_time_multiplier: 4
       max_retries: 6
+    ######## Quality-Fixes
+    assume_quality:
+      hdtv: 720p
     ######## Naming-Fixes
     pathscrub: windows  # Use Windows conform filenames (since Windows is the worst of all OS, what's working on Windows, should always work on Linux/Mac)
     plugin_priority:
@@ -27,13 +30,31 @@ templates:
       regexp: 200
     # fix nonsense
     manipulate:
+      #Quality 
+      - title:
+          replace:
+            regexp: 'DTSD'
+            format: 'DTS\.dubbed'
+      - title:
+          replace:            
+            regexp: 'DTSD-HD'
+            format: 'DTS-HD\.dubbed'
+      - title:
+          replace:            
+            regexp: 'AC3D'
+            format: 'AC3\.dubbed'
+      - title:
+          replace:            
+            regexp: 'AACD'
+            format: 'AC3\.dubbed'
+      #Misc 
       - title:
           replace:            
             regexp: 'http://nima4k.org/release/..../'
             format: ''
       - title:
           replace:            
-            regexp: '.(Deutsch|Englisch).' #fix SJ naming
+            regexp: '^.(Deutsch|Englisch).' #fix SJ naming (assume "german" missing in title = not german)
             format: ''
       - title:
           replace:
@@ -61,7 +82,7 @@ templates:
             format: ''
       - title:
           replace:
-            regexp: 'tv-film|!|,|´|`|’|\?'
+            regexp: 'tv-film|\!|\,|´|`|’|\?'
             format: ''
       - title:
           replace:
@@ -72,20 +93,28 @@ templates:
             regexp: ' (-|–|—) ' #remove minus with spaces - "en dash", "hyphen" and "em dash" (looks the same, but are different)
             format: ' '
       - title:
+          replace:            
+            regexp: 'p60' #e.g. 2160p60 -> 2160p 60fps
+            format: 'p 60fps'
+      - title:
           replace:
-            regexp: '&'
+            regexp: '\&'
             format: ' '
       - title:            
           replace:
-            regexp: "\'" # remove apostrophes
+            regexp: "[\']" # remove apostrophes
             format: ""
-      - title:
+      - title:            
           replace:
-            regexp: ':|\+' # ":" and "+"
+            regexp: '[\"]' # remove apostrophes
             format: ''
       - title:
           replace:
-            regexp: '\.' #remove dot by space
+            regexp: '\:|\+' # ":" and "+"
+            format: ''
+      - title:
+          replace:
+            regexp: '[\.]' #remove dot by space
             format: ' '
       - title:
           replace:
@@ -110,7 +139,7 @@ templates:
             format: 'ss'
       - title:
           replace:
-            regexp: '\$'
+            regexp: '[\$]' # "$" needs special double coudraple escape
             format: 's'
       - title:
           replace:
@@ -124,27 +153,27 @@ templates:
           replace:
             regexp: 'ó|ò'
             format: 'o'
-     ## Known Problematic Releasenames
+     ## Known Problematic filenames
       - title:
           replace:
-            regexp: 'greys' 
+            regexp: '(greys(?!anatomy))'
             format: 'greys.anatomy' 
       - title:
           replace:
             regexp: 'deadlyclass'
-            format: 'deadly.class'
+            format: 'deadly\.class'
       - title:
           replace:
             regexp: 'totdy'
-            format: 'too.old.to.die.young'
+            format: 'too\.old\.to\.die\.young'
       - title:
           replace:
             regexp: "^marvel(')?s.agents.of.(s.h.i.e.l.d.?|shield)"
-            format: 'Marvels.Agents.of.S.H.I.E.L.D'
+            format: 'Marvels\.Agents\.of\.S\.H\.I\.E\.L\.D'
       - title:
           replace:
             regexp: 'vrfall'
-            format: 'ein.fall.fuer.Vera'
+            format: 'ein\.fall\.fuer\.Vera'
     ######################################## Global Exclude  (For testing: https://regex101.com)
     regexp:
       reject:
@@ -213,7 +242,8 @@ templates:
     imdb_lookup: yes
     trakt_lookup:
       account: '{? trakt.acc ?}'
-    bluray_lookup: yes
+    nfo_lookup: yes
+    bluray_lookup: no
 #    rottentomatoes_lookup: yes #Buggy - 403 Client Error: Forbidden
 
   ######################################## Series-Global
@@ -235,12 +265,19 @@ templates:
       - seen_movies
       
   ######################################## Download Streams
-  Movie_Streams: #720p / 1080p 
-    inputs:
-      - rss: '{? flexget.path ?}/rss/HDWorld-Movies.xml'
-      - rss: '{? flexget.path ?}/rss/HDArea-Movies.xml'
-      - rss: '{? flexget.path ?}/rss/MovieBlog-Movies.xml'
+  #720p / 1080p 
+  Movie_Streams:
+    limit:
+      amount: '{? movies.amount.streams ?}'
+      from:
+        inputs:
+          - rss: '{? flexget.path ?}/rss/HDWorld-Movies.xml'
+          - rss: '{? flexget.path ?}/rss/HDArea-Movies.xml'
+          - rss: '{? flexget.path ?}/rss/MovieBlog-Movies.xml'
 
+    
+
+  #4K
   Movie_Streams_4K:
     inputs:
       - rss: 
@@ -255,16 +292,20 @@ templates:
 
 
   Series_Streams_Singles:
-    inputs:
-      - rss: '{? flexget.path ?}/rss/rss_feed_1.xml'
-      - rss: '{? flexget.path ?}/rss/rss_feed_2.xml'
-      - rss: '{? flexget.path ?}/rss/rss_feed_3.xml'
-      - rss: '{? flexget.path ?}/rss/rss_feed_4.xml'
-      - rss: '{? flexget.path ?}/rss/rss_feed_5.xml'
-      - rss: '{? flexget.path ?}/rss/rss_feed_6.xml'
-      - rss: '{? flexget.path ?}/rss/rss_feed_7.xml'
-      - rss: '{? flexget.path ?}/rss/rss_feed_8.xml'
-      - rss: '{? flexget.path ?}/rss/rss_feed_9.xml'
+    limit:
+      amount: '{? series.amount.streams ?}'
+      from:
+        inputs:
+          - rss: '{? flexget.path ?}/rss/rss_feed_1.xml'
+          - rss: '{? flexget.path ?}/rss/rss_feed_2.xml'
+          - rss: '{? flexget.path ?}/rss/rss_feed_3.xml'
+          - rss: '{? flexget.path ?}/rss/rss_feed_4.xml'
+          - rss: '{? flexget.path ?}/rss/rss_feed_5.xml'
+          - rss: '{? flexget.path ?}/rss/rss_feed_6.xml'
+          - rss: '{? flexget.path ?}/rss/rss_feed_7.xml'
+          - rss: '{? flexget.path ?}/rss/rss_feed_8.xml'
+          - rss: '{? flexget.path ?}/rss/rss_feed_9.xml'
+    
 
   Series_Streams_Seasons:
     inputs:
@@ -329,9 +370,9 @@ templates:
           type: shows
           strip_dates: yes
           language: de
-#    exists_series:
-#      path: "{? filesystem.Library.series ?}/{{series_name}}"
-#      allow_different_qualities: '{? series.different_qualities ?}'
+    exists_series:
+      path: "{? filesystem.Library.series ?}/"
+      allow_different_qualities: '{? series.different_qualities ?}'
 
   disable-Upgrade-Series:
     configure_series:
@@ -350,9 +391,6 @@ templates:
           type: shows
           strip_dates: yes
           language: de
-#    exists_series:
-#      path: "{? filesystem.Library.series ?}/{{series_name}}"
-#      allow_different_qualities: '{? series.different_qualities ?}'
 
   ######################################## Enable/Disable MOVIES Upgrade
 
@@ -361,8 +399,9 @@ templates:
       path: 
         - "{? filesystem.Library.movies ?}/"
       allow_different_qualities: '{? movies.different_qualities ?}'
-#      lookup: imdb
+      type: files
       type: dirs
+#      lookup: imdb
 
   disable-Upgrade-Movies:
     exec:
@@ -426,6 +465,16 @@ templates:
   disable-Download_Sports: 
     manual: yes
 
+  enable-Trailers: 
+    manual: no
+  disable-Trailers: 
+    manual: yes
+
+  enable-Extras: 
+    manual: no
+  disable-Extras: 
+    manual: yes
+
   enable-4K: 
     manual: no
   disable-4K:
@@ -447,9 +496,9 @@ templates:
     manual: yes
 
       
-  enable-Download_Seasons: 
+  enable-Seasons: 
     manual: no
-  disable-Download_Seasons: 
+  disable-Seasons: 
     manual: yes
 
   enable-Series_Collection_DE_Stream: 
@@ -602,105 +651,151 @@ templates:
   ######## Defaults
   jdownloader-Defaults:
     exec:
-      - echo " " >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
-      - echo "text={{url}}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
-      - echo "autoConfirm=TRUE" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
-      - echo "addOfflineLink=false" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+      on_output:
+        for_accepted:        
+          - echo " " >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+          - echo "text={{url}}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+          - echo "autoConfirm=TRUE" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+          - echo "addOfflineLink=false" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
   ######## Archive-Series
   jdownloader-Archive-Series:
     exec:
-      - echo "downloadPassword=serienjunkies.org"  >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
-      - echo "extractPasswords=serienjunkies.org"  >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
-      - echo "priority={? JDownloader.priority.Archive ?}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+      on_output:
+        for_accepted:     
+          - echo "downloadPassword=serienjunkies.org"  >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+          - echo "extractPasswords=serienjunkies.org"  >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+          - echo "priority={? JDownloader.priority.Archive ?}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
     if:
       - trakt_ep_id:
           exec: 
-            - echo "packageName={{title}}-({{trakt_series_name}})-{{trakt_ep_id}}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
-            - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+            on_output:
+              for_accepted:                    
+                - echo "packageName={{title}}-({{trakt_series_name}})-{{trakt_ep_id}}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+                - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
       - not trakt_ep_id:
           exec: 
-            - echo "packageName={{title}}-({{series_name}})-({{series_id}})" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
-            - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/{{title}}-({{series_name}})-({{series_id}})/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+            on_output:
+              for_accepted:           
+                - echo "packageName={{title}}-({{series_name}})-({{series_id}})" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+                - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Series/{{title}}-({{series_name}})-({{series_id}})/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
   ######## Archive-Movies
   jdownloader-Archive-Movies:
     exec:
-      - echo "priority={? JDownloader.priority.Archive ?}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+      on_output:
+        for_accepted:     
+          - echo "priority={? JDownloader.priority.Archive ?}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
     if:
       - imdb_id:
           exec: 
-            - echo "packageName={{title}}-({{imdb_name}})-({{imdb_year}})-{{imdb_id}}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
-            - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Movies/{{title}}-({{imdb_name}})-({{imdb_year}})-{{imdb_id}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+            on_output:
+              for_accepted:           
+                - echo "packageName={{title}}-({{imdb_name}})-({{imdb_year}})-{{imdb_id}}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+                - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Movies/{{title}}-({{imdb_name}})-({{imdb_year}})-{{imdb_id}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
 
       - not imdb_id:
           exec: 
-            - echo "packageName={{title}}-({{movie_name}})" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
-            - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Movies/{{title}}-({{movie_name}})/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+            on_output:
+              for_accepted:           
+                - echo "packageName={{title}}-({{movie_name}})" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+                - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Archive ?}/Movies/{{title}}-({{movie_name}})/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
 
   ######## Watchlist
   jdownloader-Watchlist-Series:
     exec:
-      - echo "downloadPassword=serienjunkies.org"  >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
-      - echo "extractPasswords=serienjunkies.org"  >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
-      - echo "priority={? JDownloader.priority.Watchlist ?}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+      on_output:
+        for_accepted:     
+          - echo "downloadPassword=serienjunkies.org"  >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+          - echo "extractPasswords=serienjunkies.org"  >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+          - echo "priority={? JDownloader.priority.Watchlist ?}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
     if:
       - trakt_ep_id:
           exec: 
-            - echo "packageName={{title}}-({{trakt_series_name}})-{{trakt_ep_id}}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
-            - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Watchlist ?}/Series/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+            on_output:
+              for_accepted:           
+                - echo "packageName={{title}}-({{trakt_series_name}})-{{trakt_ep_id}}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+                - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Watchlist ?}/Series/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
       - not trakt_ep_id:
           exec: 
-            - echo "packageName={{title}}-({{series_name}})-({{series_id}})" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
-            - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Watchlist ?}/Series/{{title}}-({{series_name}})-({{series_id}})/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+            on_output:
+              for_accepted:           
+                - echo "packageName={{title}}-({{series_name}})-({{series_id}})" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+                - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Watchlist ?}/Series/{{title}}-({{series_name}})-({{series_id}})/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
   ######## Watchlist
   jdownloader-Watchlist-Movies:
     exec:
-      - echo "priority={? JDownloader.priority.Watchlist ?}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+      on_output:
+        for_accepted:     
+          - echo "priority={? JDownloader.priority.Watchlist ?}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
     if:
       - imdb_id:
           exec: 
-            - echo "packageName={{title}}-({{imdb_name}})-({{imdb_year}})-{{imdb_id}}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
-            - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Watchlist ?}/Movies/{{title}}-({{imdb_name}})-({{imdb_year}})-{{imdb_id}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
-
+            on_output:
+              for_accepted:           
+                - echo "packageName={{title}}-({{imdb_name}})-({{imdb_year}})-{{imdb_id}}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+                - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Watchlist ?}/Movies/{{title}}-({{imdb_name}})-({{imdb_year}})-{{imdb_id}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
       - not imdb_id:
           exec: 
-            - echo "packageName={{title}}-({{movie_name}})" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
-            - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Watchlist ?}/Movies/{{title}}-({{movie_name}})/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+            on_output:
+              for_accepted:           
+                - echo "packageName={{title}}-({{movie_name}})" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+                - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Watchlist ?}/Movies/{{title}}-({{movie_name}})/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
   ######## YouTube
   jdownloader-YouTube:
     exec:
-      - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.YouTube ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+      on_output:
+        for_accepted:     
+          - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.YouTube ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
   ######## YouTube
-  jdownloader-YouTube:
+  jdownloader-Spielshows:
     exec:
-      - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Spielshows ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+      on_output:
+        for_accepted:     
+          - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Spielshows ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
   ######## 3D
   jdownloader-3D:
     exec:
-      - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.3D ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+      on_output:
+        for_accepted:     
+          - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.3D ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
     if:
       - imdb_id:
-          exec: echo "packageName={{title}}-({{imdb_name}})-({{imdb_year}})-{{imdb_id}}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+          exec: 
+            on_output:
+              for_accepted:           
+                 - echo "packageName={{title}}-({{imdb_name}})-({{imdb_year}})-{{imdb_id}}" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
       - not imdb_id:
-          exec: echo "packageName={{title}}-({{movie_name}})" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+          exec: 
+            on_output:
+              for_accepted:           
+                - echo "packageName={{title}}-({{movie_name}})" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
   ######## eBooks
   jdownloader-eBooks:
     exec:
-      - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.eBooks ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+      on_output:
+        for_accepted:     
+          - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.eBooks ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
   ######## Sports
   jdownloader-Sports:
     exec:
-      - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Sports ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+      on_output:
+        for_accepted:     
+          - echo "downloadFolder={? filesystem.Downloads.Main ?}/{? filesystem.Downloads.Sports ?}/{{title}}/" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
   ######## Queue-enable
   jdownloader-enable-Queue:
     exec:
-      - echo "autoStart=TRUE" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
-      - echo "forcedStart=TRUE" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+      on_output:
+        for_accepted:     
+          - echo "autoStart=TRUE" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+          - echo "forcedStart=TRUE" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
   ######## Queue-Disable
   jdownloader-disable-Queue:
     exec:
-      - echo "Queue-Disabled -> Downloads parked"
-      - echo "autoStart=FALSE" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
-      - echo "forcedStart=FALSE" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+      on_output:
+        for_accepted:     
+          - echo "Queue-Disabled -> Downloads parked"
+          - echo "autoStart=FALSE" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+          - echo "forcedStart=FALSE" >> "{? JDownloader.path ?}/folderwatch/{{task}}-{{title}}.crawljob"
+
 #   ################## pyLoad (buggy? needs testing, i'm not a pyLoad-User anymore)
 #   ######## Defaults
   pyload-Defaults:
@@ -830,16 +925,16 @@ tasks:
 
   ######################################## Crawl
   Crawl_Plugins:
-    interval: 1 hours
     template:
       - no_seen
       - no_global
     priority: 1
+    interval: 2 hours
     no_entries_ok: yes
     exec:
       on_start:
         phase: 
-          - "cd {? flexget.path ?}/rss/ && rm *.xml; cd {? flexget.path ?}/ && python3 ./streams.py"
+          - "cd {? flexget.path ?}/rss/ && rm *.xml; cd {? flexget.path ?}/ && python3 ./streams.py {? filesystem.Flexget ?}/rss/"
 #           - "cd {? flexget.path ?}/rss/HDArea-Movies-Feed/ && rm *.xml; python ./HDAreaOrg-RSS.py"
 #           - "cd {? flexget.path ?}/rss/HDWorld-Feed/ && rm *.xml; python ./HDWorld-RSS.py"
 #           - "cd {? flexget.path ?}/rss/SJ_ && rm *.xml; python ./Serienjunkies-RSS.py"          
@@ -991,7 +1086,7 @@ tasks:
   ######################################## Sync Trakt Movie-Watchlist to Flexget-Queue (strips dates and unconform-characters)
   Sync_Movies_to_Flexget:
     priority: 1
-    interval: 48 hours #takes a long time if translated to german
+    interval: 48 hours #takes a long time if translated to german #needs fix -> entry task with seen for 4 weeks
     template: 
       - no_seen
     accept_all: yes 
@@ -1001,27 +1096,25 @@ tasks:
       fields:
         - trakt_id
       action: reject
-    list_match:
-      from:
-        - trakt_list:
-            account: '{? trakt.acc ?}'
-            list: watchlist
-            type: movies
-            language: de
-            strip_dates: yes
-        - trakt_list:
-            account: '{? trakt.acc ?}'
-            list: '{? movies.list.popular ?}'
-            type: movies
-            language: de
-            strip_dates: yes
-        - trakt_list:
-            account: '{? trakt.acc ?}'
-            list: '{? movies.list.trending ?}'
-            type: movies
-            language: de
-            strip_dates: yes
-      remove_on_match: no
+    inputs:
+      - trakt_list:
+          account: '{? trakt.acc ?}'
+          list: watchlist
+          type: movies
+          language: de
+          strip_dates: yes
+      - trakt_list:
+          account: '{? trakt.acc ?}'
+          list: '{? movies.list.popular ?}'
+          type: movies
+          language: de
+          strip_dates: yes
+      - trakt_list:
+          account: '{? trakt.acc ?}'
+          list: '{? movies.list.trending ?}'
+          type: movies
+          language: de
+          strip_dates: yes
     list_add:
       - movie_list: Default #save with unique-ID for explicit matches after searching with regexp
       - entry_list: Default #save with regexp (global-filter) so we get searchable titles
@@ -1038,12 +1131,13 @@ tasks:
       - '{? enable_disable.Merge_Trakt_List ?}-Merge_Trakt_List'
     trakt_lookup: yes
     accept_all: yes
-    trakt_list:
-      username: '{? Merge_Trakt_List.from.username ?}'
-      list: '{? Merge_Trakt_List.from.listname ?}'
-    trakt_list:
-      username: '{? Merge_Trakt_List.from.username2 ?}'
-      list: '{? Merge_Trakt_List.from.listname2 ?}'
+    inputs:
+      - trakt_list:
+          username: '{? Merge_Trakt_List.from.username ?}'
+          list: '{? Merge_Trakt_List.from.listname ?}'
+      - trakt_list:
+          username: '{? Merge_Trakt_List.from.username2 ?}'
+          list: '{? Merge_Trakt_List.from.listname2 ?}'
     if:
       - trakt_votes > '{? Merge_Trakt_List.min_votes ?}': accept
       - trakt_rating > '{? Merge_Trakt_List.min_rating ?}': accept 
@@ -1226,17 +1320,31 @@ tasks:
 #       reject_excluding:
 #         - \bdl|dual\b # Dual-Language
     quality: '{? quality_movies.main ?}'
-    discover:
-      what:
-        - entry_list: Default
+    limit:
+      amount: '{? movies.amount.discover ?}'
       from:
-        - searchHdarea:
-            hoster: '{? Settings.Hoster ?}'
-        - searchHdworld:
-            hoster: '{? Settings.Hoster ?}'
-        - searchMovieBlog:
-            hoster: '{? Settings.Hoster ?}'
-      release_estimations: ignore
+        discover:
+          what:
+            - entry_list: Default
+          from:
+            - searchHdarea:
+                hoster: '{? Settings.Hoster ?}'
+            - searchHdworld:
+                hoster: '{? Settings.Hoster ?}'
+            - searchMovieBlog:
+                hoster: '{? Settings.Hoster ?}'
+          release_estimations: ignore
+#     discover:
+#       what:
+#         - entry_list: Default
+#       from:
+#         - searchHdarea:
+#             hoster: '{? Settings.Hoster ?}'
+#         - searchHdworld:
+#             hoster: '{? Settings.Hoster ?}'
+#         - searchMovieBlog:
+#             hoster: '{? Settings.Hoster ?}'
+# #      release_estimations: ignore
     list_match:
       from:
         - movie_list: Default
@@ -1244,7 +1352,6 @@ tasks:
       remove_on_match: yes
     list_add:
       - movie_list: offline_check
-
 
  ######################################## Search for queued Movies on hdarea with the help of a custom  pipe
   Movies_Watchlist_Search_DE_Low:
@@ -1259,16 +1366,20 @@ tasks:
       - Movies_Lookup
       - German
     quality: '{? quality_movies.low ?}'
-    discover:
-      what:
-        - entry_list: Default
+    limit:
+      amount: '{? movies.amount.discover ?}'
       from:
-        - searchHdarea:
-            hoster: '{? Settings.Hoster ?}'
-        - searchHdworld:
-            hoster: '{? Settings.Hoster ?}'
-        - searchMovieBlog:
-            hoster: '{? Settings.Hoster ?}'
+        discover:
+          what:
+            - entry_list: Default
+          from:
+            - searchHdarea:
+                hoster: '{? Settings.Hoster ?}'
+            - searchHdworld:
+                hoster: '{? Settings.Hoster ?}'
+            - searchMovieBlog:
+                hoster: '{? Settings.Hoster ?}'
+          release_estimations: ignore
     list_match:
       from:
         - movie_list: Default
@@ -1295,7 +1406,6 @@ tasks:
       - German
       - Movie_Streams
       - Movies_Global
-#      - '{? enable_disable.3D ?}-3D'
     quality: '{? quality_movies.main ?}'
     list_match:
       from:
@@ -1368,7 +1478,8 @@ tasks:
         - imdb_id
       action: reject
     seen: local
-    list_add: # TODO: offline_check_4K , as this will block 1080p from being downloaded, if 720p is first in library
+    list_add: 
+    # TODO: offline_check_4K , as this will block 1080p from being downloaded, if 720p is first in library
       - movie_list: offline_check
       - trakt_list:
           account: '{? trakt.acc ?}'
@@ -1432,7 +1543,6 @@ tasks:
     regexp:
       reject:
         - \bs[0-9][0-9]\b
-    redirect_url: yes
     serienjunkies:
       language: '{? Settings.LanguageSJ ?}'
       hoster: '{? Settings.HosterSJ ?}'
@@ -1534,11 +1644,10 @@ tasks:
       - no_global
 
 
-  YouTube-Trailers:
-    manual: yes
+  Trailers:
     priority: 10
-    seen: local
-    only_new: yes
+    seen: no #local
+#    only_new: yes
     tmdb_lookup:
       language: de
     require_field: [tmdb_name, tmdb_year]
@@ -1559,14 +1668,13 @@ tasks:
       on_output:
         for_entries: 
           - echo "got {{tmdb_name}}"
-          - "youtube-dl ytsearch20:'{{tmdb_name}} {{tmdb_year}} Trailer Deutsch' --match-title '{{tmdb_name}}.*(Trailer|Deutsch).*(Trailer|Deutsch).*' -f best -o '/home/snikay/Trailers/Movies/{{tmdb_name|default(movie_name)}} ({{tmdb_year}})/{{tmdb_name}}.{{tmdb_year}}.German-trailer.mp4'" # -f 'bestvideo[height>=720]+bestaudio/best[height>=720]'
+          - "youtube-dl ytsearch10:'{{tmdb_name}} {{tmdb_year}} Trailer Deutsch' --match-title '(?i)(?=.*{{tmdb_name}})(?=.*{{tmdb_year}})(?=.*(german|deutsch))(?=.*trailer).+' -f 'best' --match-filter 'duration < 150' -o '/home/snikay/Trailers/Movies/{{tmdb_name|default(movie_name)}} ({{tmdb_year}})/{{tmdb_name}}.{{tmdb_year}}.German-trailer'" 
+          #-f 'best[filesize>30M]+[filesize<70M]/bestvideo[height>=480]+bestaudio/best[height>=480]/best'
     accept_all: yes
     template:
       - no_global
       - no_seen
-#      - '{? enable_disable.YouTube_Downloads ?}-YouTube_Downloads'
-#      - '{? DownloadManager ?}-Defaults'
-#      - '{? DownloadManager ?}-YouTube'
+      - '{? enable_disable.Trailers ?}-Trailers'
 
 
 ############################################################################################################ MediathekView ############################################################################################################
@@ -1650,24 +1758,24 @@ tasks:
     seen: local
     verify_ssl_certificates: no
     csv:
-      url: 'file://{? flexget.path ?}/rss/TVRex/TVRex.csv'
       values:
         title: 1
         quality: 2
         url: 3
+      url: 'file://{? flexget.path ?}/rss/TVRex/TVRex.csv'
 
   Specials: #custom-task
+    priority: 10
     template:
       - '{? custom.Download_Specials ?}-Download_Specials'
-    priority: 10
-
+      - no_global
 
   Specials2:  #custom-task
+    priority: 10
     template:
       - no_global
       - no_seen     
       - '{? custom.Download_Specials2 ?}-Download_Specials2'
-    priority: 10   
 
 
   Comedy_Shows:
@@ -1707,7 +1815,8 @@ tasks:
 # 
 #   
 
-  imdb_to_trakt:  # This task adds all the movies in your imdb watchlist to your trakt watchlist
+  imdb_to_trakt:  
+  # This task adds all the movies in your imdb watchlist to your trakt watchlist (hopefully^^)
     imdb_list:
       login: '{? imdb.acc ?}'
       password: '{? imdb.pwd ?}'
@@ -1726,7 +1835,7 @@ tasks:
 ####################################################################################################################################################################################
 
 
-# Run every task on given schedule, except tasks with own interval:
+# Run every task on given schedule, except tasks with own interval
 schedules:
   - tasks: '*'
     schedule:
