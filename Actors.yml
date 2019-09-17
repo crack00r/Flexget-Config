@@ -1,0 +1,146 @@
+imdb:
+  accept_actors:
+#### ACTORS
+####    
+    - nm0413168 # Hugh Jackman
+    - nm0000138 # Leonardo DiCaprio
+    - nm0000375 # Robert Downey Jr.
+    - nm0000129 # Tom Cruise
+    - nm0000136 # Johnny Depp
+    - nm0251986 # Jesse Eisenberg
+    - nm0000437 # Woody Harrelson
+    - nm0479471 # Shia LaBeouf
+    - nm0000242 # Mark Wahlberg
+    - nm0000243 # Denzel Washington
+    - nm0005351 # Ryan Reynolds
+    - nm0001774 # Ben Stiller
+    - nm0001191 # Adam Sandler
+    - nm0642145 # Ed O'Neill
+    - nm0123092 # Ty Burrell
+    - nm0837177 # Jason Sudeikis
+    - nm0124930 # Gerard Butler
+    - nm0736622 # Seth Rogen
+    - nm0748620 # Paul Rudd
+    - nm0136797 # Steve Carell
+    - nm0000141 # David Duchovny
+    - nm0366389 # Kevin Hart
+    - nm0331516 # Ryan Gosling
+    - nm0005110 # Ashton Kutcher
+    - nm0005458 # Jason Statham
+    - nm0781981 # Jason Segel
+    - nm0416673 # Kevin James
+    - nm0000093 # Brad Pitt
+    - nm0000226 # Will Smith
+    - nm0425005 # Dwayne Johnson
+    - nm0000246 # Bruce Willis
+    - nm0000115 # Nicolas Cage
+    - nm0000288 # Christian Bale
+    - nm0000199 # Al Pacino
+    - nm0000131 # John Cusack
+    - nm0000329 # Jackie Chan
+    - nm0000120 # Jim Carrey
+    - nm0000354 # Matt Damon
+    - nm0000197 # Jack Nicholson
+    - nm0000123 # George Clooney
+    - nm0000190 # Matthew McConaughey
+    - nm0005562 # Owen Wilson
+    - nm0000197 # Jack Nicholson
+    - nm0000008 # Marlon Brando
+    - nm0000134 # Robert De Niro
+    - nm0000199 # Al Pacino
+    - nm0000358 # Daniel Day-Lewis
+    - nm0000163 # Dustin Hoffman
+    - nm0000158 # Tom Hanks
+    - nm0000164 # Anthony Hopkins
+    - nm0000056 # Paul Newman
+    - nm0000243 # Denzel Washington
+    - nm0000075 # Spencer Tracy
+    - nm0000059 # Laurence Olivier
+    - nm0000493 # Jack Lemmon
+    - nm0000323 # Michael Caine
+    - nm0000071 # James Stewart
+    - nm0000245 # Robin Williams
+    - nm0000380 # Robert Duvall
+    - nm0000576 # Sean Penn
+    - nm0000151 # Morgan Freeman
+    - nm0000313 # Jeff Bridges
+    - nm0001627 # Sidney Poitier
+    - nm0000564 # Peter O'Toole
+    - nm0000142 # Clint Eastwood
+    - nm0000432 # Gene Hackman
+    - nm0000122 # Charles Chaplin
+    - nm0001426 # Ben Kingsley
+    - nm0000450 # Philip Seymour Hoffman
+    - nm0000138 # Leonardo DiCaprio
+    - nm0000128 # Russell Crowe
+    - nm0000228 # Kevin Spacey
+    - nm0000007 # Humphrey Bogart
+    - nm0000060 # Gregory Peck
+    - nm0000022 # Clark Gable
+    - nm0000011 # Gary Cooper
+    - nm0001715 # George C. Scott
+    - nm0001673 # Jason Robards
+    - nm0001452 # Charles Laughton
+    - nm0000063 # Anthony Quinn
+    - nm0000634 # Peter Sellers
+    - nm0000010 # James Cagney
+    - nm0002075 # Peter Finch
+    - nm0000020 # Henry Fonda
+    - nm0000026 # Cary Grant
+    - nm0000009 # Richard Burton
+    - nm0000044 # Burt Lancaster
+    - nm0000034 # William Holden
+    - nm0000078 # John Wayne
+    - nm0000018 # Kirk Douglas
+    - nm0000027 # Alec Guinness
+    - nm0001626 # Christopher Plummer
+    - nm0000169 # Tommy Lee Jones
+    - nm0000125 # Sean Connery
+    - nm0000273 # Alan Arkin
+    - nm0000686 # Christopher Walken
+    - nm0000582 # Joe Pesci
+    - nm0005212 # Ian McKellen
+    - nm0000140 # Michael Douglas
+    - nm0000685 # Jon Voight
+    - nm0001215 # Albert Finney
+    - nm0001691 # Geoffrey Rush
+    - nm0000460 # Jeremy Irons
+    - nm0000849 # Javier Bardem
+    - nm0005132 # Heath Ledger
+    - nm0910607 # Christoph Waltz
+    - nm0000146 # Ralph Fiennes
+    - nm0000136 # Johnny Depp
+    - nm0001125 # Benicio Del Toro
+    - nm0004937 # Jamie Foxx
+    - nm0001618 # Joaquin Phoenix
+    - nm0000147 # Colin Firth
+    - nm0000190 # Matthew McConaughey
+    - nm0000288 # Christian Bale
+    - nm0000198 # Gary Oldman
+    - nm0001570 # Edward Norton
+    - nm0000093 # Brad Pitt
+    - nm0000129 # Tom Cruise
+    - nm0000354 # Matt Damon
+    - nm0413168 # Hugh Jackman
+    - nm0000375 # Robert Downey Jr.
+    - nm0000553 # Liam Neeson
+    - nm0000154 # Mel Gibson
+    - nm0000148 # Harrison Ford
+    - nm0000095 # Woody Allen
+    - nm0000537 # Steve McQueen
+    - nm0000080 # Orson Welles
+    - nm0000602 # Robert Redford
+    - nm0000015 # James Dean
+    - nm0000032 # Charlton Heston
+    - nm0000037 # Gene Kelly
+    - nm0000053 # Robert Mitchum
+    - nm0000195 # Bill Murray
+    - nm0000168 # Samuel L. Jackson
+    - nm0000120 # Jim Carrey
+    - nm0000332 # Don Cheadle
+    - nm0000640 # Martin Sheen
+    - nm0000614 # Alan Rickman
+    - nm0000064 # Edward G. Robinson
+    - nm0000226 # Will Smith
+    - nm0000422 # John Goodman
+    - nm0000036 # Buster Keaton
